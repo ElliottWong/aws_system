@@ -1,0 +1,89 @@
+@import "../themes/theme";
+
+// Document tab styling
+.c-Tab {
+  &--focused {
+    span {
+      padding: 8px 40px;
+      border-radius: 21px 21px 0 0;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: auto;
+      -webkit-user-select: none; /* Safari */
+      -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* IE10+/Edge */
+      user-select: none; /* Standard */
+    }
+    span:hover {
+      opacity: 0.7;
+    }
+
+    .c-Tab {
+      &--active {
+        background-color: $message-ok-bg;
+        color: $message-ok-fg;
+      }
+
+      &--idle {
+        background-color: $message-idle-bg;
+        color: $message-idle-fg;
+      }
+
+      &--rejected {
+        background-color: $message-error-bg;
+        color: $message-error-fg;
+      }
+
+      &--editing {
+        background-color: $message-info-bg;
+        color: $message-info-fg;
+      }
+
+      &--pending {
+        background-color: $message-warning-bg;
+        color: $message-warning-fg;
+      }
+
+      &--dark {
+        background-color: $message-dark-bg;
+        color: $message-dark-fg;
+      }
+
+      &--inactive {
+        background-color: $message-idle-fg;
+        color: white;
+      }
+    }
+  }
+
+  &--unfocused {
+    span {
+      padding: 8px 40px;
+      border-radius: 21px 21px 0 0;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      background-color: $message-idle-bg;
+      color: $message-idle-fg;
+      -webkit-user-select: none; /* Safari */
+      -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* IE10+/Edge */
+      user-select: none; /* Standard */
+    }
+    &:hover {
+      opacity: 0.7;
+    }
+    &:active {
+      opacity: 0.8;
+    }
+
+    .c-Tab--dark {
+      background-color: $message-dark-bg;
+      color: $message-dark-fg;
+    }
+
+    .c-Tab--disabled {
+      pointer-events: none;
+    }
+  }
+}

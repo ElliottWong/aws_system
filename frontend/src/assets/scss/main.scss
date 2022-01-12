@@ -1,0 +1,84 @@
+// Vendors styles
+@import "vendors/bootstrap";
+
+// Themes styles
+@import "themes/theme";
+
+// Base styles
+@import "base/typography";
+@import "base/reset";
+
+// Utilities styles
+@import "utilities/mixins";
+
+// Components styles
+@import "components/ip-add-row";
+@import "components/announcements-bento-box";
+@import "components/announcements-list-item";
+@import "components/breadcrumb";
+@import "components/buttons";
+@import "components/dashboard-bento-box";
+@import "components/dashboard-info-cards";
+@import "components/document-tab";
+@import "components/document";
+@import "components/error-card";
+@import "components/evaluation-qns";
+@import "components/file-select";
+@import "components/induction-form-section";
+@import "components/rno-items";
+@import "components/role-tags";
+@import "components/scrollbar";
+@import "components/status-pill";
+@import "components/settings-bento-box";
+@import "components/confirm-alert";
+@import "components/loading";
+@import "components/obj-achiv-program-item";
+@import "components/swot-items";
+@import "components/company-policy-items";
+
+// Layout styles
+@import "layout/header";
+@import "layout/body";
+@import "layout/footer";
+@import "layout/sidenav";
+@import "layout/table";
+
+// Pages styles
+@import "pages/account-verification";
+@import "pages/announcements";
+@import "pages/company-policy";
+@import "pages/create-account";
+@import "pages/create-announcement";
+@import "pages/create-evaluation-template";
+@import "pages/create-training-request";
+@import "pages/dashboard";
+@import "pages/equipment-maintainance";
+@import "pages/interested-party";
+@import "pages/login";
+@import "pages/manage-account";
+@import "pages/manage-equipment-maintainance";
+@import "pages/manage-induction-form";
+@import "pages/manage-induction-template";
+@import "pages/manage-induction-templates";
+@import "pages/manage-invites";
+@import "pages/manage-my-training-record";
+@import "pages/manage-my-training-request";
+@import "pages/manage-trainings";
+@import "pages/manage-training-record";
+@import "pages/manage-training-request";
+@import "pages/manage-users";
+@import "pages/manage-user";
+@import "pages/my-training";
+@import "pages/page-not-found";
+@import "pages/post-evaluation-form";
+@import "pages/resp-n-authority";
+@import "pages/resp-n-authority-add-chart";
+@import "pages/resp-n-authority-add-role";
+@import "pages/resp-n-authority-manage-chart";
+@import "pages/resp-n-authority-manage-role";
+@import "pages/risk-n-opp";
+@import "pages/obj-achiv-program";
+@import "pages/scope-of-qms";
+@import "pages/settings";
+@import "pages/swot";
+@import "pages/view-announcements";

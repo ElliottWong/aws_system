@@ -1,0 +1,53 @@
+.l-Announcements-bento-box {
+    display: flex;
+    flex-direction: column;
+    border: thin solid #8E8E8E;
+    border-radius: 5px;
+    max-width: 700px;
+
+    &__Top-line {
+        background-color: $main-air-force-blue;
+        width: 100%;
+        height: 10px;
+        border-radius: 5px 5px 0 0;
+    }
+
+    .c-Announcements-bento-box {
+        padding: 20px;
+
+        &__Account {
+            h1 {
+                font-size: $font-small;
+                font-weight: bold;
+            }
+
+            p {
+                font-size: $font-small;
+                color: #8E8E8E;
+            }
+        }
+
+        &__Content {
+
+            h1 {
+                font-size: $font-small;
+                font-weight: bold;
+            }
+
+            p {
+                width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+
+            }
+
+        }
+
+        &__Link {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+}

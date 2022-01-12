@@ -1,0 +1,65 @@
+.c-Login {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url("../../images/blob-scene-haikei.svg");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  .l-Login__Card {
+    background-color: white;
+    padding: 50px;
+    width: 400px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px 0.3px grey;
+    .c-Login__Card {
+      .otpInput {
+        input {
+          width: 70% !important;
+          border-radius: 0;
+          font-size: 21px;
+          border: 2px solid black;
+        }
+      }
+      .c-Card__Back-btn{
+        padding-left: 0;
+      }
+      .c-Username__Information-message {
+        font-size: 14px;
+      }
+      .c-Card__Logo {
+        display: flex;
+        justify-content: center;
+      }
+      input {
+        width: 100%;
+        border: thin solid black;
+        outline: none;
+        border-radius: 5px;
+        padding-left: 10px;
+      }
+      button {
+        width: 100%;
+        margin-top: 20px;
+      }
+      .c-Card__Username,
+      .c-Card__Password {
+        margin-top: 10px;
+      }
+
+      .c-Card__Forgot-password {
+        color: $anchor-enabled;
+      }
+      .c-Card__Forgot-password:hover {
+        opacity: 0.7;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+    }
+  }
+}

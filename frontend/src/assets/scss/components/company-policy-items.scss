@@ -1,0 +1,56 @@
+.l-Company-Policy-Item {
+    width: 100%;
+    border: thin solid #808080;
+    border-radius: 5px;
+    margin: 20px 0;
+    
+    &--odd {
+        background-color: #F0F0F0;
+    }
+
+    &--even {
+        background-color: white;
+    }
+    
+    .c-Company-Policy-Item {
+        width: 95%;
+        margin: auto;
+        padding: 10px 0;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        &__Top {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            flex-direction: row;
+            padding-bottom: 20px;
+            svg:hover {
+                cursor: pointer;
+                opacity: 0.7;
+            }
+        }
+        input {
+            width: 35%;
+            border-radius: 5px;
+            border: thin solid black;
+            padding-left: 10px;
+        }
+        textarea {
+            border-radius: 5px;
+            border: thin solid black;
+            padding-left: 10px;
+
+        }
+
+        h1 {
+            font-size: $font-small;
+            font-weight: none;
+            text-decoration: underline;
+        }
+        p {
+            padding-top: 10px;
+            font-size: $font-small;
+        }
+    }
+}

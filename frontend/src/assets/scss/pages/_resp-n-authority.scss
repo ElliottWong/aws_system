@@ -1,0 +1,65 @@
+.c-Resp-N-Auth {
+  &__Org-Chart {
+    margin-top: 20px;
+    .c-Org-Chart__Top {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px 0;
+      h1 {
+        font-size: $font-medium;
+        font-weight: bold;
+      }
+    }
+
+    .c-Org-Chart__Table {
+    }
+  }
+
+  &__Roles {
+    margin-top: 100px;
+    .c-Roles {
+      &__Top {
+        margin: 20px 0;
+        h1 {
+          font-size: $font-medium;
+          font-weight: bold;
+        }
+      }
+
+      &__Table {
+        .c-Table {
+          &__Top {
+              display: flex;
+              flex-direction: row;
+              justify-content: space-between;
+              align-items: center;
+            width: 100%;
+            //   Search bar
+            .search-label {
+              width: 100%;
+              // Hide react table's "search this table" text
+              input {
+                width: 100%;
+              }
+              span {
+                display: none;
+              }
+            }
+            //   Clear btn
+            .c-Table__Clear-btn {
+              margin: 0 40px;
+              &:hover {
+                text-decoration: underline;
+                opacity: 0.7;
+              }
+            }
+            // Add role btn
+            
+          }
+        }
+      }
+    }
+  }
+}

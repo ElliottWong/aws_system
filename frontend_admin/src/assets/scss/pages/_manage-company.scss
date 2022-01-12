@@ -1,0 +1,125 @@
+.c-Manage-company {
+  .c-Companies__Danger-zone {
+    margin-top: 20px;
+    .c-Danger-zone__Row {
+      margin-top: 20px;
+    }
+  }
+
+  .c-Companies__Danger-zone {
+    h4 {
+      font-weight: bold;
+      font-size: 21px;
+    }
+  }
+  &__Profile-card {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin: 50px 0;
+    width: 100%;
+
+    .l-Profile-card__Left {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      align-items: center;
+      img {
+        width: 100px;
+        height: 100px;
+        border-radius: 75px;
+      }
+      span {
+        color: $anchor-enabled;
+      }
+
+      img:hover,
+      span:hover {
+        opacity: 0.7;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+    }
+
+    .l-Profile-card__Right {
+      width: 80%;
+      font-size: $font-small;
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      h1 {
+        font-size: $font-small;
+        font-weight: bold;
+      }
+      h2 {
+        font-size: $font-small;
+        color: #919191;
+      }
+    }
+  }
+
+  .l-Manage-company__Inputs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+
+    &--row {
+      width: 100%;
+      margin: 5px 0;
+      .c-Input {
+        width: 100%;
+        &--read-only {
+          input {
+            background-color: #e8e8e8;
+            border: thin solid #e8e8e8;
+          }
+        }
+        &--edit {
+          input {
+            border-radius: 5px;
+            border: thin solid black;
+            outline: none;
+            padding-left: 10px;
+            width: 100%;
+          }
+        }
+        input {
+          border-radius: 5px;
+          outline: none;
+          padding-left: 10px;
+          width: 100%;
+        }
+      }
+
+      .c-Input:first-of-type {
+        margin-right: 20px;
+      }
+      .c-Input:last-of-type {
+        margin-left: 20px;
+      }
+    }
+    &--row3 {
+      .l-Manage-account__Roles {
+        p {
+          font-size: $font-small;
+          font-weight: 400;
+        }
+      }
+    }
+    .c-Manage-account__Btns {
+      display: flex;
+      justify-content: flex-start;
+      width: 100%;
+      margin: 20px 0;
+      button {
+        width: fit-content;
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+// Vendors styles
+@import "vendors/bootstrap";
+
+// Themes styles
+@import "themes/theme";
+
+// Base styles
+@import "base/typography";
+@import "base/reset";
+
+// Utilities styles
+@import "utilities/mixins";
+
+// Components styles
+@import "components/breadcrumb";
+@import "components/buttons";
+@import "components/dashboard-bento-box";
+@import "components/error-card";
+@import "components/loading";
+@import "components/confirm-alert";
+@import "components/page-not-found";
+@import "components/scrollbar";
+@import "components/settings-bento-box";
+
+// Layout styles
+@import "layout/header";
+@import "layout/body";
+@import "layout/footer";
+@import "layout/sidenav";
+@import "layout/table";
+
+// Pages styles
+@import "pages/add-company";
+@import "pages/companies";
+@import "pages/dashboard";
+@import "pages/login";
+@import "pages/manage-account";
+@import "pages/manage-company";
+@import "pages/manage-invites";
+@import "pages/settings";
+
+

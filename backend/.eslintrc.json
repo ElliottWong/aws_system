@@ -1,0 +1,46 @@
+{
+    "env": {
+        "node": true,
+        "commonjs": true,
+        "es2021": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+        "ecmaVersion": "latest"
+    },
+    "rules": {
+        "quotes": [
+            "warn",
+            "single"
+        ],
+        "indent": [
+            "warn",
+            4,
+            {
+                "SwitchCase": 1
+            }
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "comma-dangle": [
+            "warn",
+            "never"
+        ],
+        "brace-style": [
+            "error",
+            "stroustrup"
+        ],
+        "eqeqeq": "warn",
+        "no-unused-vars": [
+            "warn",
+            {
+                "caughtErrors": "all"
+            }
+        ],
+        "arrow-parens": "warn",
+        "prefer-const": "off",
+        "eol-last": "warn"
+    }
+}

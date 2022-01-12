@@ -1,0 +1,19 @@
+[
+    {
+        "function": "Sales",
+        "quality_objective": "achieve 4.5 star customer ratings",
+        "personel_responsible": 2,
+        "data_collection": "send out customer feedback form",
+        "data_analysis": "tabulate results from customer feedback form",
+        "display_order": 1,
+        "parent_item_id": 1,
+        "files": [
+            {
+                "new": false,
+                "file_id": 1,
+                "name": "satisfaction monitoring table 123",
+                "deleted": false
+            }
+        ]
+    }
+]

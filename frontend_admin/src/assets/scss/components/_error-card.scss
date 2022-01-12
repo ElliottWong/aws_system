@@ -1,0 +1,17 @@
+.l-Error-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 30px;
+    .c-Error-card {
+        width: 100%;
+        max-width: 400px;
+        .h4 {
+            font-weight: bold;
+            font-size: $font-medium;
+        }
+        p {
+            font-size: $font-small;
+        }
+    }
+}

@@ -1,0 +1,113 @@
+// Button styling
+.c-Btn {
+    border: none;
+    box-shadow: 0px 0px 10px 0.3px grey;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 9px 23px;
+    height: fit-content;
+    white-space: nowrap;
+
+    &--alert {
+        color: white;
+        background-color: $button-alert;
+        margin-left: 30px;
+    }
+
+    &--ok {
+        color: white;
+        background-color: $button-ok;
+    }
+
+    &--warning {
+        color: white;
+        background-color: $button-warning;
+    }
+
+    &--primary {
+        color: white;
+        background-color: $button-primary;
+    }
+
+    &--info {
+        color: white;
+        background-color: $button-info;
+    }
+
+    &--cancel {
+        color: black;
+        background-color: white;
+        box-shadow: none;
+        border: none;
+        margin-left: 30px;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    &--dark {
+        color: white;
+        background-color: $button-dark;
+    }
+
+    &--disabled {
+        color: white;
+        background-color: $button-disabled;
+    }
+
+    &--login {
+        color: white;
+        background-color: $button-login;
+    }
+
+    &:hover {
+        opacity: 0.7;
+    }
+
+    &:active {
+        opacity: 0.8;
+    }
+
+    &--alert-border {
+        color: $button-alert;
+        background-color: transparent;
+        border: 1px solid $button-alert;
+        box-shadow: none;
+
+        &:hover {
+            color: white;
+            background-color: $button-alert;
+            border: 1px solid $button-alert;
+            box-shadow: none;
+            opacity: 1;
+        }
+    }
+
+    &--primary-border {
+        color: $button-primary;
+        background-color: transparent;
+        border: 1px solid $button-primary;
+        box-shadow: none;
+
+        &:hover {
+            color: white;
+            background-color: $button-primary;
+            border: 1px solid $button-primary;
+            box-shadow: none;
+            opacity: 1;
+        }
+    }
+}
+
+.c-Table-Btn {
+    &--bin {
+        text-align: center;
+
+        &:hover {
+            cursor: pointer;
+            opacity: 1;
+        }
+    }
+}

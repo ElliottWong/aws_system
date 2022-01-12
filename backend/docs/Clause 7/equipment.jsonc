@@ -1,0 +1,768 @@
+// example output for clause 7.1 equipment/maintenance
+[
+    {
+        "equipment_id": 4,
+        "fk_company_id": 2,
+        "created_by": 12,
+        "reference_number": "5TYYH1VM",
+        "register_number": "KNXFCGE2",
+        "serial_number": "BHLCQ3J6",
+        "model": "Ranchero",
+        "location": "27734 Roob Unions",
+        "archived_at": null,
+        "created_at": "2021-12-26T07:40:58.000Z",
+        "updated_at": "2021-12-26T07:40:58.000Z",
+        "author": {
+            "employee_id": 12,
+            "firstname": "Magnolia",
+            "lastname": "Walter",
+            "title": "Global Identity Representative",
+            "email": "magnolia_walter@example.com",
+            "fk_company_id": 2,
+            "fk_address_id": 14,
+            "admin_level": 2,
+            "status": "available",
+            "profile_picture": null,
+            "created_at": "2021-12-26T07:40:57.000Z",
+            "updated_at": "2021-12-26T07:40:57.000Z",
+            "deleted_at": null,
+            "account": {
+                "username": "magnolia_walter"
+            }
+        },
+        "maintenance": [
+            {
+                "maintenance_id": 10,
+                "fk_company_id": 2,
+                "fk_equipment_id": 4,
+                "title": "harness real-time markets",
+                "description": null,
+                "freq_multiplier": 1,
+                "freq_unit_time": 365,
+                "first_notification": false,
+                "second_notification": false,
+                "last_service_at": "2021-12-23",
+                "next_service_at": "2022-12-23",
+                "days_left": 362,
+                "days_left_pct": 99,
+                "created_at": "2021-12-26T07:40:58.000Z",
+                "updated_at": "2021-12-26T07:40:58.000Z",
+                "assignees": [
+                    {
+                        "employee_id": 12,
+                        "firstname": "Magnolia",
+                        "lastname": "Walter",
+                        "title": "Global Identity Representative",
+                        "email": "magnolia_walter@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 14,
+                        "admin_level": 2,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "magnolia_walter"
+                        }
+                    },
+                    {
+                        "employee_id": 13,
+                        "firstname": "Augustus",
+                        "lastname": "Powlowski",
+                        "title": "International Quality Strategist",
+                        "email": "augustus_powlowski@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 15,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "augustus_powlowski"
+                        }
+                    },
+                    {
+                        "employee_id": 14,
+                        "firstname": "Paxton",
+                        "lastname": "Pfeffer",
+                        "title": "Dynamic Factors Director",
+                        "email": "paxton_pfeffer@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 16,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "paxton_pfeffer"
+                        }
+                    }
+                ],
+                "uploads": []
+            },
+            {
+                "maintenance_id": 11,
+                "fk_company_id": 2,
+                "fk_equipment_id": 4,
+                "title": "streamline visionary e-services",
+                "description": null,
+                "freq_multiplier": 2,
+                "freq_unit_time": 30,
+                "first_notification": false,
+                "second_notification": false,
+                "last_service_at": "2021-12-22",
+                "next_service_at": "2022-02-20",
+                "days_left": 56,
+                "days_left_pct": 93,
+                "created_at": "2021-12-26T07:40:58.000Z",
+                "updated_at": "2021-12-26T07:40:58.000Z",
+                "assignees": [
+                    {
+                        "employee_id": 12,
+                        "firstname": "Magnolia",
+                        "lastname": "Walter",
+                        "title": "Global Identity Representative",
+                        "email": "magnolia_walter@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 14,
+                        "admin_level": 2,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "magnolia_walter"
+                        }
+                    },
+                    {
+                        "employee_id": 13,
+                        "firstname": "Augustus",
+                        "lastname": "Powlowski",
+                        "title": "International Quality Strategist",
+                        "email": "augustus_powlowski@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 15,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "augustus_powlowski"
+                        }
+                    },
+                    {
+                        "employee_id": 14,
+                        "firstname": "Paxton",
+                        "lastname": "Pfeffer",
+                        "title": "Dynamic Factors Director",
+                        "email": "paxton_pfeffer@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 16,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "paxton_pfeffer"
+                        }
+                    }
+                ],
+                "uploads": []
+            },
+            {
+                "maintenance_id": 12,
+                "fk_company_id": 2,
+                "fk_equipment_id": 4,
+                "title": "embrace efficient content",
+                "description": null,
+                "freq_multiplier": 1,
+                "freq_unit_time": 7,
+                "first_notification": false,
+                "second_notification": false,
+                "last_service_at": "2021-12-22",
+                "next_service_at": "2021-12-29",
+                "days_left": 3,
+                "days_left_pct": 43,
+                "created_at": "2021-12-26T07:40:58.000Z",
+                "updated_at": "2021-12-26T07:40:58.000Z",
+                "assignees": [
+                    {
+                        "employee_id": 12,
+                        "firstname": "Magnolia",
+                        "lastname": "Walter",
+                        "title": "Global Identity Representative",
+                        "email": "magnolia_walter@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 14,
+                        "admin_level": 2,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "magnolia_walter"
+                        }
+                    },
+                    {
+                        "employee_id": 13,
+                        "firstname": "Augustus",
+                        "lastname": "Powlowski",
+                        "title": "International Quality Strategist",
+                        "email": "augustus_powlowski@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 15,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "augustus_powlowski"
+                        }
+                    },
+                    {
+                        "employee_id": 14,
+                        "firstname": "Paxton",
+                        "lastname": "Pfeffer",
+                        "title": "Dynamic Factors Director",
+                        "email": "paxton_pfeffer@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 16,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "paxton_pfeffer"
+                        }
+                    }
+                ],
+                "uploads": []
+            }
+        ]
+    },
+    {
+        "equipment_id": 5,
+        "fk_company_id": 2,
+        "created_by": 12,
+        "reference_number": "0MU1JE2K",
+        "register_number": "5D1FU46U",
+        "serial_number": "JYVPDB79",
+        "model": "Element",
+        "location": "1640 Darren Gardens",
+        "archived_at": null,
+        "created_at": "2021-12-26T07:40:58.000Z",
+        "updated_at": "2021-12-26T07:40:58.000Z",
+        "author": {
+            "employee_id": 12,
+            "firstname": "Magnolia",
+            "lastname": "Walter",
+            "title": "Global Identity Representative",
+            "email": "magnolia_walter@example.com",
+            "fk_company_id": 2,
+            "fk_address_id": 14,
+            "admin_level": 2,
+            "status": "available",
+            "profile_picture": null,
+            "created_at": "2021-12-26T07:40:57.000Z",
+            "updated_at": "2021-12-26T07:40:57.000Z",
+            "deleted_at": null,
+            "account": {
+                "username": "magnolia_walter"
+            }
+        },
+        "maintenance": [
+            {
+                "maintenance_id": 13,
+                "fk_company_id": 2,
+                "fk_equipment_id": 5,
+                "title": "monetize synergistic solutions",
+                "description": null,
+                "freq_multiplier": 3,
+                "freq_unit_time": 30,
+                "first_notification": false,
+                "second_notification": false,
+                "last_service_at": "2021-12-24",
+                "next_service_at": "2022-03-24",
+                "days_left": 88,
+                "days_left_pct": 98,
+                "created_at": "2021-12-26T07:40:58.000Z",
+                "updated_at": "2021-12-26T07:40:58.000Z",
+                "assignees": [
+                    {
+                        "employee_id": 12,
+                        "firstname": "Magnolia",
+                        "lastname": "Walter",
+                        "title": "Global Identity Representative",
+                        "email": "magnolia_walter@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 14,
+                        "admin_level": 2,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "magnolia_walter"
+                        }
+                    },
+                    {
+                        "employee_id": 13,
+                        "firstname": "Augustus",
+                        "lastname": "Powlowski",
+                        "title": "International Quality Strategist",
+                        "email": "augustus_powlowski@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 15,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "augustus_powlowski"
+                        }
+                    },
+                    {
+                        "employee_id": 14,
+                        "firstname": "Paxton",
+                        "lastname": "Pfeffer",
+                        "title": "Dynamic Factors Director",
+                        "email": "paxton_pfeffer@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 16,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "paxton_pfeffer"
+                        }
+                    }
+                ],
+                "uploads": []
+            },
+            {
+                "maintenance_id": 14,
+                "fk_company_id": 2,
+                "fk_equipment_id": 5,
+                "title": "mesh real-time applications",
+                "description": null,
+                "freq_multiplier": 2,
+                "freq_unit_time": 365,
+                "first_notification": false,
+                "second_notification": false,
+                "last_service_at": "2021-12-25",
+                "next_service_at": "2023-12-25",
+                "days_left": 729,
+                "days_left_pct": 100,
+                "created_at": "2021-12-26T07:40:58.000Z",
+                "updated_at": "2021-12-26T07:40:58.000Z",
+                "assignees": [
+                    {
+                        "employee_id": 12,
+                        "firstname": "Magnolia",
+                        "lastname": "Walter",
+                        "title": "Global Identity Representative",
+                        "email": "magnolia_walter@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 14,
+                        "admin_level": 2,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "magnolia_walter"
+                        }
+                    },
+                    {
+                        "employee_id": 13,
+                        "firstname": "Augustus",
+                        "lastname": "Powlowski",
+                        "title": "International Quality Strategist",
+                        "email": "augustus_powlowski@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 15,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "augustus_powlowski"
+                        }
+                    },
+                    {
+                        "employee_id": 14,
+                        "firstname": "Paxton",
+                        "lastname": "Pfeffer",
+                        "title": "Dynamic Factors Director",
+                        "email": "paxton_pfeffer@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 16,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "paxton_pfeffer"
+                        }
+                    }
+                ],
+                "uploads": []
+            },
+            {
+                "maintenance_id": 15,
+                "fk_company_id": 2,
+                "fk_equipment_id": 5,
+                "title": "engage bricks-and-clicks e-business",
+                "description": null,
+                "freq_multiplier": 5,
+                "freq_unit_time": 30,
+                "first_notification": false,
+                "second_notification": false,
+                "last_service_at": "2021-12-20",
+                "next_service_at": "2022-05-19",
+                "days_left": 144,
+                "days_left_pct": 96,
+                "created_at": "2021-12-26T07:40:58.000Z",
+                "updated_at": "2021-12-26T07:40:58.000Z",
+                "assignees": [
+                    {
+                        "employee_id": 12,
+                        "firstname": "Magnolia",
+                        "lastname": "Walter",
+                        "title": "Global Identity Representative",
+                        "email": "magnolia_walter@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 14,
+                        "admin_level": 2,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "magnolia_walter"
+                        }
+                    },
+                    {
+                        "employee_id": 13,
+                        "firstname": "Augustus",
+                        "lastname": "Powlowski",
+                        "title": "International Quality Strategist",
+                        "email": "augustus_powlowski@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 15,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "augustus_powlowski"
+                        }
+                    },
+                    {
+                        "employee_id": 14,
+                        "firstname": "Paxton",
+                        "lastname": "Pfeffer",
+                        "title": "Dynamic Factors Director",
+                        "email": "paxton_pfeffer@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 16,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "paxton_pfeffer"
+                        }
+                    }
+                ],
+                "uploads": []
+            }
+        ]
+    },
+    {
+        "equipment_id": 6,
+        "fk_company_id": 2,
+        "created_by": 12,
+        "reference_number": "AAN5QSRO",
+        "register_number": "B5N06R57",
+        "serial_number": "XN21EJV2",
+        "model": "Model 3",
+        "location": "1733 Felicia Road",
+        "archived_at": null,
+        "created_at": "2021-12-26T07:40:58.000Z",
+        "updated_at": "2021-12-26T07:40:58.000Z",
+        "author": {
+            "employee_id": 12,
+            "firstname": "Magnolia",
+            "lastname": "Walter",
+            "title": "Global Identity Representative",
+            "email": "magnolia_walter@example.com",
+            "fk_company_id": 2,
+            "fk_address_id": 14,
+            "admin_level": 2,
+            "status": "available",
+            "profile_picture": null,
+            "created_at": "2021-12-26T07:40:57.000Z",
+            "updated_at": "2021-12-26T07:40:57.000Z",
+            "deleted_at": null,
+            "account": {
+                "username": "magnolia_walter"
+            }
+        },
+        "maintenance": [
+            {
+                "maintenance_id": 16,
+                "fk_company_id": 2,
+                "fk_equipment_id": 6,
+                "title": "recontextualize vertical paradigms",
+                "description": null,
+                "freq_multiplier": 9,
+                "freq_unit_time": 7,
+                "first_notification": false,
+                "second_notification": false,
+                "last_service_at": "2021-12-24",
+                "next_service_at": "2022-02-25",
+                "days_left": 61,
+                "days_left_pct": 97,
+                "created_at": "2021-12-26T07:40:58.000Z",
+                "updated_at": "2021-12-26T07:40:58.000Z",
+                "assignees": [
+                    {
+                        "employee_id": 12,
+                        "firstname": "Magnolia",
+                        "lastname": "Walter",
+                        "title": "Global Identity Representative",
+                        "email": "magnolia_walter@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 14,
+                        "admin_level": 2,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "magnolia_walter"
+                        }
+                    },
+                    {
+                        "employee_id": 13,
+                        "firstname": "Augustus",
+                        "lastname": "Powlowski",
+                        "title": "International Quality Strategist",
+                        "email": "augustus_powlowski@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 15,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "augustus_powlowski"
+                        }
+                    },
+                    {
+                        "employee_id": 14,
+                        "firstname": "Paxton",
+                        "lastname": "Pfeffer",
+                        "title": "Dynamic Factors Director",
+                        "email": "paxton_pfeffer@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 16,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "paxton_pfeffer"
+                        }
+                    }
+                ],
+                "uploads": []
+            },
+            {
+                "maintenance_id": 17,
+                "fk_company_id": 2,
+                "fk_equipment_id": 6,
+                "title": "maximize best-of-breed architectures",
+                "description": null,
+                "freq_multiplier": 4,
+                "freq_unit_time": 7,
+                "first_notification": false,
+                "second_notification": false,
+                "last_service_at": "2021-12-22",
+                "next_service_at": "2022-01-19",
+                "days_left": 24,
+                "days_left_pct": 86,
+                "created_at": "2021-12-26T07:40:58.000Z",
+                "updated_at": "2021-12-26T07:40:58.000Z",
+                "assignees": [
+                    {
+                        "employee_id": 12,
+                        "firstname": "Magnolia",
+                        "lastname": "Walter",
+                        "title": "Global Identity Representative",
+                        "email": "magnolia_walter@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 14,
+                        "admin_level": 2,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "magnolia_walter"
+                        }
+                    },
+                    {
+                        "employee_id": 13,
+                        "firstname": "Augustus",
+                        "lastname": "Powlowski",
+                        "title": "International Quality Strategist",
+                        "email": "augustus_powlowski@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 15,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "augustus_powlowski"
+                        }
+                    },
+                    {
+                        "employee_id": 14,
+                        "firstname": "Paxton",
+                        "lastname": "Pfeffer",
+                        "title": "Dynamic Factors Director",
+                        "email": "paxton_pfeffer@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 16,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "paxton_pfeffer"
+                        }
+                    }
+                ],
+                "uploads": []
+            },
+            {
+                "maintenance_id": 18,
+                "fk_company_id": 2,
+                "fk_equipment_id": 6,
+                "title": "integrate cross-platform e-commerce",
+                "description": null,
+                "freq_multiplier": 1,
+                "freq_unit_time": 365,
+                "first_notification": false,
+                "second_notification": false,
+                "last_service_at": "2021-12-22",
+                "next_service_at": "2022-12-22",
+                "days_left": 361,
+                "days_left_pct": 99,
+                "created_at": "2021-12-26T07:40:58.000Z",
+                "updated_at": "2021-12-26T07:40:58.000Z",
+                "assignees": [
+                    {
+                        "employee_id": 12,
+                        "firstname": "Magnolia",
+                        "lastname": "Walter",
+                        "title": "Global Identity Representative",
+                        "email": "magnolia_walter@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 14,
+                        "admin_level": 2,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "magnolia_walter"
+                        }
+                    },
+                    {
+                        "employee_id": 13,
+                        "firstname": "Augustus",
+                        "lastname": "Powlowski",
+                        "title": "International Quality Strategist",
+                        "email": "augustus_powlowski@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 15,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "augustus_powlowski"
+                        }
+                    },
+                    {
+                        "employee_id": 14,
+                        "firstname": "Paxton",
+                        "lastname": "Pfeffer",
+                        "title": "Dynamic Factors Director",
+                        "email": "paxton_pfeffer@example.com",
+                        "fk_company_id": 2,
+                        "fk_address_id": 16,
+                        "admin_level": 0,
+                        "status": "available",
+                        "profile_picture": null,
+                        "created_at": "2021-12-26T07:40:57.000Z",
+                        "updated_at": "2021-12-26T07:40:57.000Z",
+                        "deleted_at": null,
+                        "account": {
+                            "username": "paxton_pfeffer"
+                        }
+                    }
+                ],
+                "uploads": []
+            }
+        ]
+    }
+]

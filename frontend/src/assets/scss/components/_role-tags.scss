@@ -1,0 +1,25 @@
+.l-Role-tags {
+    width: fit-content;
+    display: inline-block;
+    border-radius: 5px;
+    margin: 5px 10px;
+    background-color: $main-air-force-blue;
+    color: white;
+    .c-Role-tags {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        align-items: center;
+        padding: 5px 10px;
+        h1 {
+            font-size: $font-small;
+            width: fit-content; 
+        }
+        button {
+            outline: none;
+            border: none;
+            background-color: transparent;
+        }
+    }
+  
+}

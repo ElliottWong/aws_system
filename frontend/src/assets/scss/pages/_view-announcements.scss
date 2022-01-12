@@ -1,0 +1,50 @@
+.c-View-announcements {
+    &__Content {
+        padding: 20px 0;
+        .c-Content {
+            padding: 20px 0;
+            &__Top {
+                h1 {
+                    font-size: $font-small;
+                    font-weight: bold;
+                }
+                h3 {
+                    font-size: $font-small;
+                    color: #8e8e8e;
+                }
+                p {
+                    font-size: $font-small;
+                }
+            }
+            &__Main {
+                h1 {
+                    font-size: $font-medium;
+                    font-weight: bold;
+                }
+                p {
+                    font-size: $font-small;
+                }
+            }
+        }
+    }
+
+    &__Danger {
+        h1 {
+            font-size: $font-medium;
+            font-weight: bold;
+        }
+        .c-Danger {
+            &__Row {
+                padding: 20px 0;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                p {
+                    color: $button-alert;
+                    padding-left: 20px;
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+}

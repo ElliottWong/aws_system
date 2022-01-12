@@ -1,0 +1,20 @@
+.c-Dashboard {
+    width: 85%;
+    min-height: 100vh;
+    margin: auto;
+    &__Welcome {
+        h1 {
+            font-weight: bold;
+            font-size: $font-medium;
+        }
+        h2 {
+            font-size: $font-small;
+            padding-top: 5px;
+        }
+    }
+
+    &__Stats {
+        width: 100%;
+    }
+   
+}

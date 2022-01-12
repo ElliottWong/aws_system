@@ -1,0 +1,170 @@
+header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  box-shadow: 0px 0px 10px 0.3px grey;
+  z-index: 98;
+  height: 70px;
+  position: fixed;
+  width: 100%;
+  background-color: #1c1c1c;
+
+  .l-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-left: 20px;
+    .c-Hamburger {
+      button {
+        border: none;
+        background-color: transparent;
+        padding: 20px 30px;
+      }
+    }
+
+    .c-Logo {
+      padding: 0 30px;
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+
+      p {
+        padding-left: 20px;
+        font-size: $font-small;
+        font-weight: bold;
+        color: white;
+      }
+      img {
+        width: 162px;
+      }
+    }
+  }
+  .l-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-right: 50px;
+
+    .l-Profile {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      .c-Profile {
+        padding: 0 20px;
+
+        button {
+          padding: 0;
+          border-radius: 50px;
+          border: none;
+          img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50px;
+          }
+        }
+
+        .l-ProfilePopUp {
+          position: relative;
+          .c-ProfilePopUp {
+            position: absolute;
+            background-color: white;
+            box-shadow: 0px 0px 10px 0.3px grey;
+            top: 10px;
+            left: -90px;
+            border-radius: 5px;
+
+            max-width: 300px;
+            width: 300px;
+            padding: 20px 0;
+            .c-ProfilePopUp__top {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              flex-direction: column;
+              padding-bottom: 20px;
+              img {
+                height: 50px;
+                width: 50px;
+                border-radius: 50px;
+              }
+
+              h1 {
+                font-size: 16px;
+                font-weight: bold;
+                width: 200px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                text-align: center;
+              }
+
+              h2 {
+                font-size: 16px;
+                color: #919191;
+                width: 250px;
+                text-align: center;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              }
+            }
+            .c-ProfilePopUp__bottom {
+              width: 100%;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              flex-direction: column;
+              a {
+                background-color: white;
+                box-shadow: 0px 0px 10px 0.3px grey;
+                border-radius: 5px;
+                font-size: 16px;
+                width: 60%;
+                text-align: center;
+                margin: auto;
+                color: black;
+                padding: 3px 0;
+              }
+
+              a:hover,
+              button:hover {
+                opacity: 0.7;
+              }
+
+              hr {
+                color: #c8c8c8;
+                width: 80%;
+                height: 3px;
+                margin: 20px auto;
+              }
+
+              button {
+                background-color: #1666ba;
+                box-shadow: 0px 0px 10px 0.3px grey;
+                border-radius: 5px;
+                font-size: 16px;
+                width: 60%;
+                margin: auto;
+                color: white;
+                outline: none;
+                border: none;
+                height: 30px;
+              }
+            }
+          }
+        }
+      }
+      .c-ProfileName {
+        h1 {
+          font-weight: bold;
+          font-size: 16px;
+          width: 200px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          color: white;
+        }
+      }
+    }
+  }
+}

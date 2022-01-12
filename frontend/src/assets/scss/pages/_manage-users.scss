@@ -1,0 +1,39 @@
+.c-Manage-users {
+    &__Table {
+        .c-Table {
+            &__Top {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                width: 100%;
+
+                //   Search bar
+                .search-label {
+                    margin-top: 10px;
+                    width: 100%;
+
+                    // Hide react table's "search this table" text
+                    input {
+                        width: 100%;
+                    }
+
+                    span {
+                        display: none;
+                    }
+                }
+
+                //   Clear btn
+                .c-Table__Clear-btn {
+                    &:hover {
+                        text-decoration: underline;
+                        opacity: 0.7;
+                    }
+                }
+
+                // Add role btn
+
+            }
+        }
+    }
+}

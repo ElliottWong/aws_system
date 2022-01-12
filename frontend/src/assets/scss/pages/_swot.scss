@@ -1,0 +1,30 @@
+.c-Swot {
+  &__Top {
+    .l-IP__Btns {
+      .c-IP__Btn {
+      }
+    }
+  }
+
+  .c-Swot__Document-content {
+    .c-Swot__Document-header {
+      display: flex;
+      justify-content: flex-start;
+      flex-direction: row;
+      padding-bottom: 30px;
+      &--left {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      &--right {
+        display: flex;
+        flex-direction: column;
+        padding-left: 10px;
+        p {
+            text-decoration: underline;
+        }
+      }
+    }
+  }
+}

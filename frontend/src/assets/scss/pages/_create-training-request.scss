@@ -1,0 +1,69 @@
+.c-Create-training-request {
+    .c-Form {
+        &__Row {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            .c-Form__Left {
+                margin-right: 20px;
+                width: 100%;
+            }
+
+            .c-Form__Right {
+                margin-left: 20px;
+                width: 100%;
+            }
+
+            .c-Form__Input {
+                padding-top: 20px;
+                display: flex;
+                flex-direction: column;
+                label {
+                    font-size: $font-small;
+                    font-weight: bold;
+                }
+                input, textarea, select {
+                    border-radius: 5px;
+                    outline: none;
+                    padding-left: 10px;
+                    width: 100%;
+                    border: thin solid black;
+                }
+
+                select {
+                    padding-top: 3.5px;
+                    padding-left: 10px;
+                    padding-bottom: 3.5px;
+                }
+
+                .c-Form__Date {
+                    input {
+                        border: none;
+                        outline: none;   
+                    }
+
+                    .react-datetime-picker__wrapper {
+                        border: thin solid black;
+                        border-radius: 5px;
+                    }
+                }
+            }
+
+            .c-Form__File-upload {
+                padding-top: 20px;
+                h2 {
+                    font-size: $font-small;
+                    font-weight: bold;
+                }
+                p {
+                    font-size: $font-small;
+                }
+
+                button {
+                    margin-top: 20px;
+                }
+            }
+
+        }
+    }
+}

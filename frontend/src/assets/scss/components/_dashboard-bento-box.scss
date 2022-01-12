@@ -1,0 +1,21 @@
+.c-Dashboard-bento-box {
+    // Variations
+    display: inline-flex;
+    width: 300px;
+    height: 150px;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: white;
+    margin: 10px;
+    border-radius: 5px;
+    h1 {
+        font-size: $font-large;
+    }
+    &--1 {
+        background: linear-gradient(to right,#9cc6f3, #67a4e5, #347dca);
+    }
+    &--2 {
+        background: linear-gradient(to right,#9cb1f3, #697fe4, #413eca);
+    }
+}

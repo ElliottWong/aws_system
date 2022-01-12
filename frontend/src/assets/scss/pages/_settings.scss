@@ -1,0 +1,13 @@
+.c-Settings {
+  padding-bottom: 30px;
+  min-height: 100vh;
+  .l-Settings__Bento-box {
+    .l-Bento-box {
+      &__Header {
+        font-weight: bold;
+        font-size: $font-medium;
+        padding-top: 30px;
+      }
+    }
+  }
+}

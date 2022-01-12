@@ -1,0 +1,75 @@
+.c-Dashboard {
+    width: 85%;
+    margin: auto;
+    min-height: 100vh;
+    &__Welcome {
+        h1 {
+            font-weight: bold;
+            font-size: $font-medium;
+        }
+        h2 {
+            font-size: $font-small;
+            padding-top: 5px;
+        }
+    }
+
+    &__Latest-announcements {
+        padding: 25px 0;
+        margin: 25px 0;
+        .c-Latest-announcements {
+            &__Heading {
+                padding: 10px 0;
+                h1 {
+                    font-weight: bold;
+                    font-size: $font-small;
+                }
+            }
+
+            &__Content {
+                margin: 25px 0;
+                width: 100%;
+                padding-left: 0;
+                padding-right: 0;
+               
+                .c-Latest-announcements__Wrapper {
+                    padding-left: 0;
+                    padding-right: 0;
+                    &:nth-of-type(1) {
+                        padding-right: 10px;
+                    }
+
+                    &:nth-of-type(2) {
+                        padding-left: 10px;
+                    }
+                }
+                @include screen-max(999px) {
+                    .c-Latest-announcements__Wrapper {
+                        padding-left: 0 !important;
+                        padding-right: 0 !important;
+                    }
+                }
+
+            }
+
+            &__Link {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        }
+    }
+
+    &__Organisation-info {
+        margin: 50px 0;
+        .c-Organisation-Info__Heading {
+            h1 {
+                font-weight: bold;
+                font-size: $font-small;
+            }
+            p {
+                font-size: $font-small;
+            }
+        }
+    }
+   
+}

@@ -1,0 +1,20 @@
+.c-Manage-induction-form {
+  &__Document {
+    h2 {
+      font-size: $font-small;
+      font-weight: bold;
+      padding-bottom: 20px;
+    }
+
+    .c-Manage-induction-form__Document-content {
+      width: 90%;
+      margin: auto;
+      h1 {
+        text-align: center;
+        font-size: 21px;
+        font-weight: bold;
+      }
+      
+    }
+  }
+}

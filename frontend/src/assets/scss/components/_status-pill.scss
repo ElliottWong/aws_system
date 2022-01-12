@@ -1,0 +1,38 @@
+.c-Status-pill {
+    width: fit-content;
+    padding: 5px 10px;
+    border-radius: 5px;
+    h1 {
+        font-size: $font-small !important;
+        font-weight: bold;
+    }
+
+    &--active {
+        background-color: $message-ok-bg;
+        h1 {
+            color: $message-ok-fg;
+        }
+    }
+    &--almost-due {
+        background-color: $message-warning-bg;
+        h1 {
+            color: $message-warning-fg;
+        }
+    }
+
+    &--pending {
+        background-color: $message-warning-bg;
+        h1 {
+            color: $message-warning-fg;
+        }
+    }
+    
+    &--overdue {
+        background-color: $message-error-bg;
+        h1 {
+            color: $message-error-fg;
+        }
+    }
+
+    
+}

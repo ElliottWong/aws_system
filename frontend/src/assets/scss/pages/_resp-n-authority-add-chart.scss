@@ -1,0 +1,38 @@
+.c-Add-chart {
+    &__Inputs {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin: 20px 0;
+        .c-Input {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            input, label {
+                width: 100%;
+            }
+            input {
+                border-radius: 5px;
+                border: 1px solid black;
+                padding: 5px 10px;
+            }
+        }
+
+        .c-Input:first-of-type {
+            padding-right: 10px;
+        }
+
+        .c-Input:nth-of-type(2) {
+            padding: 0 10px;
+        }
+        .c-Input:nth-of-type(3) {
+            padding-left: 10px;
+        }
+
+        .c-Add-chart__Upload-file {
+            input {
+                border: none;
+            }
+        }
+    }
+}

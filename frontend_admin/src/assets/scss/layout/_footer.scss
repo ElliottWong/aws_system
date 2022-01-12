@@ -1,0 +1,68 @@
+.l-Footer {
+  background-color: #1c1c1c;
+  max-width: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+
+  .c-Footer {
+    width: 80%;
+    margin: auto;
+    padding: 40px 0;
+    color: white;
+    font-size: $font-small;
+
+    &__top {
+      display: flex;
+      justify-content: center;
+
+      .c-Footer__img {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        img {
+          width: 180px;
+          height: 53.56px;
+        }
+      }
+
+      .c-Footer__company,
+      .c-Footer__legal {
+        display: flex;
+        flex-direction: column;
+        padding: 0 50px;
+        // For screen size < 1200px, refer to utilities/mixins for more details
+        @include screen-max(1200px) {
+          display: flex;
+          align-items: center;
+          padding: 0;
+        }
+        h1 {
+          font-size: $font-small;
+          font-weight: bold;
+        }
+        a,
+        p {
+          font-size: $font-small;
+          color: white;
+          padding: 3px 0;
+        }
+        a:hover {
+          opacity: 0.7;
+        }
+      }
+    }
+
+    &__hr {
+      color: white;
+      opacity: 1;
+      height: 2px;
+      margin: 16px 0;
+    }
+
+    &__caption {
+      font-size: $font-small;
+      color: white;
+    }
+  }
+}

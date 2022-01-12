@@ -1,0 +1,53 @@
+{
+    "Companies": [
+        {
+            "company_id": 1,
+            "name": "Joongang Tongyang Broadcasting Company",
+            "alias": "JTBC",
+            "description": "JTBC (Korean: 제이티비씨; an abbreviation for Joongang Tongyang Broadcasting Company; stylized as jtbc) is a South Korean nationwide pay television network, in which its largest shareholder is JoongAng Ilbo/The JoongAng Group with 25% of shares. It was launched on 1 December 2011.",
+            "business_registration_number": "3424324-234-234",
+            "fk_address_id": "1",
+            "status": 1
+        }
+    ],
+    "CompanyParties": [
+        {
+            "party_id": 1,
+            "title": "Interested Parties Document 2018/2019",
+            "fk_company_id": 1,
+            "created_by": "Thomas Lim",
+            "remarks": "",
+            "approved_by": 1,
+            "status": 1,
+            "approved_on": "01/01/2018",
+            "expired_on": null
+        },
+        {
+            "party_id": 2,
+            "title": "Interested Parties Document 2017/2018",
+            "fk_company_id": 1,
+            "created_by": "Thomas Lim",
+            "remarks": "",
+            "approved_by": 1,
+            "status": 2,
+            "approved_on": "01/01/2017",
+            "expired_on": "01/01/2018"
+        }
+    ],
+    "PartyItems": [
+        {
+            "party_item_id": 1,
+            "fk_party_id": 1,
+            "interested_party": "Employees",
+            "expectations": "Job Security, \nCompetitive salary",
+            "parent_item_id": 1
+        },
+        {
+            "party_item_id": 2,
+            "fk_party_id": 1,
+            "interested_party": "CEOs",
+            "expectations": "Money, More money",
+            "parent_item_id": 1
+        }
+    ]
+}

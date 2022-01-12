@@ -1,0 +1,54 @@
+.c-Add-Company {
+  .l-Add-Company__Inputs {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    &--row {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      margin: 5px 0;
+      .c-Input {
+        width: 100%;
+        &--read-only {
+          input {
+            background-color: #e8e8e8;
+            border: thin solid #e8e8e8;
+          }
+        }
+        &--edit {
+          input {
+            border-radius: 5px;
+            border: thin solid black;
+            outline: none;
+            padding-left: 10px;
+            width: 100%;
+          }
+        }
+        input {
+          border-radius: 5px;
+          outline: none;
+          padding-left: 10px;
+          width: 100%;
+        }
+      }
+
+      .c-Input:first-of-type {
+        margin-right: 20px;
+      }
+      .c-Input:last-of-type {
+        margin-left: 20px;
+      }
+    }
+  }
+  .c-Add-company__Btns {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    margin: 20px 0;
+  }
+}

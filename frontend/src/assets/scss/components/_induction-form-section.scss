@@ -1,0 +1,31 @@
+.c-Induction-form-section {
+  border: 1px solid black;
+  border-radius: 5px;
+  &__Header {
+    .c-Induction-form-section__Text {
+      font-size: $font-small;
+      font-weight: bold;
+      padding: 10px 20px;
+    }
+    width: 100%;
+    background-color: #c4c4c4;
+  }
+
+  &__Tasks {
+    .c-Induction-form-task {
+      &__Header {
+        width: 100%;
+        background-color: #ededed;
+        .c-Induction-form-task__Text {
+          font-size: $font-small;
+          font-weight: bold;
+          padding: 8px 20px;
+        }
+      }
+
+      &__Table {
+        padding: 8px 20px;
+      }
+    }
+  }
+}

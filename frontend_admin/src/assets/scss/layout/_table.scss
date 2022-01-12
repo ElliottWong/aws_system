@@ -1,0 +1,77 @@
+.l-Main__Outer .react-bootstrap-table table {
+    table-layout: auto;
+    margin-bottom: 0;
+    width: 100%;
+    text-align: left;
+    thead {
+        th {
+            border-bottom-width: 0px;
+        }
+    }
+    tbody {
+        tr {
+            
+            td {
+                vertical-align: middle;
+            }
+        }
+    }
+}
+
+// Styling for swot tables
+// Swot table (non edit mode)
+.c-Swot-item .react-bootstrap-table table {
+    margin-bottom: 0;
+    width: 100%;
+    thead {
+        th {
+            border-bottom-width: 0px;
+            width: 200px;
+        }
+    }
+    tbody {
+        tr {
+            
+            td {
+                vertical-align: middle;
+            }
+
+            td:first-of-type {
+                width: 50px;
+            }
+        }
+    }
+}
+
+// Swot table (edit mode)
+.c-Swot__Tables--edit .react-bootstrap-table table {
+    margin-bottom: 0;
+    width: 100%;
+    thead {
+        th {
+            border-bottom-width: 0px;
+            
+        }
+        th:first-of-type {
+            width: 50px;
+        }
+        th:last-of-type {
+            width: 50px;
+        }
+    }
+    tbody {
+        tr {
+            
+            td {
+                vertical-align: middle;
+            }
+
+            td:first-of-type {
+                width: 50px;
+            }
+            td:last-of-type {
+                width: 50px;
+            }
+        }
+    }
+}

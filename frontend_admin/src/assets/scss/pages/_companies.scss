@@ -1,0 +1,32 @@
+.c-Companies {
+  &__Table {
+    margin-top: 20px;
+    .c-Table {
+      &__Top {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        //   Search bar
+        .search-label {
+          width: 75%;
+          // Hide react table's "search this table" text
+          input {
+            width: 100%;
+          }
+          span {
+            display: none;
+          }
+        }
+        //   Clear btn
+        .c-Table__Clear-btn {
+          &:hover {
+            text-decoration: underline;
+            opacity: 0.7;
+          }
+        }
+      }
+    }
+  }
+}

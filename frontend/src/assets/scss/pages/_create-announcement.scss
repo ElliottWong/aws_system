@@ -1,0 +1,98 @@
+.c-Create-announcement {
+    .c-Fields {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: row;
+        padding: 40px 0;
+
+        &__Left {
+            flex: 1;
+            .c-Fields {
+                &__Recipients {
+                    padding-bottom: 20px;
+                    h2 {
+                        font-size: $font-medium;
+                        font-weight: bold;
+                        padding-bottom: 10px;
+                    }
+                    h3 {
+                        font-size: $font-medium;
+                        font-weight: bold;
+                        text-align: center;
+                        padding: 13px 0;
+                    }
+                }
+
+                &__Title {
+                    padding: 20px 0;
+                    label {
+                        font-size: $font-medium;
+                        font-weight: bold;
+                        padding-bottom: 10px;
+                    }
+                    input {
+                        border-radius: 5px;
+                        border: thin solid black;
+                        outline: none;
+                        padding-left: 10px;
+                        width: 100%;
+                    }
+                }
+
+                &__Content {
+                    padding: 20px 0;
+                    h2 {
+                        font-size: $font-medium;
+                        font-weight: bold;
+                        padding-bottom: 10px;
+                    }
+                    .demo-wrapper {
+                        width: 100%;
+                        overflow: auto;
+                      }
+                      .rdw-editor-toolbar {
+                        width: 100%;
+                      }
+                      .demo-editor {
+                        border: 1px solid #dee2e6;
+                        padding: 5px 12px;
+                        border-radius: 5px;
+                        overflow: auto;
+                      }
+                }
+
+                &__More-info {
+                    padding: 20px 0;
+                    h2 {
+                        font-size: $font-medium;
+                        font-weight: bold;
+                        padding-bottom: 10px;
+                    }
+                    input[type=checkbox] {
+                        transform: scale(1.5);
+                        margin-left: 10px;
+                    }
+                    label {
+                        font-size: $font-small;
+                        padding-left: 10px;
+                    }
+                }
+            }
+        }
+
+        &__VL {
+            margin: 0 20px;
+            border-right: 1px solid #C4C4C4;
+            display: flex;
+        }
+
+        &__Right {
+            flex: 1;
+            h2 {
+                font-size: $font-medium;
+                font-weight: bold;
+                padding-bottom: 10px;
+            }
+        }
+    }
+}

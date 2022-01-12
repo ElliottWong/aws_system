@@ -1,0 +1,6 @@
+// Mixin for media query
+@mixin screen-max($max) {
+  @media (max-width: $max - 1) {
+    @content;
+  }
+}

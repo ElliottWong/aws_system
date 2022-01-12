@@ -1,0 +1,37 @@
+.c-Account-verification {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fafafa;
+
+    .l-Account-verification__Card {
+        background-color: white;
+        padding: 50px;
+        width: 500px;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        border-radius: 5px;
+        box-shadow: 0px 0px 5px 0.3px grey;
+
+        .c-Account-verification__Card {
+            .c-Card__Logo {
+                display: flex;
+                justify-content: center;
+                padding-bottom: 25px;
+            }
+
+            button {
+                width: 100%;
+                margin-top: 20px;
+            }
+
+            h4 {
+                padding-bottom: 10px;
+                font-size: 21px;
+            }
+        }
+    }
+}

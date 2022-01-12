@@ -1,0 +1,127 @@
+.c-Manage-user {
+    &__User-heading {
+        font-size: $font-medium;
+        font-weight: bold;
+        margin: 20px 0;
+    }
+
+    &__Inputs {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        margin: 20px 0;
+
+        .c-Inputs__Left {
+            flex: 1;
+            margin-right: 20px;
+            .c-Left__Admin-level {
+                display: flex;
+                flex-direction: column;
+                label {
+                    font-size: $font-small;
+                    font-weight: bold;
+                    margin-bottom: 20px;
+                }
+                button {
+                    margin-top: 20px;
+                }
+            }
+            .c-Left__Job-title {
+                margin-top: 20px;
+                h2 {
+                    font-size: $font-small;
+                    font-weight: bold;
+                }
+    
+                .c-Job-title__Input {
+                    display: flex;
+                    flex-direction: column;
+                    margin: 20px 0;
+                    width: 100%;
+    
+                    input {
+                        width: 100%;
+                        border-radius: 5px;
+                        outline: none;
+                        border: thin solid black;
+                        padding-left: 10px;
+                    }
+                    .c-Input__Btn-section {
+                        margin-top: 20px;
+                        display: flex;
+                        flex-direction: row;
+                    }
+                    .c-Btn-section--edit {
+                        button {
+                            width: 100%;
+                        }
+                    }
+                }
+    
+            }
+    
+        }
+       
+
+        .c-Inputs__Right {
+            margin-left: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+
+            label {
+                font-size: $font-small;
+                font-weight: bold;
+                margin-bottom: 20px;
+            }
+            h2 {
+                font-size: $font-small;
+                font-weight: bold;
+            }
+
+            button {
+                margin: 20px 0;
+            }
+
+            .c-Roles__Data {
+                display: flex;
+                justify-content: space-between;
+                flex-direction: row;
+                margin: 5px 0;
+
+                .c-Data__Delete-Btn {
+                    cursor: pointer;
+                }
+            }
+
+        }
+
+      
+        .c-Inputs__Danger-zone {
+            h2 {
+                font-size: $font-small;
+                font-weight: bold;
+            }
+
+            .c-Danger-zone__Row {
+                margin: 20px 0;
+                display: flex;
+                flex-direction: row;
+
+                .c-Row__Info {
+                    margin-left: 50px;
+
+                    h3 {
+                        font-size: $font-small;
+                        font-weight: bold;
+                    }
+
+                    p {
+                        font-size: $font-small;
+                    }
+                }
+            }
+        }
+
+    }
+}

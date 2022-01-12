@@ -1,0 +1,98 @@
+.c-Create-PET {
+  &__Document {
+    h2 {
+      font-size: $font-small;
+      font-weight: bold;
+      padding-bottom: 20px;
+    }
+
+    .c-Create-PET__Document-content {
+      width: 90%;
+      margin: auto;
+
+      h1 {
+        text-align: center;
+        font-size: 21px;
+        font-weight: bold;
+        padding: 10px 0;
+      }
+
+      .c-Create-PET__Document-header {
+        display: flex;
+        flex-direction: row;
+        padding-top: 40px;
+
+        .c-Document-header__Key {
+          p {
+            font-weight: bold;
+            font-size: $font-small;
+          }
+        }
+
+        .c-Document-header__Value {
+          padding-left: 20px;
+
+          p {
+            font-size: $font-small;
+          }
+
+          input {
+            font-size: $font-small;
+            padding-left: 10px;
+            border-radius: 5px;
+            outline: none;
+          }
+        }
+      }
+
+      .c-Create-PET__Document-form {
+        .c-Document-form__Heading {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 20px 0;
+        }
+
+        .c-Document-form__Fields {
+          .c-Document-form__Add-qns {
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            background-color: #ececec;
+            padding: 20px 0;
+            border-radius: 5px;
+
+            p {
+              font-size: $font-small;
+              font-weight: bold;
+              color: #0d6efd;
+              -webkit-touch-callout: none;
+              /* iOS Safari */
+              -webkit-user-select: none;
+              /* Safari */
+              -khtml-user-select: none;
+              /* Konqueror HTML */
+              -moz-user-select: none;
+              /* Old versions of Firefox */
+              -ms-user-select: none;
+              /* Internet Explorer/Edge */
+              user-select: none;
+              /* Non-prefixed version, currently */
+            }
+
+            &:hover {
+              opacity: 0.7;
+              text-decoration: underline;
+              text-decoration-color: $anchor-enabled;
+            }
+
+            &:active {
+              opacity: 0.8;
+            }
+          }
+        }
+      }
+    }
+  }
+}

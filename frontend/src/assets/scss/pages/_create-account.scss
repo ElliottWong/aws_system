@@ -1,0 +1,68 @@
+.c-Create-account {
+  min-height: 1000px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fafafa;
+
+  .l-Create-account__Card {
+    background-color: white;
+    padding: 50px;
+    width: 700px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px 0.3px grey;
+
+    .c-Create-account__Card {
+      .c-Card__Logo {
+        display: flex;
+        justify-content: center;
+      }
+
+      input {
+        width: 100%;
+        border: thin solid black;
+        outline: none;
+        border-radius: 5px;
+        padding-left: 10px;
+      }
+
+      .c-Card__Submit-btn {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      button {
+        padding: 9px 100px;
+      }
+      .c-Card__Form-title {
+        padding-bottom: 10px;
+      }
+
+      .c-Card__Basic-details-first-row,
+      .c-Card__Basic-details-second-row,
+      .c-Card__Basic-details-third-row,
+      .c-Card__Basic-details-fourth-row,
+      .c-Card__Basic-details-fifth-row,
+      .c-Card__Password-info {
+        margin-bottom: 10px;
+      }
+
+      .c-Card__Password-criteria {
+        padding-top: 10px;
+        margin: auto;
+        width: fit-content;
+      }
+
+      .c-Card__Terms-message {
+        padding-top: 10px;
+        font-size: 16px;
+      }
+    }
+  }
+}

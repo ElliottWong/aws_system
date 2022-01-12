@@ -1,0 +1,4721 @@
+swagger: "2.0"
+info:
+  title: ADES eISO
+  description: ADES eISO endpoints
+  version: 1.0.3
+  # semantic versioning
+
+# need to tab
+# tag endpoints to their purpose
+tags:
+  - name: "Companies"
+    description: "Organisations using the platform"
+  - name: "Invitations & Registration"
+    description: "Platform users and company users"
+  - name: "Login"
+    description: "Platform and company login"
+  - name: "Forget Password"
+    description: "Platform and company forget password"
+  - name: "Users"
+    description: "Employee details from platform or company"
+  - name: "File"
+    description: "Files down from cloudinary"
+  - name: "Clause 1"
+    description: "Scope as described by Clause 1"
+  - name: "Clause 2"
+    description: "Normative Charts as described by Clause 2"
+  - name: "Clause 3"
+    description: "Terms & Definitions as described by Clause 3"
+  - name: "Clause 4.1"
+    description: "SWOT Analysis as described by Clause 4.1"
+  - name: "Clause 4.2"
+    description: "Interested Parties as described by Clause 4.2"
+  - name: "Clause 4.3"
+    description: "Scope of QMS as described by Clause 4.3"
+  - name: "Clause 5.2"
+    description: "Policy as described by Clause 5.2"
+  - name: "Clause 5.3"
+    description: "Responsibility and Authorities as described by Clause 5.3"
+  - name: "Clause 6.1"
+    description: "Register of Opportunities and Risks based on SWOT as described by Clause 6.1"
+  - name: "Clause 6.2"
+    description: "Objective Achievement Program as described by Clause 6.2"
+
+securityDefinitions:
+  BasicAuth:
+    type: basic
+security:
+  - BasicAuth: []
+
+paths:
+  # Companies API
+  /companies:
+    get:
+      tags:
+        - "Companies"
+      summary: Gets all companies
+      operationId: findAllComapnies
+      description: Gets all companies
+      produces:
+        - application/json
+      responses:
+        200:
+          description: All Companies
+          schema:
+            $ref: "#/definitions/companies"
+        204:
+          description: No Companies
+        400:
+          description: Invalid parameter
+        401:
+          description: Reauth required
+        403:
+          description: Unauthorised request
+        500:
+          description: Server error
+
+    post:
+      tags:
+        - "Companies"
+      summary: Insert new company
+      operationId: insertCompany
+      description: Insert new company
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: Request Body
+          required: true
+          schema:
+            $ref: "#/definitions/companyPost"
+      responses:
+        201:
+          description: Created
+          schema:
+            $ref: "#/definitions/company"
+        400:
+          description: Invalid parameter
+        401:
+          description: Reauth required
+        403:
+          description: Unauthorised request
+        500:
+          description: Server error
+
+  /companies/{companyId}:
+    get:
+      tags:
+        - "Companies"
+      summary: Get a specified company
+      operationId: findCompanyById
+      description: Get a specified company
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Scopes that belong a given company
+          schema:
+            $ref: "#/definitions/company"
+        400:
+          description: Invalid parameter
+        401:
+          description: Reauth required
+        403:
+          description: Unauthorised request
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+    put:
+      tags:
+        - "Companies"
+      summary: Update a specified company
+      operationId: editCompany
+      description: Update a specified company
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          description: New company details
+          required: true
+          schema:
+            $ref: "#/definitions/companyPut"
+      responses:
+        204:
+          description: The specified company has been updated
+        400:
+          description: Invalid parameter
+        401:
+          description: Reauth required
+        403:
+          description: Unauthorised request
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  # Invitations API
+
+  # /invites/new/pa:
+  #   post:
+  #     tags:
+  #       - "Invitations & Registration"
+  #     summary: Invite PlatfromAdmin
+  #     operationId: invitePlatfromAdmin
+  #     description: Platform admin invites another platform admin
+  #     consumes:
+  #       - application/json
+  #     produces:
+  #       - application/json
+  #     responses:
+  #       201:
+  #         description: Send email successfully
+  #       400:
+  #         description: Invalid parameter
+  #       403:
+  #         description: Unauthorised request
+  #       500:
+  #         description: Server error
+
+  # /invites/accept/{inviteToken}:
+  #   post:
+  #     tags:
+  #       - "Invitations & Registration"
+  #     summary: Platform Admin Registration
+  #     operationId: platformAdminRegistration
+  #     description: Platform admin registration
+  #     consumes:
+  #       - application/json
+  #     produces:
+  #       - application/json
+  #     parameters:
+  #       - in: path
+  #         name: inviteToken
+  #         description: Invite Token
+  #         required: true
+  #         type: integer
+  #     responses:
+  #       201:
+  #         description: Checked Token and Register successfully
+  #       400:
+  #         description: Invalid parameter
+  #       403:
+  #         description: Unauthorised request
+  #       404:
+  #         description: Not found
+  #       500:
+  #         description: Server error
+
+  /company/{companyId}/invites:
+    get:
+      tags:
+        - "Invitations & Registration"
+      summary: Gets all invites in a company
+      operationId: findAllInvitesCompany
+      description: Gets all invites in a company
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search invites of
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Invites that belong a given company
+          schema:
+            $ref: "#/definitions/companiesInvites"
+        204:
+          description: No invites
+        401:
+          description: Reauth required
+        403:
+          description: Unauthorised request
+        500:
+          description: Server error
+
+  /company/{companyId}/invites/new/user:
+    post:
+      tags:
+        - "Invitations & Registration"
+      summary: New user invite
+      operationId: newUserInvite
+      description: New user invite
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search invites of
+          required: true
+          type: integer
+        - in: body
+          name: Request Body
+          required: true
+          schema:
+            $ref: "#/definitions/newUserInvitePost"
+      responses:
+        201:
+          description: Sended Email Successfully
+        400:
+          description: Invalid parameter
+        401:
+          description: Reauth required
+        403:
+          description: Unauthorised request
+        500:
+          description: Server error
+
+  /company/{companyId}/invites/new/secondary:
+    post:
+      tags:
+        - "Invitations & Registration"
+      summary: New secondary admin invite
+      operationId: newSecondaryAdminInvite
+      description: New secondary admin invite
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search invites of
+          required: true
+          type: integer
+        - in: body
+          name: Request Body
+          required: true
+          schema:
+            $ref: "#/definitions/newUserInvitePost"
+      responses:
+        201:
+          description: Sended Email Successfully
+        400:
+          description: Invalid parameter
+        401:
+          description: Reauth required
+        403:
+          description: Unauthorised request
+        500:
+          description: Server error
+
+  /company/{companyId}/invites/new/system:
+    post:
+      tags:
+        - "Invitations & Registration"
+      summary: Invite System Admin
+      operationId: inviteSystemAdmin
+      description: System admin invites another system admin
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search invites of
+          required: true
+          type: integer
+        - in: body
+          name: Request Body
+          required: true
+          schema:
+            $ref: "#/definitions/newUserInvitePost"
+      responses:
+        201:
+          description: Sended Email Successfully
+        400:
+          description: Invalid parameter
+        401:
+          description: Reauth required
+        403:
+          description: Unauthorised request
+        500:
+          description: Server error
+
+  /invites/{inviteToken}:
+    get:
+      tags:
+        - "Invitations & Registration"
+      summary: Gets Validate the token
+      operationId: GetsValidateTheToken
+      description: Gets Validate the token (all Invite would to use this API)
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: inviteToken
+          description: Invite Token
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Confirm token
+        204:
+          description: Token invalid
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /company/{companyId}/invites/accept/{inviteToken}:
+    post:
+      tags:
+        - "Invitations & Registration"
+      summary: Accepts and registers account
+      operationId: acceptsAndRegistersAccount
+      description: Accepts and registers account for system admin invite to system admin
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search invites of
+          required: true
+          type: integer
+        - in: path
+          name: inviteToken
+          description: Invite Token
+          required: true
+          type: integer
+        - in: body
+          name: Request Body
+          required: true
+          schema:
+            $ref: "#/definitions/registerInvitePost"
+      responses:
+        201:
+          description: Created Account successfully
+        400:
+          description: Invalid parameter
+        403:
+          description: Unauthorised request
+        500:
+          description: Server error
+
+  # Login API
+
+  /admin/login:
+    post:
+      tags:
+        - "Login"
+      summary: Login for Platform Admin
+      operationId: loginPlatfromAdmin
+      description: Login for Platform Admin
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/loginPost"
+      security:
+        -
+      responses:
+        201:
+          description: Login successfully
+        400:
+          description: Invalid parameter
+        401:
+          description: Invalid password
+        403:
+          description: Unauthorised request
+        404:
+          description: Account not found
+        500:
+          description: Server error
+
+  /login:
+    post:
+      tags:
+        - "Login"
+      summary: Login for Company Users
+      operationId: loginCompanyUsers
+      description: Login for Company Users
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/loginPost"
+      security:
+        -
+      responses:
+        201:
+          description: Login successfully
+        400:
+          description: Invalid parameter
+        401:
+          description: Invalid password
+        403:
+          description: Unauthorised request
+        404:
+          description: Account not found
+        500:
+          description: Server error
+
+  # Forget Password API
+
+  /forget-password/otp/new:
+    post:
+      tags:
+        - "Forget Password"
+      summary: Create new otp
+      operationId: sendOtp
+      description: Forget password before login
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/requestOtpPost"
+      security:
+        -
+      responses:
+        200:
+          description: Send email successfully
+        403:
+          description: Account is deactivated
+        404:
+          description: Account does not exist
+        500:
+          description: Server error
+
+  /forget-password/otp/check:
+    post:
+      tags:
+        - "Forget Password"
+      summary: Otp check
+      operationId: checkOtp
+      description: Forget password before login
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/validateOtpPost"
+      security:
+        -
+      responses:
+        200:
+          description: Check successfully
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /forget-password/otp/change:
+    post:
+      tags:
+        - "Forget Password"
+      summary: Change the password
+      operationId: changePassword
+      description: Forget password before login
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/changePasswordWithOtpPost"
+      security:
+        -
+      responses:
+        204:
+          description: Changed Password successfully
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /forget-password/change:
+    post:
+      tags:
+        - "Forget Password"
+      summary: Password change in account
+      operationId: changePasswordAfterLogin
+      description: Change password after login
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/changePasswordLoggedInPost"
+      responses:
+        204:
+          description: Changed Password successfully
+        400:
+          description: Invalid parameter
+        401:
+          description: Old password is incorrect
+        500:
+          description: Server error
+
+  # Users API
+
+  /admins:
+    get:
+      tags:
+        - "Users"
+      summary: Gets all platform admin
+      operationId: findAllPlatformAdmin
+      description: Gets all platform admin
+      produces:
+        - application/json
+      responses:
+        200:
+          description: All platform admin
+          schema:
+            $ref: "#/definitions/RespondUsers"
+        204:
+          description: No platform admins found
+        403:
+          description: Client user on wrong endpoint
+        500:
+          description: Server error
+
+  /admins/{employeeId}:
+    get:
+      tags:
+        - "Users"
+      summary: Get a specified platform admin
+      operationId: findPlatformAdminById
+      description: Get a specified platform admin
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: employeeId
+          description: Employee ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: found a platform admin
+          schema:
+            $ref: "#/definitions/RespondUser"
+        400:
+          description: Invalid parameter
+        403:
+          description: Client user on wrong endpoint
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+    put:
+      tags:
+        - "Users"
+      summary: Update a specified platform admin
+      operationId: editPlatformAdmin
+      description: Update a specified platform admin
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: employeeId
+          description: Employee ID
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          description: New platform admin details
+          required: true
+          schema:
+            $ref: "#/definitions/RespondUserPost"
+      responses:
+        204:
+          description: The specified platform admin has been updated
+        400:
+          description: Invalid parameter
+        403:
+          description: Client user on wrong endpoint
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/employees:
+    get:
+      tags:
+        - "Users"
+      summary: Gets all company employees
+      operationId: findAllCompanyEmployees
+      description: Gets all company employees
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: All company employees
+          schema:
+            $ref: "#/definitions/RespondUsers"
+        204:
+          description: No companies employees found
+        403:
+          description: Client user on wrong endpoint
+        500:
+          description: Server error
+
+  /company/{companyId}/employees/{employeeId}:
+    get:
+      tags:
+        - "Users"
+      summary: Get a specified company employee
+      operationId: findCompanyEmployeeById
+      description: Get a specified company employee
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: employeeId
+          description: Employee ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Success
+          schema:
+            $ref: "#/definitions/RespondUser"
+        400:
+          description: Invalid parameter
+        403:
+          description: Client user on wrong endpoint
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+    put:
+      tags:
+        - "Users"
+      summary: Update a specified company employee
+      operationId: editCompanyEmployee
+      description: Update a specified company employee
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: employeeId
+          description: Employee ID
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          description: New Company Employee details
+          required: true
+          schema:
+            $ref: "#/definitions/RespondUserPost"
+      responses:
+        204:
+          description: The specified company employee has been updated
+        400:
+          description: Invalid parameter
+        403:
+          description: Client user on wrong endpoint
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  # File Download API
+
+  /api/v1/file/info/{fileId}:
+    get:
+      tags:
+        - "File"
+      summary: Gets file info
+      operationId: findFileById
+      description: Gets file info
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: fileId
+          description: File ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Show files information
+          schema:
+            $ref: "#/definitions/file"
+        400:
+          description: Invalid parameter
+        403:
+          description: No access to another company's data
+        404:
+          description: No file found
+        500:
+          description: Server error
+
+  /api/v1/file/download/{fileId}:
+    get:
+      tags:
+        - "File"
+      summary: Gets file to download
+      operationId: findFileDownloadById
+      description: Gets file to download
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: fileId
+          description: File ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Download file successfully
+          schema:
+            $ref: "#/definitions/file"
+        400:
+          description: Invalid parameter
+        403:
+          description: No access to another company's data
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  # Clause 1 API
+
+  /company/{companyId}/scopes:
+    get:
+      tags:
+        - "Clause 1"
+      summary: Gets all scopes of a company
+      operationId: findAllScopes
+      description: Gets all scopes of a company
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search scopes of
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Scopes that belong a given company
+          schema:
+            $ref: "#/definitions/companyScopes"
+        204:
+          description: Company has no scopes
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+    post:
+      tags:
+        - "Clause 1"
+      summary: Posts a scope for a given company
+      operationId: insertScope
+      description: Posts a scope for a given company
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search scope of
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/companyScopePost"
+      responses:
+        201:
+          description: Created
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot edit this document
+        500:
+          description: Server error
+
+  /company/{companyId}/scopes/{scopeId}:
+    get:
+      tags:
+        - "Clause 1"
+      summary: Gets a specified scope of a company
+      operationId: findScopeById
+      description: Gets a specified scope of a company
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: scopeId
+          description: Scope ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified scope
+          schema:
+            $ref: "#/definitions/companyScope"
+        400:
+          description: Invalid parameter
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  # Clause 2 API
+
+  /company/{companyId}/references:
+    get:
+      tags:
+        - "Clause 2"
+      summary: Gets all references of a company
+      operationId: findAllReferences
+      description: Gets all references of a company
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search references of
+          required: true
+          type: integer
+      responses:
+        200:
+          description: References that belong a given company
+          schema:
+            $ref: "#/definitions/companyReferences"
+        204:
+          description: Company has no references
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+    post:
+      tags:
+        - "Clause 2"
+      summary: Posts a reference for a given company
+      operationId: insertReference
+      description: Posts a reference for a given company
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search Reference of
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/companyReferencePost"
+      responses:
+        201:
+          description: Created
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot edit this document
+        500:
+          description: Server error
+
+  /company/{companyId}/references/{referenceId}:
+    get:
+      tags:
+        - "Clause 2"
+      summary: Gets a specified reference of a company
+      operationId: findReferenceById
+      description: Gets a specified reference of a company
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: ReferenceId
+          description: Reference ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified Reference
+          schema:
+            $ref: "#/definitions/companyReference"
+        400:
+          description: Invalid parameter
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  # Clause 3 API
+
+  /company/{companyId}/terms:
+    get:
+      tags:
+        - "Clause 3"
+      summary: Gets all terms of a company
+      operationId: findAllTerms
+      description: Gets all terms of a company
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search terms of
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Terms that belong a given company
+          schema:
+            $ref: "#/definitions/companyTerms"
+        204:
+          description: Company has no terms
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+    post:
+      tags:
+        - "Clause 3"
+      summary: Posts a term for a given company
+      operationId: insertTerm
+      description: Posts a term for a given company
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search Term of
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/companyTermPost"
+      responses:
+        201:
+          description: Created
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot edit this document
+        500:
+          description: Server error
+
+  /company/{companyId}/terms/{termId}:
+    get:
+      tags:
+        - "Clause 3"
+      summary: Gets a specified term of a company
+      operationId: findTermById
+      description: Gets a specified term of a company
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: TermId
+          description: Term ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified Term
+          schema:
+            $ref: "#/definitions/companyTerm"
+        400:
+          description: Invalid parameter
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  # Clause 4.1 API
+
+  /company/{companyId}/swots:
+    get:
+      tags:
+        - "Clause 4.1"
+      summary: Finds all swots
+      operationId: findAllSwots
+      description: Find all swots. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified swots
+          schema:
+            $ref: "#/definitions/shallowSwots"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+    post:
+      tags:
+        - "Clause 4.1"
+      summary: Posts a swot
+      operationId: insertSwot
+      description: Posts a swot
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/swotItemsPost"
+      responses:
+        201:
+          description: The specified swot
+          schema:
+            type: object
+            properties:
+              swot_id:
+                type: integer
+              status:
+                type: string
+        400:
+          description: Invalid parameter
+        403:
+          description: Unauthorised
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/swots/{swotId}:
+    get:
+      tags:
+        - "Clause 4.1"
+      summary: Gets a specified swot of a company
+      operationId: findSwotById
+      description: Find specified swot. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: swotId
+          description: Swot ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified swot
+          schema:
+            $ref: "#/definitions/shallowSwotIDAndStatus"
+        400:
+          description: Invalid parameter
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+    delete:
+      tags:
+        - "Clause 4.1"
+      summary: delete a specified swot of a Company
+      operationId: deleteSwot
+      description: delete a swot (rejected or achieved)
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: swotId
+          description: Swot ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: delete swot successfully
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot delete this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/swot/approve/{swotId}:
+    put:
+      tags:
+        - "Clause 4.1"
+      summary: Approves a pending swot
+      operationId: approveSwot
+      description: Approves a pending swot
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: swotId
+          description: Swot ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: The swot has been approved
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot approve this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/swot/reject/{swotId}:
+    put:
+      tags:
+        - "Clause 4.1"
+      summary: Rejects a pending swot
+      operationId: rejectSwot
+      description: Rejects a pending swot
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: swotId
+          description: Swot ID
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          schema:
+            $ref: "#/definitions/reject"
+      responses:
+        204:
+          description: The swot has been rejected
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot reject this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/swot/{status}:
+    get:
+      tags:
+        - "Clause 4.1"
+      summary: Gets a specified swot status of a Company
+      operationId: findSwotByStatus
+      description: Find specified swots status. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: status
+          description: Active, Pending, Rejected, Archives
+          required: true
+          type: string
+      responses:
+        200:
+          description: The specified swot
+          schema:
+            $ref: "#/definitions/shallowSwotsIDAndStatus"
+        204:
+          description: Not found
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  # Clause 4.2 API
+
+  /company/{companyId}/interested-parties:
+    get:
+      tags:
+        - "Clause 4.2"
+      summary: Finds all interested parties
+      operationId: findAllInterestedParties
+      description: Find all interested parties. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified parties
+          schema:
+            $ref: "#/definitions/shallowInterestedParties"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+    post:
+      tags:
+        - "Clause 4.2"
+      summary: New interested party form
+      operationId: InsertParty
+      description: New interested party form
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        201:
+          description: Created successfully
+          schema:
+            $ref: "#/definitions/interestedPartyPost"
+        400:
+          description: Invalid parameter
+        403:
+          description: Unauthorised
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/interested-parties/{partyId}:
+    get:
+      tags:
+        - "Clause 4.2"
+      summary: Gets a specified party of a company
+      operationId: findPartyById
+      description: Find specified party. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: partyId
+          description: Party ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified party
+          schema:
+            $ref: "#/definitions/shallowInterestedPartyIDAndStatus"
+        400:
+          description: Invalid parameter
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+    delete:
+      tags:
+        - "Clause 4.2"
+      summary: delete a specified party of a company
+      operationId: deleteParty
+      description: delete a party (rejected or achieved)
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: partyId
+          description: Party ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: delete party successfully
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot delete this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/interested-party/approve/{partyId}:
+    put:
+      tags:
+        - "Clause 4.2"
+      summary: Approves a pending party
+      operationId: approveParty
+      description: Approves a pending party
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: partyId
+          description: Party ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: The party has been approved
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot approve this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/interested-party/reject/{partyId}:
+    put:
+      tags:
+        - "Clause 4.2"
+      summary: Rejects a pending party
+      operationId: rejectParty
+      description: Rejects a pending party
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: partyId
+          description: Party ID
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          schema:
+            $ref: "#/definitions/reject"
+      responses:
+        204:
+          description: The party has been rejected
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot reject this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/interested-party/active:
+    get:
+      tags:
+        - "Clause 4.2"
+      summary: Finds all active interested parties
+      operationId: findAllActiveInterestedParties
+      description: Find all active interested parties. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified active party
+          schema:
+            $ref: "#/definitions/shallowInterestedPartyIDAndStatus"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /company/{companyId}/interested-party/pending:
+    get:
+      tags:
+        - "Clause 4.2"
+      summary: Finds all pending interested parties
+      operationId: findAllPendingInterestedParties
+      description: Find all pending interested parties. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified pending party
+          schema:
+            $ref: "#/definitions/shallowInterestedPartyIDAndStatus"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /company/{companyId}/interested-party/rejected:
+    get:
+      tags:
+        - "Clause 4.2"
+      summary: Finds all rejected interested parties
+      operationId: findAllRejectedInterestedParties
+      description: Find all rejected interested parties. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified rejected party
+          schema:
+            $ref: "#/definitions/shallowInterestedPartyIDAndStatus"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /company/{companyId}/interested-party/archives:
+    get:
+      tags:
+        - "Clause 4.2"
+      summary: Finds all archives interested parties
+      operationId: findAllArchivesInterestedParties
+      description: Find all archives interested parties. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified archives parties
+          schema:
+            $ref: "#/definitions/shallowInterestedPartiesArchives"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  # Clause 4.3 API
+
+  /company/{companyId}/qms-scopes:
+    get:
+      tags:
+        - "Clause 4.3"
+      summary: Finds all qms scopes
+      operationId: findAllQMSScopes
+      description: Find all qms scopes. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified qms scopes
+          schema:
+            $ref: "#/definitions/shallowQMSScopes"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+    post:
+      tags:
+        - "Clause 4.3"
+      summary: New qms scope form
+      operationId: insertQMSScope
+      description: New qms scope form
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        201:
+          description: Created successfully
+          schema:
+            $ref: "#/definitions/qMSScopePost"
+        400:
+          description: Invalid parameter
+        403:
+          description: Unauthorised
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/qms-scopes/{qmsId}:
+    get:
+      tags:
+        - "Clause 4.3"
+      summary: Gets a specified qms scope of a Company
+      operationId: findQMSScopeById
+      description: Find specified qms scope. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: qmsId
+          description: QMS Scope ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified qms scope
+          schema:
+            $ref: "#/definitions/shallowQMSScopeIDAndStatus"
+        400:
+          description: Invalid parameter
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+    delete:
+      tags:
+        - "Clause 4.3"
+      summary: delete a specified qms scope of a Company
+      operationId: deleteQmsScope
+      description: delete a qms scope (rejected or achieved)
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: qmsId
+          description: QmsScope ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: delete qms scope successfully
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot delete this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/qms-scope/approve/{qmsId}:
+    put:
+      tags:
+        - "Clause 4.3"
+      summary: Approves a pending qms scope
+      operationId: approveQMSScope
+      description: Approves a pending qms scope
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: qmsId
+          description: QMS Scope ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: The qms scope has been approved
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot approve this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/qms-scope/reject/{qmsId}:
+    put:
+      tags:
+        - "Clause 4.3"
+      summary: Rejects a pending qms scope
+      operationId: rejectQmsScope
+      description: Rejects a pending qms scope
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: qmsId
+          description: QMS Scope ID
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          schema:
+            $ref: "#/definitions/reject"
+      responses:
+        204:
+          description: The qms scope has been rejected
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot reject this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/qms-scope/active:
+    get:
+      tags:
+        - "Clause 4.3"
+      summary: Finds all active qms scopes
+      operationId: findAllActiveQMSScopes
+      description: Find all active qms scopes. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified active qms scope
+          schema:
+            $ref: "#/definitions/shallowQMSScopeIDAndStatus"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /company/{companyId}/qms-scope/pending:
+    get:
+      tags:
+        - "Clause 4.3"
+      summary: Finds all pending qms scopes
+      operationId: findAllPendingQMSScopes
+      description: Find all pending qms scopes. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified pending qms scope
+          schema:
+            $ref: "#/definitions/shallowQMSScopeIDAndStatus"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /company/{companyId}/qms-scope/rejected:
+    get:
+      tags:
+        - "Clause 4.3"
+      summary: Finds all rejected qms scopes
+      operationId: findAllRejectedQMSScopes
+      description: Find all rejected qms scopes. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified rejected qms scope
+          schema:
+            $ref: "#/definitions/shallowQMSScopeIDAndStatus"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /company/{companyId}/qms-scope/archives:
+    get:
+      tags:
+        - "Clause 4.3"
+      summary: Finds all archives qms scopes
+      operationId: findAllArchivesQMSScopes
+      description: Find all archives qms scopes. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified archives qms scopes
+          schema:
+            $ref: "#/definitions/shallowQMSScopesArchives"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  # Clause 5.2 API
+
+  /company/{companyId}/policies:
+    get:
+      tags:
+        - "Clause 5.2"
+      summary: Finds all policies
+      operationId: findAllPolicies
+      description: Find all policies. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified policies
+          schema:
+            $ref: "#/definitions/shallowPolicies"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+    post:
+      tags:
+        - "Clause 5.2"
+      summary: New policy form
+      operationId: insertPolicy
+      description: New policy form
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        201:
+          description: Created successfully
+          schema:
+            $ref: "#/definitions/policyPost"
+        400:
+          description: Invalid parameter
+        403:
+          description: Unauthorised
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/policies/{policyId}:
+    get:
+      tags:
+        - "Clause 5.2"
+      summary: Gets a specified policy of a Company
+      operationId: findQMSScopeById
+      description: Find specified policy. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: policyId
+          description: Policy ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified policy
+          schema:
+            $ref: "#/definitions/shallowPolicyIDAndStatus"
+        400:
+          description: Invalid parameter
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+    delete:
+      tags:
+        - "Clause 5.2"
+      summary: delete a specified policy of a Company
+      operationId: deletePolicy
+      description: delete a policy (rejected or achieved)
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: policyId
+          description: Policy ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: delete policy successfully
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot delete this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/policy/approve/{policyId}:
+    put:
+      tags:
+        - "Clause 5.2"
+      summary: Approves a pending policy
+      operationId: approvePolicy
+      description: Approves a pending policy
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: policyId
+          description: Policy ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: The policy has been approved
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot approve this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/policy/reject/{policyId}:
+    put:
+      tags:
+        - "Clause 5.2"
+      summary: Rejects a pending policy
+      operationId: rejectPolicy
+      description: Rejects a pending policy
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: policyId
+          description: Policy ID
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          schema:
+            $ref: "#/definitions/reject"
+      responses:
+        204:
+          description: The policy has been rejected
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot reject this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/policy/active:
+    get:
+      tags:
+        - "Clause 5.2"
+      summary: Finds all active policies
+      operationId: findAllActivePolicies
+      description: Find all active policies. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified active policy
+          schema:
+            $ref: "#/definitions/shallowPolicyIDAndStatus"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /company/{companyId}/policy/pending:
+    get:
+      tags:
+        - "Clause 5.2"
+      summary: Finds all pending policies
+      operationId: findAllPendingPolicies
+      description: Find all pending policies. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified pending policy
+          schema:
+            $ref: "#/definitions/shallowPolicyIDAndStatus"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /company/{companyId}/policy/rejected:
+    get:
+      tags:
+        - "Clause 5.2"
+      summary: Finds all rejected policies
+      operationId: findAllRejectedPolicies
+      description: Find all rejected policies. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified rejected policy
+          schema:
+            $ref: "#/definitions/shallowPolicyIDAndStatus"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /company/{companyId}/policy/archives:
+    get:
+      tags:
+        - "Clause 5.2"
+      summary: Finds all archives policies
+      operationId: findAllArchivesPolicies
+      description: Find all archives policies. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified archives policy
+          schema:
+            $ref: "#/definitions/shallowPoliciesArchives"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  # Clause 5.3A API
+
+  /company/{companyId}/org-charts:
+    get:
+      tags:
+        - "Clause 5.3"
+      summary: Gets all organization charts of a company
+      operationId: findAllOrganizationCharts
+      description: Gets all organization charts of a company
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search organization charts of
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Organization charts that belong a given company
+          schema:
+            $ref: "#/definitions/companyCharts"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+    post:
+      tags:
+        - "Clause 5.3"
+      summary: Posts a organization chart for a given company
+      operationId: insertOrganizationChart
+      description: Posts a organization chart for a given company
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search organization chart of
+          required: true
+          type: integer
+        - in: formData
+          name: title
+          required: true
+          type: string
+        - in: formData
+          name: description
+          required: true
+          type: string
+        - in: formData
+          name: approved_by
+          required: true
+          type: integer
+        - in: formData
+          name: chart
+          required: true
+          type: file
+          # schema:
+          #   $ref: "#/definitions/companyChartPost"
+      responses:
+        201:
+          description: Created
+        400:
+          description: Invalid parameter
+        403:
+          description: Unauthorised
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/org-chart/{chartId}:
+    get:
+      tags:
+        - "Clause 5.3"
+      summary: Gets a specified organization chart of a company
+      operationId: findOrganizationChartById
+      description: Gets a specified organization chart of a company
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: chartId
+          description: Organization Chart ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified organization chart
+          schema:
+            $ref: "#/definitions/companyChart"
+        400:
+          description: Invalid parameter
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+    put:
+      tags:
+        - "Clause 5.3"
+      summary: Edit organization chart
+      operationId: editOrganizationChart
+      description: Edit the organization chart
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: chartId
+          description: Chart ID
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/companyChartPut"
+      responses:
+        204:
+          description: The chart has been updated successfully
+        400:
+          description: Invalid parameter
+        403:
+          description: Unauthorised
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+    delete:
+      tags:
+        - "Clause 5.3"
+      summary: delete a specified organization chart of a company
+      operationId: deleteOrganizationChart
+      description: delete a organization chart
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: chartId
+          description: Chart ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: delete chart successfully
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot delete this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  # Clause 5.3B API
+
+  /company/{companyId}/roles:
+    get:
+      tags:
+        - "Clause 5.3"
+      summary: Gets all roles of a company
+      operationId: findAllRoles
+      description: Gets all roles of a company
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search roles of
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Roles that belong a given company
+          schema:
+            $ref: "#/definitions/RespondRoles"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+    post:
+      tags:
+        - "Clause 5.3"
+      summary: Posts a role for a given company
+      operationId: insertRole
+      description: Posts a role for a given company
+      consumes:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search role of
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/rolePost"
+      responses:
+        201:
+          description: Created
+        400:
+          description: Invalid parameter
+        403:
+          description: Unauthorised
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/role/{roleId}:
+    get:
+      tags:
+        - "Clause 5.3"
+      summary: Gets a specified role of a company
+      operationId: findRoleById
+      description: Gets a specified role of a company
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: roleId
+          description: role ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified role
+          schema:
+            $ref: "#/definitions/RespondRights"
+        400:
+          description: Invalid parameter
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+    put:
+      tags:
+        - "Clause 5.3"
+      summary: Edit role
+      operationId: editRole
+      description: Edit the role
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: roleId
+          description: Role ID
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/rolePut"
+      responses:
+        204:
+          description: The role has been updated successfully
+        400:
+          description: Invalid parameter
+        403:
+          description: Unauthorised
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+    delete:
+      tags:
+        - "Clause 5.3"
+      summary: delete a specified role of a company
+      operationId: deleteRole
+      description: delete a role
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: roleId
+          description: Role ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: delete role successfully
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot delete this role
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/employee/{employeeId}/roles:
+    post:
+      tags:
+        - "Clause 5.3"
+      summary: Insert a specified roles in employee
+      operationId: InsertRolesInEmployee
+      description: Insert a specified roles in employee
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: employeeId
+          description: Employee ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Successfully insert roles in employee
+          schema:
+            $ref: "#/definitions/roleAssignmentsPost"
+        400:
+          description: Invalid parameter
+        403:
+          description: Unauthorised
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/employee/{employeeId}/rights/{moduleId}:
+    get:
+      tags:
+        - "Clause 5.3"
+      summary: Gets right of a employee
+      operationId: GetsRightEmployee
+      description: Checks the right of employee
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search roles right of employee
+          required: true
+          type: integer
+        - in: path
+          name: employeeId
+          description: Employee ID to search roles right
+          required: true
+          type: integer
+        - in: path
+          name: moduleId
+          description: Module ID to of roles
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Role right Found Successfully
+          schema:
+            $ref: "#/definitions/RespondRoleRight"
+        204:
+          description: Employee has no rights
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /company/{companyId}/edit/{moduleId}/employees:
+    get:
+      tags:
+        - "Clause 5.3"
+      summary: Gets edit right of a Employee
+      operationId: GetsEditRightEmployee
+      description: Checks all edit right of employee
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search edit right of employee
+          required: true
+          type: integer
+        - in: path
+          name: moduleId
+          description: Module ID to of edit
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Edit right Found Successfully
+          schema:
+            $ref: "#/definitions/Respond"
+        204:
+          description: Employee has no edit rights
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  /company/{companyId}/approve/{moduleId}/employees:
+    get:
+      tags:
+        - "Clause 5.3"
+      summary: Gets approve right of a employee
+      operationId: GetsApproveRightEmployee
+      description: Checks all approve right of employee
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID to search approve right of employee
+          required: true
+          type: integer
+        - in: path
+          name: moduleId
+          description: Module ID to of approve
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Approve right found successfully
+          schema:
+            $ref: "#/definitions/Respond"
+        204:
+          description: Employee has no approve rights
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  # Clause 6.1 API
+
+  /company/{companyId}/risks-analyses:
+    get:
+      tags:
+        - "Clause 6.1"
+      summary: Finds all risks
+      operationId: findAllRisks
+      description: Find all risks. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified risks
+          schema:
+            $ref: "#/definitions/shallowRisks"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+    post:
+      tags:
+        - "Clause 6.1"
+      summary: Posts a risk
+      operationId: insertRisk
+      description: Posts a risk
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          required: true
+          schema:
+            $ref: "#/definitions/riskItemsPost"
+      responses:
+        201:
+          description: The specified risk
+          schema:
+            type: object
+            properties:
+              risks_analysis_id:
+                type: integer
+              status:
+                type: string
+        400:
+          description: Invalid parameter
+        403:
+          description: Unauthorised
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/risks-analyses/{analysisId}:
+    get:
+      tags:
+        - "Clause 6.1"
+      summary: Gets a specified risk of a company
+      operationId: findRiskById
+      description: Find specified risk. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: analysisId
+          description: Risk ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified risk
+          schema:
+            $ref: "#/definitions/shallowRiskIDAndStatus"
+        400:
+          description: Invalid parameter
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+    delete:
+      tags:
+        - "Clause 6.1"
+      summary: delete a specified risk of a company
+      operationId: deleteRisk
+      description: delete a risk (rejected or achieved)
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: analysisId
+          description: Risk ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: delete risk successfully
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot delete this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/risks-analysis/approve/{analysisId}:
+    put:
+      tags:
+        - "Clause 6.1"
+      summary: Approves a pending risk
+      operationId: approveRisk
+      description: Approves a pending risk
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: analysisId
+          description: Risk ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: The risk has been approved
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot approve this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/risks-analysis/reject/{analysisId}:
+    put:
+      tags:
+        - "Clause 6.1"
+      summary: Rejects a pending risk
+      operationId: rejectRisk
+      description: Rejects a pending risk
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: analysisId
+          description: Risk ID
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          schema:
+            $ref: "#/definitions/reject"
+      responses:
+        204:
+          description: The risk has been rejected
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot reject this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/risks-analysis/{status}:
+    get:
+      tags:
+        - "Clause 6.1"
+      summary: Gets a specified risks status of a Company
+      operationId: findRiskByStatus
+      description: Find specified risks status. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: status
+          description: Active, Pending, Rejected, Archives
+          required: true
+          type: string
+      responses:
+        200:
+          description: The specified risk
+          schema:
+            $ref: "#/definitions/shallowRisksIDAndStatus"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+  # Clause 6.2 API
+
+  /company/{companyId}/objective-achievements:
+    get:
+      tags:
+        - "Clause 6.2"
+      summary: Finds all achievements
+      operationId: findAllAchievements
+      description: Find all achievements. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified achievements
+          schema:
+            $ref: "#/definitions/shallowAchievements"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+    post:
+      tags:
+        - "Clause 6.2"
+      summary: New achievement form
+      operationId: insertAchievement
+      description: New achievement form
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: formData
+          name: title
+          required: true
+          type: string
+        - in: formData
+          name: approved_by
+          required: true
+          type: integer
+        - in: formData
+          name: achievements
+          required: true
+          type: string
+          description: This is a stringified JSON
+          format: >
+            [{
+              function, quality_objective, 
+              personel_responsible (role_id),
+              data_collection, data_analysis,
+              display_order, parent_item_id,
+              files: [
+                { new: true, name, key: "x" },
+                { new?: false, file_id, name, deleted?: false }
+              ]
+            }]
+        - in: formData
+          name: file
+          required: false
+          type: file
+          description: There may be zero or more files uploaded, the key of this parameter may vary as well
+      responses:
+        201:
+          description: Created successfully
+          schema:
+            $ref: "#/definitions/achievementPost"
+        400:
+          description: Invalid parameter
+        403:
+          description: Unauthorised
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/objective-achievements/{achievementId}:
+    get:
+      tags:
+        - "Clause 6.2"
+      summary: Gets a specified achievement of a company
+      operationId: findAchievementById
+      description: Find specified achievement. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: achievementId
+          description: Achievement ID
+          required: true
+          type: integer
+      responses:
+        200:
+          description: The specified achievement
+          schema:
+            $ref: "#/definitions/shallowAchievementIDAndStatus"
+        400:
+          description: Invalid parameter
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+    delete:
+      tags:
+        - "Clause 6.2"
+      summary: delete a specified achievement of a company
+      operationId: deleteAchievement
+      description: delete a achievement (rejected or achieved)
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: achievementId
+          description: Achievement ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: delete achievement successfully
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot delete this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/objective-achievement/approve/{achievementId}:
+    put:
+      tags:
+        - "Clause 6.2"
+      summary: Approves a pending achievement
+      operationId: approveAchievement
+      description: Approves a pending achievement
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: achievementId
+          description: Achievement ID
+          required: true
+          type: integer
+      responses:
+        204:
+          description: The achievement has been approved
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot approve this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/objective-achievement/reject/{achievementId}:
+    put:
+      tags:
+        - "Clause 6.2"
+      summary: Rejects a pending achievement
+      operationId: rejectAchievement
+      description: Rejects a pending achievement
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: achievementId
+          description: Achievement ID
+          required: true
+          type: integer
+        - in: body
+          name: requestBody
+          schema:
+            $ref: "#/definitions/reject"
+      responses:
+        204:
+          description: The achievement has been rejected
+        400:
+          description: Invalid parameter
+        403:
+          description: Employee cannot reject this document
+        404:
+          description: Not found
+        500:
+          description: Server error
+
+  /company/{companyId}/objective-achievement/{status}:
+    get:
+      tags:
+        - "Clause 6.2"
+      summary: Gets a specified achievements status of a company
+      operationId: findAchievementByStatus
+      description: Find specified achievements status. Shallow results.
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: companyId
+          description: Company ID
+          required: true
+          type: integer
+        - in: path
+          name: status
+          description: Active, Pending, Rejected, Archives
+          required: true
+          type: string
+      responses:
+        200:
+          description: The specified achievements
+          schema:
+            $ref: "#/definitions/shallowAchievementsIDAndStatus"
+        204:
+          description: Don't have data
+        400:
+          description: Invalid parameter
+        500:
+          description: Server error
+
+definitions:
+  reject:
+    type: object
+    properties:
+      remark:
+        type: string
+
+  author:
+    type: object
+    properties:
+      employee_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      fk_address_id:
+        type: integer
+      admin_level:
+        type: integer
+      firstname:
+        type: string
+      lastname:
+        type: string
+      title:
+        type: string
+      email:
+        type: string
+      status:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      account:
+        type: object
+        properties:
+          username:
+            $ref: "#/definitions/account/properties/username"
+
+  approver:
+    type: object
+    properties:
+      employee_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      fk_address_id:
+        type: integer
+      admin_level:
+        type: integer
+      firstname:
+        type: string
+      lastname:
+        type: string
+      title:
+        type: string
+      email:
+        type: string
+      status:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      account:
+        type: object
+        properties:
+          username:
+            $ref: "#/definitions/account/properties/username"
+
+  account:
+    type: object
+    properties:
+      account_id:
+        type: integer
+      fk_employee_id:
+        type: integer
+      username:
+        type: string
+      status:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+
+  employee:
+    type: object
+    properties:
+      employee_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      fk_address_id:
+        type: integer
+      admin_level:
+        type: integer
+      firstname:
+        type: string
+      lastname:
+        type: string
+      title:
+        type: string
+      email:
+        type: string
+      status:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+
+  address:
+    type: object
+    properties:
+      address_id:
+        type: integer
+      address_line_one:
+        type: string
+      address_line_two:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      country:
+        type: string
+      postal_code:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+
+  addressPost:
+    type: object
+    properties:
+      address_line_one:
+        type: string
+      address_line_two:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      country:
+        type: string
+      postal_code:
+        type: string
+
+  addressPut:
+    type: object
+    properties:
+      address_line_one:
+        type: string
+      address_line_two:
+        type: string
+      city:
+        type: string
+      state:
+        type: string
+      country:
+        type: string
+      postal_code:
+        type: string
+
+  company:
+    type: object
+    properties:
+      company_id:
+        type: integer
+      name:
+        type: string
+      alias:
+        type: string
+      description:
+        type: string
+      business_registration_number:
+        type: string
+      fk_address_id:
+        type: integer
+      status:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      address:
+        $ref: "#/definitions/address"
+
+  companies:
+    type: array
+    items:
+      $ref: "#/definitions/company"
+
+  companyPost:
+    type: object
+    properties:
+      name:
+        type: string
+      alias:
+        type: string
+      description:
+        type: string
+      business_registration_number:
+        type: string
+      addresses:
+        $ref: "#/definitions/addressPost"
+
+  companyPut:
+    type: object
+    properties:
+      name:
+        type: string
+      alias:
+        type: string
+      description:
+        type: string
+      business_registration_number:
+        type: string
+      address:
+        $ref: "#/definitions/addressPut"
+
+  companyInvite:
+    type: object
+    properties:
+      invitation_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      sent_by:
+        type: integer
+      name:
+        type: string
+      email:
+        type: string
+      token:
+        type: string
+      created_at:
+        type: string
+
+  companiesInvites:
+    type: array
+    items:
+      $ref: "#/definitions/companyInvite"
+
+  newUserInvitePost:
+    type: object
+    properties:
+      name:
+        type: string
+      email:
+        type: string
+      title:
+        type: string
+
+  registerInvitePost:
+    type: object
+    properties:
+      firstname:
+        type: string
+      lastname:
+        type: string
+      title:
+        type: string
+      email:
+        type: string
+      accounts:
+        type: object
+        properties:
+          username:
+            $ref: "#/definitions/account/properties/username"
+      addresses:
+        $ref: "#/definitions/addressPost"
+
+  loginPost:
+    type: object
+    properties:
+      username:
+        type: string
+      password:
+        type: string
+
+  requestOtpPost:
+    type: object
+    properties:
+      username:
+        type: string
+
+  validateOtpPost:
+    type: object
+    properties:
+      username:
+        type: string
+      otp:
+        type: string
+
+  changePasswordWithOtpPost:
+    type: object
+    properties:
+      username:
+        type: string
+      otp:
+        type: string
+      password:
+        type: string
+
+  changePasswordLoggedInPost:
+    type: object
+    properties:
+      old_password:
+        type: string
+      new_password:
+        type: string
+
+  accountStatus:
+    type: object
+    properties:
+      username:
+        type: string
+      status:
+        type: string
+
+  employeeStatus:
+    type: object
+    properties:
+      employee_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      fk_address_id:
+        type: integer
+      admin_level:
+        type: integer
+      firstname:
+        type: string
+      lastname:
+        type: string
+      title:
+        type: string
+      email:
+        type: string
+      status:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      account:
+        $ref: "#/definitions/accountStatus"
+
+  RespondUser:
+    type: object
+    properties:
+      OK:
+        type: string
+      status:
+        type: integer
+      message:
+        type: string
+      results:
+        type: array
+        $ref: "#/definitions/employeeStatus"
+
+  RespondUsers:
+    type: array
+    items:
+      $ref: "#/definitions/RespondUser"
+
+  RespondUserPost:
+    type: object
+    properties:
+      admin_level:
+        type: integer
+      firstname:
+        type: string
+      lastname:
+        type: string
+      title:
+        type: string
+      email:
+        type: string
+      status:
+        type: string
+      addresses:
+        $ref: "#/definitions/addressPost"
+      account:
+        $ref: "#/definitions/accountStatus"
+
+  file:
+    type: object
+    properties:
+      file_id:
+        type: integer
+      file_name:
+        type: string
+      cloudinary_id:
+        type: string
+      cloudinary_uri:
+        type: string
+      created_by:
+        type: integer
+      created_at:
+        type: string
+      updated_at:
+        type: string
+
+  companyScope:
+    type: object
+    properties:
+      scope_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      content:
+        type: string
+      edited_by:
+        type: integer
+        description: May be null if not expired
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+
+  companyScopes:
+    type: array
+    items:
+      $ref: "#/definitions/companyScope"
+
+  companyScopePost:
+    type: object
+    properties:
+      content:
+        type: string
+      edited_by:
+        type: integer
+
+  companyReference:
+    type: object
+    properties:
+      reference_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      content:
+        type: string
+      edited_by:
+        type: integer
+        description: May be null if not expired
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+
+  companyReferences:
+    type: array
+    items:
+      $ref: "#/definitions/companyReference"
+
+  companyReferencePost:
+    type: object
+    properties:
+      content:
+        type: string
+      edited_by:
+        type: integer
+
+  companyTerm:
+    type: object
+    properties:
+      term_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      content:
+        type: string
+      edited_by:
+        type: integer
+        description: May be null if not expired
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+
+  companyTerms:
+    type: array
+    items:
+      $ref: "#/definitions/companyTerm"
+
+  companyTermPost:
+    type: object
+    properties:
+      content:
+        type: string
+      edited_by:
+        type: integer
+
+  shallowSwot:
+    type: object
+    properties:
+      swot_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      created_by:
+        type: integer
+      remarks:
+        type: string
+      status:
+        type: string
+      approved_at:
+        type: string
+      approved_by:
+        type: integer
+      expired_at:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+      approver:
+        $ref: "#/definitions/approver"
+
+  shallowSwots:
+    type: array
+    items:
+      $ref: "#/definitions/shallowSwot"
+
+  swotItemPost:
+    type: object
+    properties:
+      display_order:
+        type: integer
+      content:
+        type: string
+      parent_item_id:
+        type: integer
+
+  swotItemsPost:
+    type: object
+    properties:
+      approved_by:
+        type: integer
+      created_by:
+        type: integer
+      strengths:
+        type: array
+        items:
+          $ref: "#/definitions/swotItemPost"
+      weaknesses:
+        type: array
+        items:
+          $ref: "#/definitions/swotItemPost"
+      opportunities:
+        type: array
+        items:
+          $ref: "#/definitions/swotItemPost"
+      threats:
+        type: array
+        items:
+          $ref: "#/definitions/swotItemPost"
+
+  shallowSwotIDAndStatus:
+    type: object
+    properties:
+      swot_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      created_by:
+        type: integer
+      remarks:
+        type: string
+      status:
+        type: string
+      approved_at:
+        type: string
+      approved_by:
+        type: integer
+      expired_at:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+      approver:
+        $ref: "#/definitions/approver"
+      strengths:
+        $ref: "#/definitions/swotItemsStatus/properties/strengths"
+      weaknesses:
+        $ref: "#/definitions/swotItemsStatus/properties/weaknesses"
+      opportunities:
+        $ref: "#/definitions/swotItemsStatus/properties/opportunities"
+      threats:
+        $ref: "#/definitions/swotItemsStatus/properties/threats"
+
+  shallowSwotsIDAndStatus:
+    type: array
+    items:
+      $ref: "#/definitions/shallowSwotIDAndStatus"
+
+  swotItemStatus:
+    type: object
+    properties:
+      swot_item_id:
+        type: integer
+      fk_swot_id:
+        type: integer
+      display_order:
+        type: integer
+      content:
+        type: string
+      parent_item_id:
+        type: integer
+      type:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+
+  swotItemsStatus:
+    type: object
+    properties:
+      approved_by:
+        type: integer
+      strengths:
+        type: array
+        items:
+          $ref: "#/definitions/swotItemStatus"
+      weaknesses:
+        type: array
+        items:
+          $ref: "#/definitions/swotItemStatus"
+      opportunities:
+        type: array
+        items:
+          $ref: "#/definitions/swotItemStatus"
+      threats:
+        type: array
+        items:
+          $ref: "#/definitions/swotItemStatus"
+
+  shallowInterestedParty:
+    type: object
+    properties:
+      party_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      created_by:
+        type: integer
+      approved_by:
+        type: integer
+      title:
+        type: string
+      remarks:
+        type: string
+      status:
+        type: string
+      approved_at:
+        type: string
+      expired_at:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+      approver:
+        $ref: "#/definitions/approver"
+
+  shallowInterestedParties:
+    type: array
+    items:
+      $ref: "#/definitions/shallowInterestedParty"
+
+  interestedPartyPost:
+    type: object
+    properties:
+      title:
+        type: string
+      created_by:
+        type: integer
+      approved_by:
+        type: integer
+      interested_parties_items:
+        type: array
+        items:
+          type: object
+          properties:
+            interested_party:
+              type: string
+            expectations:
+              type: string
+            display_order:
+              type: integer
+            parent_item_id:
+              type: integer
+
+  shallowInterestedPartyIDAndStatus:
+    type: object
+    properties:
+      party_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      created_by:
+        type: integer
+      approved_by:
+        type: integer
+      title:
+        type: string
+      remarks:
+        type: string
+      status:
+        type: string
+      approved_at:
+        type: string
+      expired_at:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+      approver:
+        $ref: "#/definitions/approver"
+      items:
+        $ref: "#/definitions/shallowInterestedPartiesIDAndStatus"
+
+  shallowInterestedPartiesIDAndStatus:
+    type: array
+    items:
+      $ref: "#/definitions/interestedPartyItemStatus"
+
+  interestedPartyItemStatus:
+    type: object
+    properties:
+      party_item_id:
+        type: integer
+      fk_party_id:
+        type: integer
+      interested_party:
+        type: string
+      expectations:
+        type: string
+      display_order:
+        type: integer
+      parent_item_id:
+        type: integer
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+
+  shallowInterestedPartiesArchives:
+    type: array
+    items:
+      $ref: "#/definitions/shallowInterestedPartyIDAndStatus"
+
+  shallowQMSScope:
+    type: object
+    properties:
+      qms_scope_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      created_by:
+        type: integer
+      approved_by:
+        type: integer
+      title:
+        type: string
+      content:
+        type: string
+      remarks:
+        type: string
+      status:
+        type: string
+      approved_at:
+        type: string
+      expired_at:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+      approver:
+        $ref: "#/definitions/approver"
+
+  shallowQMSScopes:
+    type: array
+    items:
+      $ref: "#/definitions/shallowQMSScope"
+
+  qMSScopePost:
+    type: object
+    properties:
+      title:
+        type: string
+      content:
+        type: string
+      created_by:
+        type: integer
+      approved_by:
+        type: integer
+      qms_scopes_items:
+        type: array
+        items:
+          type: object
+          properties:
+            site_name:
+              type: string
+            site_scope:
+              type: string
+            address:
+              type: string
+            display_order:
+              type: integer
+            parent_item_id:
+              type: integer
+
+  shallowQMSScopeIDAndStatus:
+    type: object
+    properties:
+      qms_scope_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      created_by:
+        type: integer
+      approved_by:
+        type: integer
+      title:
+        type: string
+      content:
+        type: string
+      remarks:
+        type: string
+      status:
+        type: string
+      approved_at:
+        type: string
+      expired_at:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+      approver:
+        $ref: "#/definitions/approver"
+      items:
+        $ref: "#/definitions/shallowQMSScopesIDAndStatus"
+
+  shallowQMSScopesIDAndStatus:
+    type: array
+    items:
+      $ref: "#/definitions/qMSScopeItemStatus"
+
+  qMSScopeItemStatus:
+    type: object
+    properties:
+      qms_scope_item_id:
+        type: integer
+      fk_qms_scope_id:
+        type: integer
+      site_name:
+        type: string
+      site_scope:
+        type: string
+      address:
+        type: string
+      display_order:
+        type: integer
+      parent_item_id:
+        type: integer
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+
+  shallowQMSScopesArchives:
+    type: array
+    items:
+      $ref: "#/definitions/shallowQMSScopeIDAndStatus"
+
+  shallowPolicy:
+    type: object
+    properties:
+      policy_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      created_by:
+        type: integer
+      approved_by:
+        type: integer
+      title:
+        type: string
+      remarks:
+        type: string
+      status:
+        type: string
+      approved_at:
+        type: string
+      expired_at:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+      approver:
+        $ref: "#/definitions/approver"
+
+  shallowPolicies:
+    type: array
+    items:
+      $ref: "#/definitions/shallowPolicy"
+
+  policyPost:
+    type: object
+    properties:
+      title:
+        type: string
+      created_by:
+        type: integer
+      approved_by:
+        type: integer
+      policy_items:
+        type: array
+        items:
+          type: object
+          properties:
+            title:
+              type: string
+            content:
+              type: string
+            display_order:
+              type: integer
+            parent_item_id:
+              type: integer
+
+  shallowPolicyIDAndStatus:
+    type: object
+    properties:
+      policy_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      created_by:
+        type: integer
+      approved_by:
+        type: integer
+      title:
+        type: string
+      remarks:
+        type: string
+      status:
+        type: string
+      approved_at:
+        type: string
+      expired_at:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+      approver:
+        $ref: "#/definitions/approver"
+      items:
+        $ref: "#/definitions/shallowPoliciesIDAndStatus"
+
+  shallowPoliciesIDAndStatus:
+    type: array
+    items:
+      $ref: "#/definitions/shallowPolicyItemStatus"
+
+  shallowPolicyItemStatus:
+    type: object
+    properties:
+      policy_item_id:
+        type: integer
+      fk_policy_id:
+        type: integer
+      title:
+        type: string
+      content:
+        type: string
+      display_order:
+        type: integer
+      parent_item_id:
+        type: integer
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+
+  shallowPoliciesArchives:
+    type: array
+    items:
+      $ref: "#/definitions/shallowPolicyIDAndStatus"
+
+  companyChart:
+    type: object
+    properties:
+      chart_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      fk_file_id:
+        type: integer
+      created_by:
+        type: integer
+      display_order:
+        type: integer
+      title:
+        type: string
+      description:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+
+  companyCharts:
+    type: array
+    items:
+      $ref: "#/definitions/companyChart"
+
+  companyChartPost:
+    type: object
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+      created_by:
+        type: integer
+      fk_file_id:
+        type: integer
+      display_order:
+        type: integer
+
+  companyChartPut:
+    type: object
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+      created_by:
+        type: integer
+      display_order:
+        type: integer
+
+  RespondRoles:
+    type: object
+    properties:
+      OK:
+        type: string
+      status:
+        type: integer
+      message:
+        type: string
+      results:
+        type: array
+        items:
+          $ref: "#/definitions/roles"
+
+  roles:
+    type: object
+    properties:
+      role_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      name:
+        type: integer
+      responsibility:
+        type: integer
+      created_at:
+        type: string
+      updated_at:
+        type: string
+
+  RespondRights:
+    type: object
+    properties:
+      OK:
+        type: string
+      status:
+        type: integer
+      message:
+        type: string
+      rights:
+        $ref: "#/definitions/modules"
+
+  modules:
+    type: object
+    properties:
+      moduleName:
+        $ref: "#/definitions/module"
+
+  module:
+    type: object
+    properties:
+      rights_id:
+        type: integer
+      fk_role_id:
+        type: integer
+      module:
+        type: string
+      edit:
+        type: string
+      approve:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+
+  rolePost:
+    type: object
+    properties:
+      name:
+        type: integer
+      responsibility:
+        type: integer
+
+  rolePut:
+    type: object
+    properties:
+      name:
+        type: integer
+      responsibility:
+        type: integer
+
+  roleAssignmentsPost:
+    type: object
+    properties:
+      fk_role_id:
+        type: integer
+
+  RespondRoleRight:
+    type: object
+    properties:
+      OK:
+        type: string
+      status:
+        type: integer
+      message:
+        type: string
+      results:
+        type: array
+        items:
+          type: object
+          properties:
+            edit:
+              type: string
+            approve:
+              type: string
+
+  Respond:
+    type: object
+    properties:
+      OK:
+        type: string
+      status:
+        type: integer
+      message:
+        type: string
+      results:
+        type: array
+        items:
+          type: string
+
+  shallowRisk:
+    type: object
+    properties:
+      risks_analysis_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      created_by:
+        type: integer
+      title:
+        type: string
+      remarks:
+        type: string
+      status:
+        type: string
+      approved_at:
+        type: string
+      approved_by:
+        type: integer
+      expired_at:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+      approver:
+        $ref: "#/definitions/approver"
+
+  shallowRisks:
+    type: array
+    items:
+      $ref: "#/definitions/shallowRisk"
+
+  riskItemPost:
+    type: object
+    properties:
+      severity:
+        type: string
+      likelihood:
+        type: integer
+      rpn:
+        type: integer
+      action:
+        type: string
+      display_order:
+        type: integer
+      content:
+        type: string
+      parent_item_id:
+        type: integer
+
+  riskItemsPost:
+    type: object
+    properties:
+      approved_by:
+        type: integer
+      created_by:
+        type: integer
+      title:
+        type: string
+      strengths:
+        type: array
+        items:
+          $ref: "#/definitions/riskItemPost"
+      weaknesses:
+        type: array
+        items:
+          $ref: "#/definitions/riskItemPost"
+      opportunities:
+        type: array
+        items:
+          $ref: "#/definitions/riskItemPost"
+      threats:
+        type: array
+        items:
+          $ref: "#/definitions/riskItemPost"
+
+  shallowRiskIDAndStatus:
+    type: object
+    properties:
+      risks_analysis_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      created_by:
+        type: integer
+      title:
+        type: string
+      remarks:
+        type: string
+      status:
+        type: string
+      approved_at:
+        type: string
+      approved_by:
+        type: integer
+      expired_at:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+      approver:
+        $ref: "#/definitions/approver"
+      strengths:
+        $ref: "#/definitions/riskItemsStatus/properties/strengths"
+      weaknesses:
+        $ref: "#/definitions/riskItemsStatus/properties/weaknesses"
+      opportunities:
+        $ref: "#/definitions/riskItemsStatus/properties/opportunities"
+      threats:
+        $ref: "#/definitions/riskItemsStatus/properties/threats"
+
+  shallowRisksIDAndStatus:
+    type: array
+    items:
+      $ref: "#/definitions/shallowRiskIDAndStatus"
+
+  riskItemStatus:
+    type: object
+    properties:
+      risk_item_id:
+        type: integer
+      fk_risks_analysis_id:
+        type: integer
+      fk_swot_item_id:
+        type: integer
+      type:
+        type: string
+      severity:
+        type: integer
+      likelihood:
+        type: string
+      rpn:
+        type: string
+      action:
+        type: string
+      parent_item_id:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      swot:
+        $ref: "#/definitions/riskItemStatus"
+
+  riskItemsStatus:
+    type: object
+    properties:
+      approved_by:
+        type: integer
+      strengths:
+        type: array
+        items:
+          $ref: "#/definitions/riskItemStatus"
+      weaknesses:
+        type: array
+        items:
+          $ref: "#/definitions/riskItemStatus"
+      opportunities:
+        type: array
+        items:
+          $ref: "#/definitions/riskItemStatus"
+      threats:
+        type: array
+        items:
+          $ref: "#/definitions/riskItemStatus"
+
+  shallowAchievement:
+    type: object
+    properties:
+      achievement_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      approved_by:
+        type: integer
+      created_by:
+        type: integer
+      status:
+        type: string
+      remarks:
+        type: string
+      title:
+        type: string
+      approved_at:
+        type: string
+      expired_at:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+      approver:
+        $ref: "#/definitions/approver"
+
+  shallowAchievements:
+    type: array
+    items:
+      $ref: "#/definitions/shallowAchievement"
+
+  achievementPost:
+    type: object
+    properties:
+      title:
+        type: string
+      created_by:
+        type: integer
+      approved_by:
+        type: integer
+      achievement_items:
+        type: array
+        items:
+          type: object
+          properties:
+            function:
+              type: string
+            quality_objective:
+              type: string
+            data_collection:
+              type: string
+            data_analysis:
+              type: string
+            personel_responsible:
+              type: integer
+            display_order:
+              type: integer
+            parent_item_id:
+              type: integer
+
+  shallowAchievementIDAndStatus:
+    type: object
+    properties:
+      achievement_id:
+        type: integer
+      fk_company_id:
+        type: integer
+      approved_by:
+        type: integer
+      created_by:
+        type: integer
+      status:
+        type: string
+      remarks:
+        type: string
+      title:
+        type: string
+      approved_at:
+        type: string
+      expired_at:
+        type: string
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+      author:
+        $ref: "#/definitions/author"
+      approver:
+        $ref: "#/definitions/approver"
+      items:
+        type: array
+        items:
+          $ref: "#/definitions/achievementItemStatus"
+
+  shallowAchievementsIDAndStatus:
+    type: array
+    items:
+      $ref: "#/definitions/shallowAchievementIDAndStatus"
+
+  achievementItemStatus:
+    type: object
+    properties:
+      achievement_item_id:
+        type: integer
+      fk_achievement_id:
+        type: integer
+      function:
+        type: string
+      quality_objective:
+        type: string
+      data_collection:
+        type: string
+      data_analysis:
+        type: string
+      personel_responsible:
+        type: integer
+      display_order:
+        type: integer
+      parent_item_id:
+        type: integer
+      created_at:
+        type: string
+      updated_at:
+        type: string
+      deleted_at:
+        type: string
+
+# Location localhost
+schemes:
+  - https
+host: localhost:5000
+basePath: /api/v1

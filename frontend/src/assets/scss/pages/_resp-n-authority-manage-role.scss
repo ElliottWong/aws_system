@@ -1,0 +1,142 @@
+.c-Manage-role {
+    display: flex;
+    flex-direction: column;
+    &__Top {
+        margin-bottom: 30px;
+    }
+
+    &__Configs {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        justify-content: space-between;
+
+        .l-Configs__Left {
+            width: 100%;
+            h1 {
+                font-weight: bold;
+                font-size: $font-medium;
+            }
+
+            .c-Configs__Role-name {
+                display: flex;
+                flex-direction: column;
+                
+                label {
+                    padding-top: 20px;
+                    font-size: $font-small;
+                }
+
+                input {
+                    padding: 5px 12px;
+                    font-size: $font-small;
+                    border-radius: 5px;
+                    outline: none;
+                    border: 1px solid black;
+                }
+            }
+
+            .c-Configs__Description {
+                display: flex;
+                flex-direction: column;
+                label {
+                    padding-top: 20px;
+                    font-size: $font-small;
+                }
+
+                textarea {
+                    padding: 5px 12px;
+                    height: 100%;
+                    min-height: 200px;
+                    border-radius: 5px;
+                    outline: none;
+                    border: 1px solid black;
+                }
+            }
+
+            .c-Configs__User-list {
+                margin-top: 20px;
+                h2 {
+                    font-size: $font-medium;
+                    font-weight: bold;
+                }
+                .c-User-list__Table {
+                    margin-top: 20px;
+                    .c-Table {
+                        &__Top {
+                            display: flex;
+                            flex-direction: row;
+                            justify-content: space-between;
+                            align-items: center;
+                          width: 100%;
+                          //   Search bar
+                          .search-label {
+                            width: 75%;
+                            // Hide react table's "search this table" text
+                            input {
+                              width: 100%;
+                            }
+                            span {
+                              display: none;
+                            }
+                          }
+                          //   Clear btn
+                          .c-Table__Clear-btn {
+                            &:hover {
+                              text-decoration: underline;
+                              opacity: 0.7;
+                            }
+                          }
+                          // Add role btn
+                          
+                        }
+                      }
+                }
+            }
+        }
+
+        .l-Configs__VL {
+            margin: 0 20px;
+            display: flex;
+            .c-Configs__VL {
+                background-color: grey;
+                width: 1px;
+                height: 100%;
+            }
+        }
+    
+        .l-Configs__Right {
+            width: 100%;
+            height: 100%;
+            .c-Configs-Permissions {
+                h1 {
+                    font-weight: bold;
+                    font-size: $font-medium;
+                }
+                &__Checkbox {
+                    display: flex;
+                    justify-content: space-between;
+                    width: 100%;
+                    margin: 10px 0;
+                    input[type=checkbox] {
+                        transform: scale(1.5);
+                    }
+                    label {
+                        font-size: $font-small;
+                    }
+                }
+            }
+
+        }
+    }
+
+    
+
+    &__Btns {
+        margin-top: 30px;
+        width: 100%;
+        height: 100%;
+    }
+}
