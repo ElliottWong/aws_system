@@ -95,7 +95,7 @@ module.exports.findCategoryWithAllEquipment = async (req, res, next) => {
         const { companyId, categoryId } = req.params;
 
         // cannot see all equipments if cannot edit (add equipments)
-        const { edit } = await findRights(employeeId, companyId, 'm07_01');
+        const { edit } = await findRights(employeeId, companyId, MODULE.EMP);
         if (!edit) throw new E.PermissionError('view');
 
         const categories = await findCategories.one({
@@ -148,14 +148,17 @@ module.exports.findAllEquipment = async (req, res, next) => {
         const { companyId } = req.params;
 
         // cannot see all equipments if cannot edit (add equipments)
-        const { edit } = await findRights(employeeId, companyId, 'm07_01');
+        const { edit } = await findRights(employeeId, companyId, MODULE.EMP);
         if (!edit) throw new E.PermissionError('view');
+
+        const archivedOnly = parseBoolean(req.query.archived);
 
         const found = await findEquipment.all({
             companyId,
             includeMaintenance: true,
             includeMaintenanceAssignees: true,
-            includeMaintenanceUploads: false
+            includeMaintenanceUploads: true,
+            archivedOnly
         });
 
         res.status(200).send(r.success200(found));
@@ -172,38 +175,14 @@ module.exports.findAllResponsibleEquipment = async (req, res, next) => {
     try {
         const { fk_employee_id: employeeId } = res.locals.account;
 
+        const archivedOnly = parseBoolean(req.query.archived);
+
         const found = await findEquipment.allResponsible({
             employeeId,
             includeMaintenance: true,
             includeMaintenanceAssignees: true,
-            includeMaintenanceUploads: false
-        });
-
-        res.status(200).send(r.success200(found));
-        return next();
-    }
-    catch (error) {
-        return next(error);
-    }
-};
-
-// ============================================================
-
-module.exports.findAllArchivedEquipment = async (req, res, next) => {
-    try {
-        const { fk_employee_id: employeeId } = res.locals.account;
-        const { companyId } = req.params;
-
-        // cannot see all equipments if cannot edit (add equipments)
-        const { edit } = await findRights(employeeId, companyId, 'm07_01');
-        if (!edit) throw new E.PermissionError('view');
-
-        const found = await findEquipment.all({
-            companyId,
-            includeMaintenance: true,
-            includeMaintenanceAssignees: true,
-            includeMaintenanceUploads: false,
-            archivedOnly: true
+            includeMaintenanceUploads: true,
+            archivedOnly
         });
 
         res.status(200).send(r.success200(found));
@@ -222,7 +201,7 @@ module.exports.findOneEquipment = async (req, res, next) => {
         const { companyId, equipmentId } = req.params;
 
         // cannot see all equipments if cannot edit (add equipments)
-        const { edit } = await findRights(employeeId, companyId, 'm07_01');
+        const { edit } = await findRights(employeeId, companyId, MODULE.EMP);
         if (!edit) throw new E.PermissionError('view');
 
         const found = await findEquipment.one({
@@ -231,8 +210,7 @@ module.exports.findOneEquipment = async (req, res, next) => {
             employeeId,
             includeMaintenance: true,
             includeMaintenanceAssignees: true,
-            includeMaintenanceUploads: false,
-            archivedOnly: true
+            includeMaintenanceUploads: true
         });
 
         res.status(200).send(r.success200(found));
@@ -248,7 +226,7 @@ module.exports.findOneEquipment = async (req, res, next) => {
 module.exports.editCategory = async (req, res, next) => {
     try {
         const { companyId, categoryId } = req.params;
-        await editCategory(categoryId, companyId);
+        await editCategory(categoryId, companyId, req.body);
 
         res.status(200).send(r.success200());
         return next();

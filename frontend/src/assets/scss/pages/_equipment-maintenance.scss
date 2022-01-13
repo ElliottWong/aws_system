@@ -1,0 +1,11 @@
+.c-Equipment-maintenance {
+    &__Table {
+        padding: 50px 0;
+    }
+
+    &__Archives {
+        .c-Equipment-maintenance__Archives-table {
+            padding-top: 25px;
+        }
+    }
+}

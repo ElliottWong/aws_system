@@ -2,6 +2,9 @@
     width: fit-content;
     padding: 5px 10px;
     border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     h1 {
         font-size: $font-small !important;
         font-weight: bold;

@@ -46,7 +46,7 @@ const ManageTrainingRecord = ({match}) => {
                     <Breadcrumb className="c-Manage-training-record__Breadcrumb l-Breadcrumb">
                         <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
                         <Breadcrumb.Item href="/settings">Settings</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/settings/manage-trainings">Manage Trainings</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/settings/trainings">Manage Trainings</Breadcrumb.Item>
                         <Breadcrumb.Item active>Manage Training Record</Breadcrumb.Item>
                     </Breadcrumb>
                     {/* Top section */}

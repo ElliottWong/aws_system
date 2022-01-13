@@ -18,11 +18,12 @@
                 padding-top: 20px;
                 display: flex;
                 flex-direction: column;
+                width: 100%;
                 label {
                     font-size: $font-small;
                     font-weight: bold;
                 }
-                input, textarea, select {
+                input, textarea {
                     border-radius: 5px;
                     outline: none;
                     padding-left: 10px;
@@ -30,22 +31,28 @@
                     border: thin solid black;
                 }
 
-                select {
-                    padding-top: 3.5px;
-                    padding-left: 10px;
-                    padding-bottom: 3.5px;
-                }
-
                 .c-Form__Date {
+                   
                     input {
                         border: none;
                         outline: none;   
                     }
-
+                
                     .react-datetime-picker__wrapper {
                         border: thin solid black;
                         border-radius: 5px;
                     }
+                }
+
+                .c-Form__Approver {
+                    padding-top: 3.5px;
+                    padding-left: 10px;
+                    padding-bottom: 3.5px;
+                    border-radius: 5px;
+                    outline: none;
+                    padding-left: 10px;
+                    width: 100%;
+                    border: thin solid black;
                 }
             }
 

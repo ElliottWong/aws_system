@@ -8,7 +8,10 @@ const {
     deleteLicence
 } = require('../models/com.licences');
 
+const { MODULE } = require('../config/enums');
 const { findRights } = require('../models/com.roles');
+
+const { parseBoolean } = require('../utils/request');
 
 const E = require('../errors/Errors');
 const r = require('../utils/response').responses;
@@ -18,7 +21,7 @@ module.exports.insertLicence = async (req, res, next) => {
         const { fk_employee_id: created_by } = res.locals.account;
         const { companyId } = req.params;
 
-        const { edit } = await findRights(created_by, companyId, 'm07_02');
+        const { edit } = await findRights(created_by, companyId, MODULE.PLC);
         if (!edit) throw new E.PermissionError('create licence');
 
         const { licence_id } = await insertLicence(companyId, created_by, req.body);
@@ -61,10 +64,11 @@ module.exports.findLicences = async (req, res, next) => {
         const { fk_employee_id: employee_id } = res.locals.account;
         const { companyId } = req.params;
 
-        const { edit } = await findRights(employee_id, companyId, 'm07_02');
+        const { edit } = await findRights(employee_id, companyId, MODULE.PLC);
         if (!edit) throw new E.PermissionError('view');
 
-        const licences = await findLicence.all(companyId, true);
+        const archivedOnly = parseBoolean(req.query.archived);
+        const licences = await findLicence.all(companyId, true, archivedOnly);
 
         res.status(200).send(r.success200(licences));
         return next();
@@ -80,7 +84,8 @@ module.exports.findResponsibleLicences = async (req, res, next) => {
     try {
         const { fk_employee_id: employee_id } = res.locals.account;
 
-        const licences = await findLicence.allResponsible(employee_id, true);
+        const archivedOnly = parseBoolean(req.query.archived);
+        const licences = await findLicence.allResponsible(employee_id, true, archivedOnly);
 
         res.status(200).send(r.success200(licences));
         return next();
@@ -97,7 +102,7 @@ module.exports.findArchivedLicences = async (req, res, next) => {
         const { fk_employee_id: employee_id } = res.locals.account;
         const { companyId } = req.params;
 
-        const { edit } = await findRights(employee_id, companyId, 'm07_02');
+        const { edit } = await findRights(employee_id, companyId, MODULE.PLC);
         if (!edit) throw new E.PermissionError('view');
 
         const licences = await findLicence.all(companyId, true, true);

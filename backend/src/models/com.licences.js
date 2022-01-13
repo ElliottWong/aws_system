@@ -138,7 +138,7 @@ module.exports.insertRenewalUpload = async (fk_company_id, licence_id, created_b
 
 // ============================================================
 
-const assignees = {
+const $includeAssignees = {
     association: 'assignees',
     include: {
         association: 'account',
@@ -147,11 +147,19 @@ const assignees = {
     through: { attributes: [] }
 };
 
-const author = {
+const $includeAuthor = {
     association: 'author',
     include: {
         association: 'account',
         attributes: ['username']
+    }
+};
+
+const $includeUploads = {
+    association: 'uploads',
+    include: {
+        association: 'file',
+        attributes: { exclude: ['cloudinary_id', 'cloudinary_uri'] }
     }
 };
 
@@ -163,8 +171,8 @@ module.exports.findLicence = {
         };
 
         const include = includeUploads
-            ? [author, assignees, 'uploads']
-            : [author, assignees];
+            ? [$includeAuthor, $includeAssignees, $includeUploads]
+            : [$includeAuthor, $includeAssignees];
 
         return PLC.Licences.findAll({ where, include });
     },
@@ -182,8 +190,8 @@ module.exports.findLicence = {
         };
 
         const include = includeUploads
-            ? [author, assignees, 'uploads']
-            : [author, assignees];
+            ? [$includeAuthor, $includeAssignees, $includeUploads]
+            : [$includeAuthor, $includeAssignees];
 
         return PLC.Licences.findAll({ where, include });
     },
@@ -192,8 +200,8 @@ module.exports.findLicence = {
         const licence = await PLC.Licences.findOne({
             where: { equipment_id: licence_id, fk_company_id },
             include: includeUploads
-                ? [author, assignees, 'uploads']
-                : [author, assignees]
+                ? [$includeAuthor, $includeAssignees, $includeUploads]
+                : [$includeAuthor, $includeAssignees]
         });
 
         if (!licence) throw new E.NotFoundError('licence');

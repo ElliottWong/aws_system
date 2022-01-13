@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@faker-js/faker": "^5.5.3",
     "aws-sdk": "^2.1023.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.27.1",
@@ -27,6 +28,7 @@
     "multer-storage-cloudinary": "^4.0.0",
     "mysql2": "^2.2.5",
     "node-fetch": "^2.6.1",
+    "node-schedule": "^2.1.0",
     "nodemailer": "^6.6.1",
     "sequelize": "^6.6.2",
     "winston": "^3.3.3",
@@ -38,7 +40,6 @@
     "@types/node": "^16.11.10",
     "@types/sequelize": "^4.28.10",
     "@types/winston": "^2.4.4",
-    "eslint": "^8.0.0",
-    "faker": "^5.5.3"
+    "eslint": "^8.0.0"
   }
 }

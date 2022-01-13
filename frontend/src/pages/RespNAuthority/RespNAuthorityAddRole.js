@@ -88,31 +88,31 @@ const RespNAuthorityAddRole = () => {
             })()
         };
         console.log(formattedInsertData)
-        // axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/roles`, formattedInsertData, {
-        //     headers: {
-        //         'Authorization': `Bearer ${token}`,
-        //         'Content-Type': 'application/json;charset=UTF-8'
-        //     }
-        // }).then((res) => {
-        //     console.log(res);
-        //     history.push('/responsibility-n-authority');
-        //     // Need to set time out so that toast request will not be flushed out
-        //     setTimeout(function () {
-        //         toast.success(<>Success!<br />Message: <b>Role has been added!</b></>);
-        //     }, 0);
+        axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/roles`, formattedInsertData, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json;charset=UTF-8'
+            }
+        }).then((res) => {
+            console.log(res);
+            history.push('/responsibility-n-authority');
+            // Need to set time out so that toast request will not be flushed out
+            setTimeout(function () {
+                toast.success(<>Success!<br />Message: <b>Role has been added!</b></>);
+            }, 0);
 
-        // }).catch((err) => {
-        //     console.log(err);
-        //     console.log(err.response);
-        //     let errCode = "Error!";
-        //     let errMsg = "Error!"
-        //     if (err.response !== undefined) {
-        //         errCode = err.response.status;
-        //         errMsg = err.response.data.message;
-        //     }
+        }).catch((err) => {
+            console.log(err);
+            console.log(err.response);
+            let errCode = "Error!";
+            let errMsg = "Error!"
+            if (err.response !== undefined) {
+                errCode = err.response.status;
+                errMsg = err.response.data.message;
+            }
 
-        //     toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
-        // })
+            toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
+        })
     };
 
     // Handler for checkbox change

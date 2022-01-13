@@ -34,7 +34,7 @@ const ManageTrainingRequest = ({ match }) => {
                 return (
                     <div className='c-Confirm-alert c-Confirm-alert--pending-reject'>
                         <h1>Confirm Reject?</h1>
-                        <p>PLease key in reason for rejection and click on confirm reject.</p>
+                        <p>Please key in reason for rejection and click on confirm reject.</p>
                         <div className="c-Confirm-alert__Remarks">
                             <h2>Remarks</h2>
                             <textarea name="pendingReject" ref={rejectRemarks}></textarea>
@@ -73,7 +73,7 @@ const ManageTrainingRequest = ({ match }) => {
                     <Breadcrumb className="c-Manage-training-request__Breadcrumb l-Breadcrumb">
                         <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
                         <Breadcrumb.Item href="/settings">Settings</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/settings/manage-trainings">Manage Trainings</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/settings/trainings">Manage Trainings</Breadcrumb.Item>
                         <Breadcrumb.Item active>Manage Training Request</Breadcrumb.Item>
                     </Breadcrumb>
                     {/* Top section */}

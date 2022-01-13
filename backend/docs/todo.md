@@ -64,3 +64,5 @@
 - [ ] clauses 1 - 6 rejection/approval does not check user that is rejecting/approving against the db record (the approved_by column)
 
 - model/files.js insertFileRecord method typically comes before another insert (the document in which the file is attached to), but if the other insert fails, insertFileRecord should also rollback
+
+- [x] migrate to from the old marak/faker.js to the new faker-js/faker (https://github.com/faker-js/faker)

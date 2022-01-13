@@ -13,6 +13,7 @@ import { useHistory } from 'react-router-dom';
 import StatusPill from '../../common/StatusPill';
 import { confirmAlert } from 'react-confirm-alert';
 import FileSelect from '../../common/FileSelect';
+import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 
 const ManageMyTrainingRequest = ({match}) => {
     const toastTiming = config.toastTiming;
@@ -22,6 +23,29 @@ const ManageMyTrainingRequest = ({match}) => {
     // State declarations
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
 
+    // Handlers
+    const handleRemoveRecord = () => {
+        // Confirmation dialogue for deleting rejected document
+        const message = `Deleting this record will remove its respective record (if any) permanently. Click confirm to proceed.`;
+        const handler = (onClose) => confirmRemoveRecord(onClose);
+        const heading = `Confirm Delete?`;
+        const type = "alert"
+        const data = {
+            message,
+            handler,
+            heading,
+            type
+        };
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return <CustomConfirmAlert {...data} onClose={onClose} />;
+            }
+        });
+
+        const confirmRemoveRecord = () => {
+
+        };
+    };
 
     return (
          <>
@@ -103,7 +127,7 @@ const ManageMyTrainingRequest = ({match}) => {
                             <h1>Danger Zone</h1>
                         </div>
                         <div className="c-Danger__Contents">
-                            <button type="button" className="c-Btn c-Btn--alert-border">Remove record & request</button>
+                            <button type="button" className="c-Btn c-Btn--alert-border" onClick = {() => handleRemoveRecord()}>Remove record & request</button>
                             <p>Performing this action will remove the request and record (if any) permanently. This action cannot be undoned.</p>
                         </div>
 

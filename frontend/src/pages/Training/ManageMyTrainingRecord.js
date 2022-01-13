@@ -13,8 +13,9 @@ import { useHistory } from 'react-router-dom';
 import StatusPill from '../../common/StatusPill';
 import { confirmAlert } from 'react-confirm-alert';
 import FileSelect from '../../common/FileSelect';
+import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 
-const ManageMyTrainingRecord = ({match}) => {
+const ManageMyTrainingRecord = ({ match }) => {
     const toastTiming = config.toastTiming;
     const history = useHistory();
     const trainingRecordID = match.params.trainingRecordID;
@@ -50,7 +51,30 @@ const ManageMyTrainingRecord = ({match}) => {
     };
 
     const handleCompletePostEvaluation = () => {
-        history.push(`/training/training-record/${trainingRecordID}/post-training-evaluation/trainee`);
+        history.push(`/training/training-record/manage/${trainingRecordID}/post-training-evaluation`);
+    };
+
+    const handleRemoveRecord = () => {
+        // Confirmation dialogue for deleting rejected document
+        const message = `Deleting this record will remove its respective request permanently. Click confirm to proceed.`;
+        const handler = (onClose) => confirmRemoveRecord(onClose);
+        const heading = `Confirm Delete?`;
+        const type = "alert"
+        const data = {
+            message,
+            handler,
+            heading,
+            type
+        };
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return <CustomConfirmAlert {...data} onClose={onClose} />;
+            }
+        });
+
+        const confirmRemoveRecord = () => {
+
+        };
     };
 
     useEffect(() => {
@@ -138,7 +162,7 @@ const ManageMyTrainingRecord = ({match}) => {
                             <h1>Danger Zone</h1>
                         </div>
                         <div className="c-Danger__Contents">
-                            <button type="button" className="c-Btn c-Btn--alert-border">Remove record & request</button>
+                            <button type="button" className="c-Btn c-Btn--alert-border" onClick={() => handleRemoveRecord()}>Remove record & request</button>
                             <p>Performing this action will remove the record and request permanently. This action cannot be undoned.</p>
                         </div>
 

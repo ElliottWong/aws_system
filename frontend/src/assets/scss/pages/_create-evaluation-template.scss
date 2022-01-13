@@ -5,11 +5,26 @@
       font-weight: bold;
       padding-bottom: 20px;
     }
+    
 
     .c-Create-PET__Document-content {
       width: 90%;
       margin: auto;
+      .c-Create-PET__Document-title {
+        width: 100%;
+        display: flex;
+        justify-content: center;
 
+        input {
+          width: 75%;
+          margin: auto;
+          font-weight: bold;
+          font-size: 21px;
+          text-align: center;
+        }
+
+      }
+      
       h1 {
         text-align: center;
         font-size: 21px;

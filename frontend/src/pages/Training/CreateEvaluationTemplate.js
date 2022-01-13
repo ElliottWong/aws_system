@@ -29,9 +29,20 @@ const CreateEvaluationTemplate = () => {
 
     useEffect(() => {
         setQuestions(() => {
+   
+            const sortedTraineeQnsRaw = defaultTemplate.evaluation.trainee.sort((a, b) => a.order - b.order);
+           
+            const sortedSupervisorQnsRaw = defaultTemplate.evaluation.supervisor.sort((a, b) => a.order - b.order);
+
             return {
-                trainee: defaultTemplate.evaluation.trainee,
-                supervisor: defaultTemplate.evaluation.supervisor
+                trainee: sortedTraineeQnsRaw.map((data, index) => ({
+                    ...data,
+                    serialNo: index + 1
+                })),
+                supervisor: sortedSupervisorQnsRaw.map((data, index) => ({
+                    ...data,
+                    serialNo: index + 1
+                })),
             };
         });
         setMeta(() => {
@@ -40,16 +51,49 @@ const CreateEvaluationTemplate = () => {
     }, []);
 
     // Handlers
-    const handleAddQns = () => {
-        setQuestions((prevState) => ([
-            ...prevState,
-            {
-                serialNo: prevState.length + 1,
-                question: '',
-                answer: '',
-                type: QUESTION_TYPE.DEFAULT
+    const handleAddQns = (type) => {
+        if (type === "trainee") {
+            setQuestions((prevState) => {
+                return ({
+                    ...prevState,
+                    trainee: [
+                        ...prevState.trainee,
+                        {
+                            serialNo: prevState.trainee.length + 1,
+                            question: '',
+                            answer: '',
+                            type: QUESTION_TYPE.DEFAULT
+                        }
+                    ]
+                })
             }
-        ]));
+            );
+        }
+        else {
+            setQuestions((prevState) => ({
+                ...prevState,
+                supervisor: [
+                    ...prevState.supervisor,
+                    {
+                        serialNo: prevState.supervisor.length + 1,
+                        question: '',
+                        answer: '',
+                        type: QUESTION_TYPE.DEFAULT
+                    }
+                ]
+            }));
+        }
+
+    };
+
+    const handleInputChange = (event) => {
+        setMeta((prevState) => ({
+            ...prevState,
+            template: {
+                ...prevState.template,
+                [event.target.name]: event.target.value
+            }
+        }));
     };
 
     return (
@@ -65,14 +109,14 @@ const CreateEvaluationTemplate = () => {
                 draggable
                 pauseOnHover
             />
-            <PageLayout sideNavStatus={sideNavStatus} setSideNavStatus={setSideNavStatus} title='Manage Post Evaluation Templates' activeLink="/settings">
+            <PageLayout sideNavStatus={sideNavStatus} setSideNavStatus={setSideNavStatus} title='Create Post Evaluation Template' activeLink="/settings">
                 <div className="c-Create-PET c-Main">
                     {/* Breadcrumb */}
                     <Breadcrumb className="c-Create-PET__Breadcrumb l-Breadcrumb">
                         <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
                         <Breadcrumb.Item href="/settings">Settings</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/settings/manage-trainings">Manage Trainings</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/settings/manage-trainings/manage-post-evaluation-templates" >Manage Post Evaluation Templates</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/settings/trainings">Manage Trainings</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/settings/trainings/post-evaluation-templates" >Manage Post Evaluation Templates</Breadcrumb.Item>
                         <Breadcrumb.Item active>Create Post Evaluation Template</Breadcrumb.Item>
                     </Breadcrumb>
                     {/* Top section */}
@@ -80,7 +124,7 @@ const CreateEvaluationTemplate = () => {
                         <h1>Create Post Evaluation Template</h1>
                         <div className="c-Top__Btns">
                             <button type="button" className="c-Btn c-Btn--primary">Create</button>
-                            <button type="button" className="c-Btn c-Btn--cancel">Cancel</button>
+                            <button type="button" className="c-Btn c-Btn--cancel" onClick={() => history.push("/settings/trainings/post-evaluation-templates")}>Cancel</button>
                         </div>
 
                     </div>
@@ -89,7 +133,10 @@ const CreateEvaluationTemplate = () => {
                         <DocumentLayout isDocCollapsed={false}>
                             <div className="c-Create-PET__Document-content">
                                 {/* Title */}
-                                <h1>Post Training Evaluation Form 2022</h1>
+                                <div className="c-Create-PET__Document-title">
+                                    <input type="text" placeholder="Enter form title" name="name" value={meta.template?.name} onChange={(event) => handleInputChange(event)} />
+                                </div>
+
                                 {/* Document Header Info */}
                                 <div className="c-Create-PET__Document-header c-Document__Header">
                                     <div className="c-Document-header__Key">
@@ -108,7 +155,7 @@ const CreateEvaluationTemplate = () => {
                                         <br />
                                         <br />
                                         <br />
-                                        <input type="text" value="PTEF.2022.1" />
+                                        <input type="text" name="version" value={meta.template?.version} onChange={(event) => handleInputChange(event)} />
                                         <br />
                                         <br />
                                         <br />
@@ -126,25 +173,25 @@ const CreateEvaluationTemplate = () => {
                                         </div>
                                         <div className="c-Document-form__Fields">
                                             {
-                                                questions.length > 0 ?
-                                                    questions.map((question, index) => {
+                                                questions?.trainee?.length > 0 ?
+                                                    questions.trainee.map((question, index) => {
                                                         return (
-                                                            <>
-                                                                <EvaluationQuestions
-                                                                    mode={TRAINING_EVALUATION_MODE.EDIT}
-                                                                    qns={question.question}
-                                                                    index={index}
-                                                                    setQuestions={setQuestions}
-                                                                />
-                                                            </>
+                                                            <EvaluationQuestions
+                                                                mode={TRAINING_EVALUATION_MODE.EDIT}
+                                                                qnsType={question.type}
+                                                                qns={question.question}
+                                                                index={index}
+                                                                setQuestions={setQuestions}
+                                                                key={index}
+                                                                formType="trainee"
+                                                            />
                                                         );
                                                     })
                                                     :
                                                     <p>No questions detected!</p>
                                             }
-
                                             {/* Add Question */}
-                                            <div className="c-Document-form__Add-qns" onClick={() => handleAddQns()}>
+                                            <div className="c-Document-form__Add-qns" onClick={() => handleAddQns("trainee")}>
                                                 <p>Add New Row</p>
                                             </div>
                                         </div>
@@ -157,14 +204,28 @@ const CreateEvaluationTemplate = () => {
                                             <p>This section will only be shown to the approver/supervisor when doing the form</p>
                                         </div>
                                         <div className="c-Document-form__Fields">
-                                            <EvaluationQuestions
-                                                mode={TRAINING_EVALUATION_MODE.VIEW}
-                                                qns="A question?"
-                                                index="1"
-                                                viewType={QUESTION_TYPE.OPEN}
-                                            />
+                                            {
+                                                questions?.supervisor?.length > 0 ?
+                                                    questions.supervisor.map((question, index) => {
+                                                        return (
+
+                                                            <EvaluationQuestions
+                                                                mode={TRAINING_EVALUATION_MODE.EDIT}
+                                                                qnsType={question.type}
+                                                                qns={question.question}
+                                                                index={index}
+                                                                setQuestions={setQuestions}
+                                                                key={index}
+                                                                formType="supervisor"
+                                                            />
+
+                                                        );
+                                                    })
+                                                    :
+                                                    <p>No questions detected!</p>
+                                            }
                                             {/* Add Question */}
-                                            <div className="c-Document-form__Add-qns" onClick={() => handleAddQns()}>
+                                            <div className="c-Document-form__Add-qns" onClick={() => handleAddQns("supervisor")}>
                                                 <p>Add New Row</p>
                                             </div>
                                         </div>

@@ -19,33 +19,32 @@ const PostEvaluationForm = ({ match }) => {
     const toastTiming = config.toastTiming;
     const history = useHistory();
     const location = useLocation();
-    const currentPath = location.pathname;
+    const pathname = location.pathname;
+    const pathnameArr = pathname.split("/");
+
 
     // State declarations
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
     const [questions, setQuestions] = useState([]);
     const trainingRecordID = match.params.trainingRecordID;
-    let formType = null;
-    const currentPathArr = currentPath.split("/");
-    if (currentPathArr.length > 0) {
-        if (currentPathArr[0] === "training") {
-            formType = "trainee";
-        } else if (currentPathArr[0] === "settings") {
-            formType = "approver";
-        } else {
-            console.log("Error! Invalid path");
+    const [formType, setFormType] = useState(null);
+
+    useEffect(() => {
+        // As an approver
+        if (pathnameArr[1] === "settings") {
+            setFormType(() => "approver");
         }
-    } else {
-        console.log("Error! Invalid path");
-    }
-
-    if (formType !== "trainee" && formType !=="approver" ) {
-        history.push("/page-not-found");
-    }
-
+        // As a trainee
+        else if (pathnameArr[1] === "training") {
+            setFormType(() => "trainee");
+        }
+        else {
+            history.push("/page-not-found");
+        }
+    }, []);
 
     const handleSubmitPostEvaluation = () => {
-
+        console.log("Clicked on submit");
     };
 
     return (
@@ -107,9 +106,14 @@ const PostEvaluationForm = ({ match }) => {
                                         <p>7/1/2022</p>
                                     </div>
                                 </div>
-
-                                <div className = "c-Post-evaluation-form__Document-form">
-                                    
+                                {/* Form section - edit mode */}
+                                <div className="c-Post-evaluation-form__Document-form c-Document-form c-Document-form--edit">
+                                    <div className="c-Document-form__Heading">
+                                        <h1>{formType === "approver" ? "Approver" : "Trainee"} Section</h1>
+                                    </div>
+                                    <div className = "c-Document-form__Fields">
+                                        
+                                    </div>
                                 </div>
                             </div>
                         </DocumentLayout>

@@ -197,6 +197,13 @@ const ManageInvites = () => {
                                             <label htmlFor="email">Email</label>
                                             <input type="text" onChange={handleInputChange} name="email" placeholder="Email" value={sendInviteInputData.email} />
                                         </div>
+                                        <div className = "c-Input__Row">
+                                            {/* To be continued */}
+                                            <label htmlFor="induction_template">Induction Template</label>
+                                            <select name = "induction_template">
+                                                <option value = {null}>Assign an induction template</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <p><b>*</b>Users who sign up through the invite link will have the role of 'Normal User'.</p>
                                     <button type="button" className="c-Btn c-Btn--primary" onClick={handleSendInviteBtn}>Send Invite</button>

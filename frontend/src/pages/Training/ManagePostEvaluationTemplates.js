@@ -73,7 +73,7 @@ const ManagePostEvaluationTemplates = () => {
                     <Breadcrumb className="c-Manage-PET__Breadcrumb l-Breadcrumb">
                         <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
                         <Breadcrumb.Item href="/settings">Settings</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/settings/manage-trainings">Manage Trainings</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/settings/trainings">Manage Trainings</Breadcrumb.Item>
                         <Breadcrumb.Item active>Manage Post Evaluation Templates</Breadcrumb.Item>
                     </Breadcrumb>
                     {/* Top section */}

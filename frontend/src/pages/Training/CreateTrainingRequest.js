@@ -67,6 +67,7 @@ const CreateTrainingRequest = () => {
                                     onChange={setTestDate}
                                     value={testDate}
                                     className="c-Form__Date"
+                                    format="dd/MM/y"
                                 />
                             </div>
                         </div>
@@ -82,6 +83,7 @@ const CreateTrainingRequest = () => {
                                     onChange={setTestDate}
                                     value={testDate}
                                     className="c-Form__Date"
+                                    format="dd/MM/y"
                                 />
                             </div>
                         </div>
@@ -93,7 +95,7 @@ const CreateTrainingRequest = () => {
                             </div>
                             <div className="c-Form__Right c-Form__Input">
                                 <label htmlFor="approver">To be approved by</label>
-                                <select name = "approver">
+                                <select name = "approver" className = "c-Form__Approver">
                                     <option>Select an approver</option>
                                 </select>
                             </div>

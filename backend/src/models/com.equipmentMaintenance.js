@@ -5,10 +5,11 @@ const db = require('../config/connection');
 
 const {
     Employees,
+    Files,
     Documents: { EMP }
 } = require('../schemas/Schemas');
 
-const { insertFile } = require('./files');
+const { insertFile, deleteFile } = require('./files');
 const { isEquipmentOwner, isAssignedEquipment } = require('./com.equipment.v3').helpers;
 
 const E = require('../errors/Errors');
@@ -151,5 +152,81 @@ module.exports.insertMaintenanceUpload = async (maintenanceId, equipmentId, crea
     catch (error) {
         await transaction.rollback();
         throw error;
+    }
+};
+
+// ============================================================
+
+// FIXME i really dont know if this actually works
+module.exports.deleteOneMaintenance = async (maintenanceId, equipmentId, companyId, createdBy) => {
+    const isOwner = isEquipmentOwner(equipmentId, companyId, createdBy);
+    if (!isOwner) throw new E.PermissionError('delete');
+
+    const transaction = await db.transaction();
+    try {
+        const maintenanceUploads = await EMP.MaintenanceUploads.findAll({
+            where: {
+                fk_maintenance_id: { maintenanceId }
+            }
+        });
+
+        // get uploadd files related to this maintenance
+        const getFiles = maintenanceUploads.map((upload) => Files.findByPk(upload.fk_file_id));
+        const files = await Promise.all(getFiles);
+
+        // destroy them from cloudinary and database
+        const destroyFilePromises = files.map((file) => deleteFile(file.file_id));
+        await Promise.all(destroyFilePromises);
+
+        // destroy everything else
+        const destroyMaintenance = EMP.Maintenance.destroy({
+            where: {
+                maintenance_id: maintenanceId,
+                fk_company_id: companyId,
+                fk_equipment_id: equipmentId
+            }
+        }, { transaction });
+
+        const destroyMaintenanceAssignees = EMP.MaintenanceAssignees.destroy({
+            where: {
+                fk_maintenance_id: maintenanceId,
+                fk_equipment_id: equipmentId
+            }
+        }, { transaction });
+
+        const destroyMaintenanceUploads = EMP.MaintenanceUploads.destroy({
+            where: {
+                fk_maintenance_id: { maintenanceId }
+            }
+        }, { transaction });
+
+        await Promise.all([
+            destroyMaintenance,
+            destroyMaintenanceAssignees,
+            destroyMaintenanceUploads
+        ]);
+
+        await transaction.commit();
+    }
+    catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
+};
+
+// ============================================================
+
+module.exports.deleteMaintenanceUpload = async (maintenanceUploadId, createdBy) => {
+    const maintenanceUpload = await EMP.MaintenanceUploads.findOne({
+        where: {
+            maintenance_upload_id: maintenanceUploadId,
+            created_by: createdBy
+        },
+        include: 'file'
+    });
+
+    if (maintenanceUpload) {
+        await deleteFile(maintenanceUpload.file.file_id, createdBy);
+        await maintenanceUpload.destroy();
     }
 };

@@ -298,7 +298,7 @@ export const historyObjAchivColumns = [
 // ----------------------------------------------------
 
 // ----------------------------------------------------
-// Start of Equipment Maintainance Program
+// Start of Equipment Maintainence Program
 // ----------------------------------------------------
 
 // History columns
@@ -368,7 +368,7 @@ export const categoryColumns = [
     },
 ]
 
-export const equipmentMaintainanceColumns = [
+export const equipmentMaintenanceColumns = [
     {
         dataField: 'id',
         text: 'Id',
@@ -410,7 +410,7 @@ export const equipmentMaintainanceColumns = [
     },
 ];
 
-export const historyEquipmentMaintainanceColumns = [
+export const historyEquipmentMaintenanceColumns = [
     {
         dataField: 'id',
         text: 'Id',
@@ -456,8 +456,205 @@ export const historyEquipmentMaintainanceColumns = [
     },
 ];
 
+export const maintenanceCycleColumns = [
+    {
+        dataField: 'id',
+        text: 'id',
+        hidden: true
+    },
+    {
+        dataField: 'serialNo',
+        text: '#',
+    },
+    {
+        dataField: 'maintenanceType',
+        text: 'Maintenance Type'
+    },
+    {
+        dataField: 'responsible',
+        text: 'Responsible'
+    },
+    {
+        dataField: 'maintenanceFrequency',
+        text: 'Maintenance Frequency'
+    },
+    {
+        dataField: 'lastServiceDate',
+        text: 'Last Service Date'
+    },
+    {
+        dataField: 'status',
+        text: 'Status',
+        formatter: (cell, row) => {
+            if (cell) {
+                return <StatusPill type={cell} />
+            } else {
+                return "Error"
+            }
+        }
+    },
+    {
+        dataField: 'action_manage',
+        text: 'Manage',
+        headerAttrs: {
+            hidden: true
+        },
+        formatter: (cell, row) => {
+            if (cell) {
+                return <NavLink to={cell} >Manage</NavLink>
+            } else {
+                return "N.a."
+            }
+        }
+    },
+    {
+        dataField: 'action_delete',
+        text: '',
+        formatter: (cell, row) => {
+            console.log(cell);
+            return 'Delete';
+            // (
+            // <ManageDeleteArchivedDoc
+            //     deleteUrl={cell}
+            //     docHeaderUrl={`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance`}
+            //     setArchivedDocData={setArchivedDocData}
+            //     docType="equipment-maintenance"
+            //     idName="equipment_maintenance_id"
+            // />
+            // )
+        }
+    },
+];
+
+export const maintenanceRecordColumns = [
+    {
+        dataField: 'id',
+        text: 'id',
+        hidden: true
+    },
+    {
+        dataField: 'serialNo',
+        text: '#',
+    },
+    {
+        dataField: 'fileName',
+        text: 'File Name'
+    },
+    {
+        dataField: 'description',
+        text: 'Description'
+    },
+    {
+        dataField: 'maintenanceFrequency',
+        text: 'Maintenance Frequency'
+    },
+    {
+        dataField: 'uploader',
+        text: 'Uploader'
+    },
+    {
+        dataField: 'uploadDate',
+        text: 'Upload Date'
+    },
+    {
+        dataField: 'action_download',
+        text: '',
+        headerAttrs: {
+            hidden: true
+        },
+        formatter: (cell, row) => {
+            if (cell) {
+                return <NavLink to={cell} >Download</NavLink>
+            } else {
+                return "N.a."
+            }
+        }
+    },
+    {
+        dataField: 'action_delete',
+        text: '',
+        formatter: (cell, row) => {
+            console.log(cell);
+            return 'Delete';
+            // (
+            // <ManageDeleteArchivedDoc
+            //     deleteUrl={cell}
+            //     docHeaderUrl={`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance`}
+            //     setArchivedDocData={setArchivedDocData}
+            //     docType="equipment-maintenance"
+            //     idName="equipment_maintenance_id"
+            // />
+            // )
+        }
+    },
+];
+
 // ----------------------------------------------------
-// End of Equipment Maintainance Program
+// End of Equipment Maintenance Program
+// ----------------------------------------------------
+
+// ----------------------------------------------------
+// Start of Register of Permits, Licenses, Approvals & Certificates
+// ----------------------------------------------------
+
+export const licenseColumns = [
+    {
+        dataField: 'id',
+        text: 'Id',
+        hidden: true
+    },
+    {
+        dataField: 'serialNo',
+        text: '#',
+    },
+    {
+        dataField: 'license',
+        text: 'License/Permit/Certificate',
+    },
+    {
+        dataField: 'licenseNo',
+        text: 'License No.',
+    },
+    {
+        dataField: 'expDate',
+        text: 'Exp. Date',
+    },
+    {
+        dataField: 'externalAgency',
+        text: 'Responsible External Agency',
+    },
+    {
+        dataField: 'responsibleUser',
+        text: 'Responsible User',
+    },
+    {
+        dataField: 'status',
+        text: 'Status',
+        formatter: (cell, row) => {
+            if (cell === undefined) {
+                return <p>Nil</p>
+            }
+            return <StatusPill type="active" />
+        }
+    },
+    {
+        dataField: 'action_manage',
+        text: 'Manage',
+        headerAttrs: {
+            hidden: true
+        },
+        formatter: (cell, row) => {
+            if (cell) {
+                return <NavLink to={cell} >Manage</NavLink>
+            } else {
+                return "N.a."
+            }
+        }
+    },
+];
+
+// ----------------------------------------------------
+// End of Register of Permits, Licenses, Approvals & Certificates
 // ----------------------------------------------------
 
 // ----------------------------------------------------

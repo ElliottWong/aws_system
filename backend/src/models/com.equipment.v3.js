@@ -1,3 +1,5 @@
+// yes, most of these are overdone
+
 const { Sequelize, Op } = require('sequelize');
 const db = require('../config/connection');
 
@@ -7,13 +9,30 @@ const {
 
 const E = require('../errors/Errors');
 
-module.exports.insertCategory = (companyId, category = {}) => {
-    const { name, description } = category;
+module.exports.insertCategory = async (companyId, category = {}) => {
+    const {
+        name,
+        description
+    } = category;
 
-    return EMP.Categories.create({
+    // check whether the company already 
+    // has an existing category with the same name
+
+    const count = await EMP.Categories.count({
+        where: { name } // where clauses are case insensitive
+    });
+
+    console.log(count);
+
+    // this check is case insensitive
+    if (count > 0) throw new E.DuplicateError('category', 'name');
+
+    const row = await EMP.Categories.create({
         fk_company_id: companyId,
         name, description
     });
+
+    return row;
 };
 
 // ============================================================
@@ -118,12 +137,14 @@ const isAssignedEquipment = async (equipmentId, employeeId) => {
         where: {
             fk_equipment_id: equipmentId,
             fk_employee_id: employeeId
-        }
+        },
+        attributes: ['fk_maintenance_id']
     });
 
+    const isAssigned = rows.length > 0;
     const maintenanceIds = rows.map((row) => row.fk_maintenance_id);
 
-    return [rows > 0, maintenanceIds];
+    return [isAssigned, maintenanceIds];
 };
 
 const isEquipmentOwner = async (equipmentId, companyId, employeeId) => {
@@ -162,14 +183,11 @@ const getIncludeMaintenance = async function ({
         include: []
     };
 
-    if (includeAssignees)
-        join.include.push($includeMaintenanceAssignees);
+    if (includeAssignees) join.include.push($includeMaintenanceAssignees);
 
-    if (includeUploads)
-        join.include.push($includeMaintenanceUploads);
+    if (includeUploads) join.include.push($includeMaintenanceUploads);
 
-    if (employeeId === null)
-        return join;
+    if (employeeId === null) return join;
 
     const assignedMaintenance = await getAssignedMaintenance(employeeId);
 
@@ -190,19 +208,15 @@ const getIncludeEquipment = async function ({
     includeMaintenanceUploads = false,
     archivedOnly = false
 }) {
+    // TODO check whether the include where clause will actually also filter out 
+    // equipment which are not assigned to a given employee
+    // -> yes
+
     const join = {
         association: 'equipment',
-        include: [$includeAuthor]
-    };
-
-    // FIXME check whether the include where clause will actually also filter out 
-    // equipment which are not assigned to a given employee
-    const includeEquipment = {
-        association: 'equipment',
-        where: {
-            archived_at: archivedOnly ? { [Op.not]: null } : null,
-            include: [$includeAuthor]
-        }
+        where: { archived_at: archivedOnly ? { [Op.not]: null } : null },
+        include: [$includeAuthor],
+        through: { attributes: [] }
     };
 
     if (includeMaintenance) {
@@ -211,15 +225,8 @@ const getIncludeEquipment = async function ({
             includeAssignees: includeMaintenanceAssignees,
             includeUploads: includeMaintenanceUploads
         });
-        includeEquipment.where.include.push(maintenanceInclude);
+        join.include.push(maintenanceInclude);
     }
-
-    if (employeeId !== null) {
-        const assignedEquipmentIds = await getAssignedEquipmentIds(employeeId);
-        includeEquipment.where.equipment_id = { [Op.or]: assignedEquipmentIds };
-    }
-
-    join.include.push(includeEquipment);
 
     return join;
 };
@@ -290,6 +297,7 @@ module.exports.findCategories = {
     //     return EMP.Categories.findAll({ include });
     // },
 
+    // FIXME will not work if category has no equipment
     one: async function ({
         categoryId: category_id,
         companyId: fk_company_id,
@@ -313,6 +321,8 @@ module.exports.findCategories = {
             });
             include.push(_includeEquipment);
         }
+
+        console.dir({ where, include }, { depth: null });
 
         return EMP.Categories.findOne({ where, include });
     }
@@ -386,70 +396,81 @@ module.exports.findEquipment = {
         includeMaintenanceAssignees = false,
         includeMaintenanceUploads = false
     }) {
-        const where = { equipment_id, fk_company_id };
-        const include = [$includeAuthor, $includeCategories];
+        const eqp = await EMP.Equipment.findOne({
+            where: { equipment_id, fk_company_id },
+            attributes: ['created_by']
+        });
 
-        const equipment = await EMP.Equipment.findOne({ where, include });
-
-        if (!equipment) throw new E.NotFoundError('equipment');
+        if (!eqp) throw new E.NotFoundError('equipment');
 
         // the employee requesting for this equipment created it
-        if (equipment.created_by === employeeId) {
+        if (eqp.created_by === employeeId) {
+            const where = { equipment_id, fk_company_id };
+            const include = [$includeAuthor, $includeCategories];
+
             if (includeMaintenance) {
-                const where = { fk_equipment_id: equipment_id };
-
-                const include = [];
-
-                if (includeMaintenanceAssignees)
-                    include.push($includeMaintenanceAssignees);
-
-                if (includeMaintenanceUploads)
-                    include.push($includeMaintenanceUploads);
-
-                const allMaintenance = await EMP.Maintenance.findAll({ where, include });
-
-                equipment.maintenance = allMaintenance;
+                const _includeMaintenance = await getIncludeMaintenance({
+                    includeAssignees: includeMaintenanceAssignees,
+                    includeUploads: includeMaintenanceUploads
+                });
+                include.push(_includeMaintenance);
             }
+
+            const equipment = await EMP.Equipment.findOne({ where, include });
+
+            return equipment;
         }
         else {
             const [isAssigned, maintenanceIds] = await isAssignedEquipment(equipment_id, employeeId);
+            console.log(isAssigned, maintenanceIds);
 
             // cannot find the row in the m:n table that relates the employee to the equipment
             if (!isAssigned) throw new E.PermissionError('view this equipment');
 
+            const where = { equipment_id, fk_company_id };
+            const include = [$includeAuthor, $includeCategories];
+
             if (includeMaintenance) {
-                const where = {
-                    maintenace_id: { [Op.or]: maintenanceIds },
-                    fk_equipment_id: equipment_id
+                const _includeMaintenance = await getIncludeMaintenance({
+                    includeAssignees: includeMaintenanceAssignees,
+                    includeUploads: includeMaintenanceUploads
+                });
+
+                // already have the maintenance ids
+                // dont need to go query db for that agn
+                _includeMaintenance.where = {
+                    maintenance_id: { [Op.or]: maintenanceIds }
                 };
 
-                const include = [];
-
-                if (includeMaintenanceAssignees)
-                    include.push($includeMaintenanceAssignees);
-
-                if (includeMaintenanceUploads)
-                    include.push($includeMaintenanceUploads);
-
-                const selectedMaintenance = await EMP.Maintenance.findAll({ where, include });
-
-                equipment.maintenance = selectedMaintenance;
+                include.push(_includeMaintenance);
             }
-        }
 
-        return equipment;
+            const equipment = await EMP.Equipment.findOne({ where, include });
+
+            return equipment;
+        }
     }
 };
 
 // ============================================================
 
 module.exports.editCategory = async (categoryId, companyId, category = {}) => {
-    const { name, description } = category;
+    const {
+        name,
+        description
+    } = category;
 
-    const where = { category_id: categoryId, fk_company_id: companyId };
+    const where = {
+        category_id: categoryId,
+        fk_company_id: companyId
+    };
 
-    const [count] = await EMP.Categories.update({ name, description }, { where });
-    if (count === 0) throw new E.NotFoundError('equipment');
+    const [affectedCount] = await EMP.Categories.update({
+        name,
+        description
+    }, { where });
+
+    if (affectedCount === 0) throw new E.NotFoundError('equipment');
 };
 
 // ============================================================
@@ -572,6 +593,7 @@ module.exports.deleteCategory = async (categoryId, companyId) => {
 
 // ============================================================
 
+// FIXME incomplete delete
 module.exports.deleteOneEquipment = async (equipmentId, companyId, createdBy) => {
     const transaction = await db.transaction();
     try {

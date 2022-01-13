@@ -36,8 +36,12 @@ const sideNavListArr = [
         display: "6.2 Obj. Achiv. Program"
     },
     {
-        link: "/equipment-maintainance",
-        display: "7.1 Equipment Maintainance Program"
+        link: "/equipment-maintenance",
+        display: "7.1 Equipment Maintenance Program"
+    },
+    {
+        link: "/licenses",
+        display: "7.2 Permits Licenses"
     },
     {
         link: "/training",
@@ -86,12 +90,8 @@ const sideNavListArr = [
                         display: "Manage Invites"
                     },
                     {
-                        link: "/manage-induction-templates",
+                        link: "/induction-templates",
                         display: "Manage Induction Templates"
-                    },
-                    {
-                        link: "/manage-labels",
-                        display: "Manage Labels"
                     },
                     {
                         link: "/trainings",

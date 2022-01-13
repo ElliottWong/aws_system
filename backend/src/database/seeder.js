@@ -4,6 +4,11 @@
 
 const { addDays, differenceInCalendarDays } = require('date-fns');
 
+const bcrypt = require('bcryptjs');
+
+const faker = require('@faker-js/faker');
+faker.locale = 'en_GB';
+
 const {
     Addresses, Companies, Employees, Files,
     User, Role,
@@ -17,9 +22,6 @@ const {
 } = require('../schemas/Schemas');
 
 const c = require('../services/cloudinary');
-
-const faker = require('faker');
-const bcrypt = require('bcryptjs');
 
 const { enumValues, MODULE } = require('../config/enums');
 const moduleKeys = enumValues(MODULE);
@@ -96,6 +98,20 @@ const getRealisticFrequency = () => {
 };
 
 const clampNegative = (value) => value < 0 ? 0 : value;
+
+const arr = ['cert', 'licence', 'permit'];
+const getLicenceName = () => {
+    const append = arr.at(Math.random() * arr.length);
+    const name = faker.commerce.productName();
+    switch (append) {
+        case arr[0]:
+            return `Certificate of ${name}`;
+        case arr[1]:
+            return `${name} Licence`;
+        case arr[2]:
+            return `Permit for ${name}`;
+    }
+};
 
 module.exports = async () => {
     // PLATFORM ADMINS
@@ -260,12 +276,14 @@ module.exports = async () => {
         await InterestedParties.Items.bulkCreate(interestedPartiesInsertions);
 
         // PER COMPANY'S SWOT
+
         const swot = await SWOT.Forms.create({
             fk_company_id: company.company_id,
             created_by: employees[0].employee_id,
             approved_by: employees[0].employee_id,
             status: 'active',
-            approved_at: new Date()
+            approved_at: new Date(),
+            due_at: addDays(new Date(), 330),
         });
 
         const s = swotList.strengths.map((content, i) => {
@@ -481,7 +499,7 @@ module.exports = async () => {
 
             const seen = new Set();
             // a chaotic mix of functional and imperative programming
-            const assigneeInsertions = manyMaintenance.map((maintenance) => {
+            const assigneeInsertions = manyMaintenance.flatMap((maintenance) => {
                 const arr = [];
                 for (let n = 0; n < 3; n++) {
                     let employee_id;
@@ -490,7 +508,7 @@ module.exports = async () => {
                     }
                     while (seen.has(employee_id));
                     seen.add(employee_id);
-                    
+
                     const create = EMP.MaintenanceAssignees.create({
                         fk_equipment_id: equipment.equipment_id,
                         fk_maintenance_id: maintenance.maintenance_id,
@@ -501,7 +519,7 @@ module.exports = async () => {
                 return arr;
             });
 
-            await Promise.all(assigneeInsertions.flat());
+            await Promise.all(assigneeInsertions);
 
             // for (let l = 0; l < 3; l++) {
             //     promises.push(EMP.Assignees.create({
@@ -533,8 +551,8 @@ module.exports = async () => {
             const licence = await PLC.Licences.create({
                 fk_company_id: company.company_id,
                 created_by: employees[0].employee_id,
-                licence_name: faker.company.catchPhraseNoun(),
-                licence_number: faker.random.alphaNumeric(8),
+                licence_name: getLicenceName(),
+                licence_number: faker.random.alphaNumeric(8).toUpperCase(),
                 external_organisation: faker.company.companyName(),
                 issued_at: iat,
                 expires_at: exp,
@@ -544,10 +562,18 @@ module.exports = async () => {
 
             const promises = [];
 
+            const seen = new Set();
             for (let l = 0; l < 3; l++) {
+                let employee_id;
+                do {
+                    employee_id = employees.at(Math.random() * employees.length).employee_id;
+                }
+                while (seen.has(employee_id));
+                seen.add(employee_id);
+
                 promises.push(PLC.Assignees.create({
                     fk_licence_id: licence.licence_id,
-                    fk_employee_id: employees[l].employee_id
+                    fk_employee_id: employee_id
                 }));
             }
 

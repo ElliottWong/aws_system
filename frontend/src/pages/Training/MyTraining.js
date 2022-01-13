@@ -23,7 +23,7 @@ const MyTraining = () => {
         {
             id: 1,
             serialNo: 1,
-            course_title: "Direct Integration COnsultant Upskilling Workshop",
+            course_title: "Direct Integration Consultant Upskilling Workshop",
             approver: "@AppleKim",
             start_date: dayjs(new Date()).format("D MMM YYYY"),
             end_date: dayjs(new Date()).format("D MMM YYYY"),
@@ -64,7 +64,7 @@ const MyTraining = () => {
         {
             id: 1,
             serialNo: 1,
-            course_title: "Direct Integration COnsultant Upskilling Workshop",
+            course_title: "Direct Integration Consultant Upskilling Workshop",
             approver: "@AppleKim",
             start_date: dayjs(new Date()).format("D MMM YYYY"),
             end_date: dayjs(new Date()).format("D MMM YYYY"),

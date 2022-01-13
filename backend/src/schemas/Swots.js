@@ -15,7 +15,12 @@ const SwotForms = db.define(
             primaryKey: true,
             autoIncrement: true
         },
-        ...commonForm({ Companies, Employees })
+        ...commonForm({ Companies, Employees }),
+        due_at: {
+            type: 'TIMESTAMP',
+            allowNull: true,
+            defaultValue: null
+        },
     },
     {
         tableName: 'swot_forms',

@@ -36,18 +36,19 @@ import ManageInvites from './pages/ManageInvites';
 import ManageOrganization from './pages/ManageOrganization';
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword';
 import ChangePassword from './pages/ForgotPassword/ChangePassword';
-import EquipmentMaintainance from './pages/EquipmentMaintainance/EquipmentMaintainance';
-import ManageEquipmentMaintainance from './pages/EquipmentMaintainance/ManageEquipmentMaintainance';
-import AddEquipmentMaintainance from './pages/EquipmentMaintainance/AddEquipmentMaintainance';
-import AddEquipmentCategory from './pages/EquipmentMaintainance/AddEquipmentCategory';
-// import EquipmentMaintainanceArchived from './pages/EquipmentMaintainance/EquipmentMaintainanceArchived';
+import EquipmentMaintenance from './pages/EquipmentMaintenance/EquipmentMaintenance';
+import ManageEquipmentMaintenance from './pages/EquipmentMaintenance/ManageEquipmentMaintenance';
+import AddEquipmentMaintenance from './pages/EquipmentMaintenance/AddEquipmentMaintenance';
+import AddEquipmentCategory from './pages/EquipmentMaintenance/AddEquipmentCategory';
+import ManageEquipmentCategory from './pages/EquipmentMaintenance/ManageEquipmentCategory';
+import Licenses from './pages/PermitLicenses/Licenses';
+import AddLicense from './pages/PermitLicenses/AddLicense';
 
 // Other imports
 import TokenManager from './utilities/tokenManager';
 import ManageInductionTemplates from './pages/InductionForm/ManageInductionTemplates';
 import ManageInductionTemplate from './pages/InductionForm/ManageInductionTemplate';
 import ManageInductionForm from './pages/InductionForm/ManageInductionForm';
-import ManageLabels from './pages/ManageLabels';
 import MyTraining from './pages/Training/MyTraining';
 import ManageMyTrainingRecord from './pages/Training/ManageMyTrainingRecord';
 import PostEvaluationForm from './pages/Training/PostEvaluationForm';
@@ -58,7 +59,9 @@ import CreateEvaluationTemplate from './pages/Training/CreateEvaluationTemplate'
 import ManageMyTrainingRequest from './pages/Training/ManageMyTrainingRequest';
 import ManageTrainingRecord from './pages/Training/ManageTrainingRecord';
 import ManageTrainingRequest from './pages/Training/ManageTrainingRequest';
-
+import ManageEvaluationTemplate from './pages/Training/ManageEvaluationTemplate';
+import AddMaintenanceCycle from './pages/EquipmentMaintenance/AddMaintenanceCycle';
+import ManageMaintenanceCycle from './pages/EquipmentMaintenance/ManageMaintenanceCycle';
 
 // Component
 const Routes = () => {
@@ -103,31 +106,35 @@ const Routes = () => {
                 <Route path="/risk-n-opportunity/archived/:rnoID" render={(props) => authGuard(RiskNOppArchived)(props)} />
                 <Route exact path="/objective-achievement-program" render={(props) => authGuard(ObjAchivProgram)(props)} />
                 <Route path="/objective-achievement-program/archived/:oapID" render={(props) => authGuard(ObjAchivProgramArchived)(props)} />
-                <Route exact path="/equipment-maintainance" render={(props) => authGuard(EquipmentMaintainance)(props)} />
-                <Route exact path="/equipment-maintainance/manage-equipment/:emID" render={(props) => authGuard(ManageEquipmentMaintainance)(props)} />
-                <Route exact path="/equipment-maintainance/add-equipment" render={(props) => authGuard(AddEquipmentMaintainance)(props)} />
-                <Route exact path="/equipment-maintainance/add-category" render={(props) => authGuard(AddEquipmentCategory)(props)} />
-                {/* <Route path="/equipment-maintainance/archived/:emID" render={(props) => authGuard(EquipmentMaintainanceArchived)(props)} /> */}
+                <Route exact path="/equipment-maintenance" render={(props) => authGuard(EquipmentMaintenance)(props)} />
+                <Route exact path="/equipment-maintenance/manage-equipment/:emID" render={(props) => authGuard(ManageEquipmentMaintenance)(props)} />
+                <Route exact path="/equipment-maintenance/add-equipment" render={(props) => authGuard(AddEquipmentMaintenance)(props)} />
+                <Route exact path="/equipment-maintenance/add-category" render={(props) => authGuard(AddEquipmentCategory)(props)} />
+                <Route exact path="/equipment-maintenance/manage-equipment/:emID/add-cycle" render={(props) => authGuard(AddMaintenanceCycle)(props)} />
+                <Route exact path="/equipment-maintenance/manage-equipment/:emID/manage-cycle/:maintenanceID" render={(props) => authGuard(ManageMaintenanceCycle)(props)} />
+                <Route exact path="/equipment-maintenance/manage-category/:catID" render={(props) => authGuard(ManageEquipmentCategory)(props)} />
+                <Route exact path="/licenses" render={(props) => authGuard(Licenses)(props)} />
+                <Route exact path="/licenses/add-license" render={(props) => authGuard(AddLicense)(props)} />
                 <Route exact path="/training" render={(props) => authGuard(MyTraining)(props)} />
                 <Route exact path="/training/training-record/manage/:trainingRecordID" render={(props) => authGuard(ManageMyTrainingRecord)(props)} />
                 <Route exact path="/training/training-request/manage/:trainingReqID" render={(props) => authGuard(ManageMyTrainingRequest)(props)} />
-                <Route path="/training/training-record/manage/:trainingRecordID/post-training-evaluation" render={(props) => authGuard(PostEvaluationForm)(props)} />
-                <Route path="/training/training-request/create" render={(props) => authGuard(CreateTrainingRequest)(props)} />
+                <Route exact path="/training/training-record/manage/:trainingRecordID/post-training-evaluation" render={(props) => authGuard(PostEvaluationForm)(props)} />
+                <Route exact path="/training/training-request/create" render={(props) => authGuard(CreateTrainingRequest)(props)} />
                 <Route exact path="/settings" render={(props) => authGuard(Settings)(props)} />
                 <Route path="/settings/manage-account" render={(props) => authGuard(ManageAccount)(props)} />
                 <Route exact path="/settings/manage-users" render={(props) => authGuard(ManageUsers)(props)} />
                 <Route path="/settings/manage-users/manage-user/:employeeID" render={(props) => authGuard(ManageUser)(props)} />
                 <Route path="/settings/manage-organization" render={(props) => authGuard(ManageOrganization)(props)} />
                 <Route path="/settings/manage-invites" render={(props) => authGuard(ManageInvites)(props)} />
-                <Route path="/settings/manage-labels" render={(props) => authGuard(ManageLabels)(props)} />
                 <Route exact path="/settings/induction-templates" render={(props) => authGuard(ManageInductionTemplates)(props)} />
                 <Route exact path="/settings/induction-templates/induction-template/:templateID" render={(props) => authGuard(ManageInductionTemplate)(props)} />
-                <Route exact path="/settings/induction-templates/induction-template/:templateID/manage-induction-form/:formID" render={(props) => authGuard(ManageInductionForm)(props)} />
+                <Route exact path="/settings/induction-templates/induction-template/:templateID/manage/:formID" render={(props) => authGuard(ManageInductionForm)(props)} />
                 <Route exact path="/settings/trainings" render={(props) => authGuard(ManageTrainings)(props)} />
                 <Route exact path="/settings/trainings/training-record/manage/:trainingID" render={(props) => authGuard(ManageTrainingRecord)(props)} />
                 <Route exact path="/settings/trainings/training-record/manage/:trainingID/post-training-evaluation" render={(props) => authGuard(PostEvaluationForm)(props)} />
                 <Route exact path="/settings/trainings/training-request/manage/:trainingID" render={(props) => authGuard(ManageTrainingRequest)(props)} />
                 <Route exact path="/settings/trainings/post-evaluation-templates" render={(props) => authGuard(ManagePostEvaluationTemplates)(props)} />
+                <Route exact path="/settings/trainings/post-evaluation-templates/manage/:templateID" render={(props) => authGuard(ManageEvaluationTemplate)(props)} />
                 <Route exact path="/settings/trainings/post-evaluation-templates/create-template" render={(props) => authGuard(CreateEvaluationTemplate)(props)} />
                 <Route path="*" render={() => <PageNotFound />} />
             </Switch>

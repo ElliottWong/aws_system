@@ -109,6 +109,12 @@ const documentApprovalHTML = (name, document, author) => `
     <p>The document <strong>${document}</strong> by ${author} requires your approval.</p>
 `;
 
+
+const updateSwotNoticeHTML = (name) => `
+    <h4>Hi ${name}!</h4>
+    <p>The SWOT have not been updated for 11 months, please update again!</p>
+`;
+
 // ============================================================
 
 module.exports.templates = {
@@ -117,5 +123,6 @@ module.exports.templates = {
     invitePlatformAdmin: invitePlatformAdminHTML,
     requestOtp: requestOtpHTML,
     passwordChanged: passwordChangedHTML,
-    documentApproval: documentApprovalHTML
+    documentApproval: documentApprovalHTML,
+    updateSwotNotice: updateSwotNoticeHTML
 };

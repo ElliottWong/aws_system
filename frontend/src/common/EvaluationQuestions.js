@@ -1,12 +1,18 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { QUESTION_TYPE, TRAINING_EVALUATION_MODE } from '../config/enums';
 import * as RiIcons from 'react-icons/ri';
 import { IconContext } from 'react-icons';
 
-const EvaluationQuestions = ({ mode, qns, index, viewType, setQuestions }) => {
+const EvaluationQuestions = ({ mode, qns, qnsType, index, viewType, setQuestions, formType }) => {
 
     // State declaration
     const [type, setType] = useState(QUESTION_TYPE.DEFAULT);
+
+    useEffect(() => {
+        if (qnsType) {
+            setType(() => qnsType);
+        }
+    }, []);
 
     // Handlers
     const handleSelectQnsType = (event) => {
@@ -15,23 +21,78 @@ const EvaluationQuestions = ({ mode, qns, index, viewType, setQuestions }) => {
 
     const handleDeleteQns = () => {
         setQuestions((prevState) => {
-            // Refer to companypolicyitem
+
+            let formTypeUsage = "";
+            if (formType === "trainee") {
+                formTypeUsage = "trainee";
+            }
+            else {
+                formTypeUsage = "supervisor";
+            }
 
             // Remove to be deleted qns from data array
-            let newData = prevState.filter((data) => {
+            let newData = prevState[formTypeUsage].filter((data) => {
                 return data.serialNo !== index + 1;
             });
 
+
             // Update serial no in array
-            let formattedData = newData.ma((data, index) => {
+            let formattedData = newData.map((data, index) => {
                 return ({
                     ...data,
                     serialNo: index + 1
                 })
             });
 
-            return formattedData;
+            if (formTypeUsage === "trainee") {
+                return {
+                    ...prevState,
+                    trainee: formattedData
+                }
+            }
+            else {
+                return {
+                    ...prevState,
+                    supervisor: formattedData
+                }
+            }
         });
+    };
+
+    const handleQnsInputChange = (event) => {
+        if (formType === "trainee") {
+            setQuestions((prevState) => ({
+                ...prevState,
+                trainee: prevState.trainee.map((data) => {
+                    if (data.serialNo === index) {
+                        return {
+                            ...data,
+                            question: event.target.value
+                        }
+                    }
+                    else {
+                        return data;
+                    }
+                })
+            }));
+        }
+        else {
+            setQuestions((prevState) => ({
+                ...prevState,
+                supervisor: prevState.supervisor.map((data) => {
+                    if (data.serialNo === index) {
+                        return {
+                            ...data,
+                            question: event.target.value
+                        }
+                    }
+                    else {
+                        return data;
+                    }
+                })
+            }));
+        }
+
     };
 
     const renderEditQnsType = () => {
@@ -40,11 +101,11 @@ const EvaluationQuestions = ({ mode, qns, index, viewType, setQuestions }) => {
             return (
                 <div className="c-Evaluation-qns__Type c-Evaluation-qns__Type--boolean">
                     <div className="c-Evaluation-qns__Option">
-                        <input name="boolean" type='radio' value="yes" readOnly/>
+                        <input name="boolean" type='radio' disabled/>
                         <label htmlFor="boolean">Yes</label>
                     </div>
                     <div className="c-Evaluation-qns__Option">
-                        <input name="boolean" type='radio' value="no" readOnly/>
+                        <input name="boolean" type='radio' disabled/>
                         <label htmlFor="boolean">No</label>
                     </div>
                 </div>
@@ -56,23 +117,23 @@ const EvaluationQuestions = ({ mode, qns, index, viewType, setQuestions }) => {
             return (
                 <div className="c-Evaluation-qns__Type c-Evaluation-qns__Type--rating">
                     <div className="c-Evaluation-qns__Option">
-                        <input name="rating" type='radio' value="1" readOnly/>
+                        <input name="rating" type='radio' disabled/>
                         <label htmlFor="rating">Strongly Disagree</label>
                     </div>
                     <div className="c-Evaluation-qns__Option">
-                        <input name="rating" type='radio' value="2" readOnly/>
+                        <input name="rating" type='radio' disabled/>
                         <label htmlFor="rating">Disagree</label>
                     </div>
                     <div className="c-Evaluation-qns__Option">
-                        <input name="rating" type='radio' value="3" readOnly/>
+                        <input name="rating" type='radio' disabled/>
                         <label htmlFor="rating">Neutrel</label>
                     </div>
                     <div className="c-Evaluation-qns__Option">
-                        <input name="rating" type='radio' value="4" readOnly/>
+                        <input name="rating" type='radio' disabled/>
                         <label htmlFor="rating">Agree</label>
                     </div>
                     <div className="c-Evaluation-qns__Option">
-                        <input name="rating" type='radio' value="5" readOnly/>
+                        <input name="rating" type='radio' disabled/>
                         <label htmlFor="rating">Strongly Agree</label>
                     </div>
                 </div>
@@ -83,7 +144,7 @@ const EvaluationQuestions = ({ mode, qns, index, viewType, setQuestions }) => {
         else if (type === QUESTION_TYPE.OPEN) {
             return (
                 <div className="c-Evaluation-qns__Type c-Evaluation-qns__Type--open">
-                    <textarea name="open" readOnly placeholder="Enter something"></textarea>
+                    <textarea name="open" disabled placeholder="Enter something"></textarea>
                 </div>
             );
         }
@@ -166,8 +227,8 @@ const EvaluationQuestions = ({ mode, qns, index, viewType, setQuestions }) => {
                 <div className = "c-Evaluation-qns__Edit">
                     <div className="c-Evaluation-qns__Top c-Top">
                         <div className="c-Top__Left">
-                            <label htmlFor="qns">{index}.</label>
-                            <input name="qns" type="text" placeholder="Enter question" />
+                            <label htmlFor="qns">{index + 1}.</label>
+                            <input name="qns" type="text" placeholder="Enter question" value={qns || ''} onChange={(event) => handleQnsInputChange(event)}/>
                         </div>
                         <div className="c-Top__Right">
                             <label htmlFor="qnsType">Qns Type:</label>
@@ -196,7 +257,7 @@ const EvaluationQuestions = ({ mode, qns, index, viewType, setQuestions }) => {
             return (
                 <div className = "c-Evaluation-qns__View">
                     <div className="c-Evaluation-qns__Top c-Top">
-                        <p>{index}.</p>
+                        <p>{index + 1}.</p>
                         <p>{qns}</p>
                     </div>
                     <div className="c-Evaluation-qns__Types">

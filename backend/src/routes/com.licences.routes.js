@@ -1,5 +1,6 @@
 const router = require('express').Router();
 
+const { MODULE } = require('../config/enums');
 const { uploadOne, destroyUploads } = require('../middlewares/multer');
 const { formDocumentsFolderPath } = require('../services/cloudinary');
 
@@ -11,68 +12,63 @@ const auth = [isLoggedIn, parseIdParams, checkAccountStatus, checkCompanyStatus,
 
 const licenceController = require('../controllers/com.licences');
 
+// use query ?archived=1 or true for the two below routes to get archives
+
 router.get(
-    '/company/:companyId/licences/all',
+    '/company/:companyId/all-licences',
     auth,
     licenceController.findLicences
 );
 
 router.get(
-    '/company/:companyId/licences/responsible',
+    '/company/:companyId/assigned-licences',
     auth,
     licenceController.findResponsibleLicences
 );
 
 router.get(
-    '/company/:companyId/licences/archives',
-    auth,
-    licenceController.findArchivedLicences
-);
-
-router.get(
-    '/company/:companyId/licences/all/:licenceId',
+    '/company/:companyId/all-licences/:licenceId',
     auth,
     licenceController.findLicenceById
 );
 
 router.post(
-    '/company/:companyId/licences/all',
+    '/company/:companyId/all-licences',
     auth,
     licenceController.insertLicence
 );
 
 router.post(
-    '/company/:companyId/licences/all/:licenceId/renewal',
+    '/company/:companyId/all-licences/:licenceId/renewal',
     auth,
     uploadOne({
         field: 'renewal',
-        to: (req, res) => formDocumentsFolderPath(req.params.companyId, 'm07_01')
+        to: (req, res) => formDocumentsFolderPath(req.params.companyId, MODULE.PLC)
     }),
     licenceController.insertRenewalUpload,
     destroyUploads
 );
 
 router.put(
-    '/company/:companyId/licences/all/:licenceId',
+    '/company/:companyId/all-licences/:licenceId',
     auth,
     licenceController.editLicence
 );
 
-// do these 2 routes make any sense
-router.post(
-    '/company/:companyId/licences/archives/:licenceId',
+router.put(
+    '/company/:companyId/all-licences/:licenceId/archive',
     auth,
     licenceController.archiveLicence
 );
 
-router.delete(
-    '/company/:companyId/licences/archives/:licenceId',
+router.put(
+    '/company/:companyId/all-licences/:licenceId/activate',
     auth,
     licenceController.activateLicence
 );
 
 router.delete(
-    '/company/:companyId/licences/all/:licenceId',
+    '/company/:companyId/all-licences/:licenceId',
     auth,
     licenceController.deleteLicence
 );

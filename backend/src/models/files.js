@@ -1,6 +1,10 @@
 // mainly for insertion
 
+const { Sequelize, Op } = require('sequelize');
+const db = require('../config/connection');
+
 const { Files } = require('../schemas/Schemas');
+const cloudinary = require('../services/cloudinary');
 
 /**
  * To insert a row in the database of a file uploaded to Cloudinary
@@ -64,4 +68,30 @@ module.exports.findFileById = (file_id, includeCloudinary = false) => {
         exclude: ['cloudinary_id', 'cloudinary_uri']
     };
     return Files.findOne(search);
+};
+
+// ============================================================
+
+/**
+ * Destroy a file from Cloudinary and the database  
+ * No transactions allowed to have file destroyed included for integrity  
+ * The file should destroyed separately first
+ * @param {number} fileId Identifier
+ * @param {number} createdBy *optional* The user who created the file
+ */
+module.exports.deleteFile = async (fileId, createdBy) => {
+    const file = await Files.findOne({
+        where: {
+            file_id: fileId,
+            created_by: createdBy
+        }
+    });
+
+    if (file) {
+        await cloudinary.deleteFile(file.cloudinary_id);
+        await file.destroy();
+        return true;
+    }
+
+    return false;
 };

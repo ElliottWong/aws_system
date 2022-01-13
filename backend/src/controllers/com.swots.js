@@ -263,7 +263,8 @@ module.exports.approveSwot = async (req, res, next) => {
         try {
             await toBeApproved.update({
                 status: DOCUMENT_STATUS.ACTIVE,
-                approved_at: new Date()
+                approved_at: new Date(),
+                due_at: addDays(new Date(), 330),
             });
         }
         catch (error) {
