@@ -4,12 +4,12 @@ module.exports = {
     port: process.env.PORT,
     cors: {
     // admin frontend, normal frontend
-        origin: ['http://localhost:3001', 'http://localhost:4001'],
+        origin: ['http://3.136.78.128:3001', 'http://3.136.78.128:4001'],
         credentials: true,
         optionsSuccessStatus: 204
     },
     frontend: {
-        baseUrl: 'http://localhost:4001'
+        baseUrl: 'http://3.136.78.128:4001'
     },
     db: {
         host: process.env.DB_HOST,
