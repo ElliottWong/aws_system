@@ -14,29 +14,34 @@ const licenceController = require('../controllers/com.licences');
 
 // use query ?archived=1 or true for the two below routes to get archives
 
+// tested
 router.get(
     '/company/:companyId/licence-registry/all-licences',
     auth,
     licenceController.findLicences
 );
 
+// tested
 router.get(
     '/company/:companyId/licence-registry/assigned-licences',
     auth,
     licenceController.findResponsibleLicences
 );
 
+// tested
 router.get(
     '/company/:companyId/licence-registry/all-licences/:licenceId',
     auth,
     licenceController.findLicenceById
 );
 
+// tested
 router.post(
     '/company/:companyId/licence-registry/all-licences',
     auth,
     licenceController.insertLicence
 );
+
 
 router.post(
     '/company/:companyId/licence-registry/all-licences/:licenceId/renewal',

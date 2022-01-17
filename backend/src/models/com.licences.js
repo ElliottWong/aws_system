@@ -30,6 +30,16 @@ const companyCheck = async (fk_company_id, employeeIds = []) => {
     return !invalid;
 };
 
+const isAssignedLicence = async (licenceId, employeeId) => {
+    const count = await PLC.Assignees.count({
+        where: {
+            fk_licence_id: licenceId,
+            fk_employee_id: employeeId
+        }
+    });
+    return count > 0;
+};
+
 const clampNegative = (value) => value < 0 ? 0 : value;
 
 module.exports.insertLicence = async (companyId, createdBy, licence = {}) => {
@@ -43,7 +53,7 @@ module.exports.insertLicence = async (companyId, createdBy, licence = {}) => {
     } = licence;
 
     const iat = new Date(issued_at);
-    const exp = expires_at ? null : new Date(expires_at);
+    const exp = expires_at ? new Date(expires_at) : null;
 
     const valid = await companyCheck(companyId, assignees);
     if (!valid) throw new E.ForeignEmployeeError();
@@ -73,7 +83,7 @@ module.exports.insertLicence = async (companyId, createdBy, licence = {}) => {
         }, { transaction });
 
         const assigneeInsertions = assignees.map((employee_id) => ({
-            fk_equipment_id: insertedLicence.licence_id,
+            fk_licence_id: insertedLicence.licence_id,
             fk_employee_id: employee_id
         }));
 
@@ -101,12 +111,8 @@ module.exports.insertRenewalUpload = async (licenceId, companyId, createdBy, ren
 
     if (!licence) throw new E.NotFoundError('licence');
 
-    // check join table if employee is assigned to licence
-    const joinCount = await PLC.Assignees.count({
-        where: { fk_licence_id: licenceId, fk_employee_id: createdBy }
-    });
-
-    if (joinCount !== 1) throw new E.PermissionError('upload renewal for this licence');
+    const isAssigned = await isAssignedLicence(licence, createdBy);
+    if (isAssigned) throw new E.PermissionError('upload renewal for this licence');
 
     const renewalDate = new Date(renewedAt);
 
@@ -164,8 +170,8 @@ const $includeAuthor = {
     }
 };
 
-const $includeUploads = {
-    association: 'uploads',
+const $includeUpload = {
+    association: 'upload',
     include: {
         association: 'file',
         attributes: { exclude: ['cloudinary_id', 'cloudinary_uri'] }
@@ -180,7 +186,7 @@ module.exports.findLicence = {
         };
 
         const include = includeUploads
-            ? [$includeAuthor, $includeAssignees, $includeUploads]
+            ? [$includeAuthor, $includeAssignees, $includeUpload]
             : [$includeAuthor, $includeAssignees];
 
         return PLC.Licences.findAll({ where, include });
@@ -194,12 +200,12 @@ module.exports.findLicence = {
         const licenceIds = joinRows.map((row) => row.fk_licence_id);
 
         const where = {
-            equipment_id: { [Op.or]: licenceIds },
+            licence_id: { [Op.or]: licenceIds },
             archived_at: archivedOnly ? { [Op.not]: null } : null
         };
 
         const include = includeUploads
-            ? [$includeAuthor, $includeAssignees, $includeUploads]
+            ? [$includeAuthor, $includeAssignees, $includeUpload]
             : [$includeAuthor, $includeAssignees];
 
         return PLC.Licences.findAll({ where, include });
@@ -212,22 +218,18 @@ module.exports.findLicence = {
                 fk_company_id: companyId
             },
             include: includeUploads
-                ? [$includeAuthor, $includeAssignees, $includeUploads]
+                ? [$includeAuthor, $includeAssignees, $includeUpload]
                 : [$includeAuthor, $includeAssignees]
         });
 
         if (!licence) throw new E.NotFoundError('licence');
 
-        if (licence.created_by === employeeId) return licence;
+        // removed access restriction to individual licences
 
-        const joinCount = await PLC.Assignees.count({
-            where: {
-                fk_licence_id: licenceId,
-                fk_employee_id: employeeId
-            }
-        });
+        // if (licence.created_by === employeeId) return licence;
 
-        if (joinCount !== 1) throw new E.PermissionError('view this licence');
+        // const isAssigned = await isAssignedLicence(licenceId, employeeId);
+        // if (!isAssigned) throw new E.PermissionError('view this licence');
 
         return licence;
     }
@@ -302,7 +304,7 @@ module.exports.deleteLicence = async (licenceId, companyId, createdBy) => {
 
     const licenceCount = await PLC.Licences.count({ where });
 
-    if (licenceCount !== 1) throw new E.NotFoundError('equipment');
+    if (licenceCount !== 1) throw new E.NotFoundError('licence');
 
     // TODO also delete uploads associated with this licence
 

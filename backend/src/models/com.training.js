@@ -8,6 +8,24 @@ const {
 
 const { TRAINING_STATUS } = require('../config/enums');
 
+const { insertFile } = require('./files.v2');
+
+const E = require('../errors/Errors');
+
+const isRequestAuthor = async (trainingId, employeeId, companyId) => {
+    const count = await HR.TrainingRequests.count({
+        where: {
+            training_id: trainingId,
+            fk_company_id: companyId,
+            created_by: employeeId
+        }
+    });
+
+    return count === 1;
+};
+
+// ============================================================
+
 module.exports.insertTraining = (data = {}, upload) => {
     const {
         company_id,
@@ -71,6 +89,23 @@ module.exports.insertTraining = (data = {}, upload) => {
 
 // ============================================================
 
+module.exports.insertAttendance = async (trainingId, employeeId, companyId, upload) => {
+    const isAuthor = isRequestAuthor(trainingId, employeeId, companyId);
+    if (!isAuthor) throw new E.NotFoundError('training request');
+
+    const { file_id } = await insertFile(employeeId, upload);
+
+    const where = {
+        training_id: trainingId,
+        fk_company_id: companyId,
+        created_by: employeeId
+    };
+
+    await HR.TrainingRequests.update({ attendance_upload: file_id }, { where });
+};
+
+// ============================================================
+
 module.exports.findTrainingRequests = {
     in: (companyId) => HR.TrainingRequests.findAll({
         where: { fk_company_id: companyId }
@@ -103,4 +138,10 @@ module.exports.findTrainingRequests = {
             ]
         }
     })
+};
+
+// ============================================================
+
+module.exports.editTrainingRequest = async () => {
+    
 };

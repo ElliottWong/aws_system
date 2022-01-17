@@ -1,5 +1,6 @@
 const {
     insertTraining,
+    insertAttendance,
     findTrainingRequests
 } = require('../models/com.training');
 
@@ -39,6 +40,23 @@ module.exports.insertTraining = async (req, res, next) => {
         }, req.upload);
 
         res.status(201).send(r.success201({ training_id }));
+        return next();
+    }
+    catch (error) {
+        return next(error);
+    }
+};
+
+// ============================================================
+
+module.exports.insertAttendance = async (req, res, next) => {
+    try {
+        const { fk_employee_id: employeeId } = res.locals.account;
+        const { companyId, trainingId } = req.params;
+
+        await insertAttendance(trainingId, employeeId, companyId, req.upload);
+
+        res.status(201).send(r.success201());
         return next();
     }
     catch (error) {
