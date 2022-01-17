@@ -102,13 +102,9 @@ const CreateTrainingRequest = () => {
                         </div>
                         {/* Justification & Recommendations */}
                         <div className="c-Form__Row">
-                            <div className="c-Form__Left c-Form__Input">
+                            <div className="c-Form__Left c-Form__Input c-Form__Justification">
                                 <label htmlFor="justification">Justification</label>
                                 <textarea name="justification" type="text" placeholder="Enter Justification" />
-                            </div>
-                            <div className="c-Form__Right c-Form__Input">
-                                <label htmlFor="recommendations">Recommendations</label>
-                                <textarea name="recommendations" type="text" placeholder="Enter Recommendations" />
                             </div>
                         </div>
                         {/* File Upload (For justification) */}

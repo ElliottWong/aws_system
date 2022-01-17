@@ -66,3 +66,9 @@
 - model/files.js insertFileRecord method typically comes before another insert (the document in which the file is attached to), but if the other insert fails, insertFileRecord should also rollback
 
 - [x] migrate to from the old marak/faker.js to the new faker-js/faker (https://github.com/faker-js/faker)
+
+- [ ] decide on file upload within system... some do cloudinary and db separately, some do together
+
+- [ ] a new function that takes checks for approve and edit rights of the approver and creator respectively (less mess to check in the controllers)
+
+- [ ] double check routes with file upload that should an error arise file is deleted from cloudinary

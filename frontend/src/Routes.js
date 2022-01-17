@@ -47,7 +47,7 @@ import AddLicense from './pages/PermitLicenses/AddLicense';
 // Other imports
 import TokenManager from './utilities/tokenManager';
 import ManageInductionTemplates from './pages/InductionForm/ManageInductionTemplates';
-import ManageInductionTemplate from './pages/InductionForm/ManageInductionTemplate';
+import ManageInductionVersions from './pages/InductionForm/ManageInductionVersions';
 import ManageInductionForm from './pages/InductionForm/ManageInductionForm';
 import MyTraining from './pages/Training/MyTraining';
 import ManageMyTrainingRecord from './pages/Training/ManageMyTrainingRecord';
@@ -62,6 +62,8 @@ import ManageTrainingRequest from './pages/Training/ManageTrainingRequest';
 import ManageEvaluationTemplate from './pages/Training/ManageEvaluationTemplate';
 import AddMaintenanceCycle from './pages/EquipmentMaintenance/AddMaintenanceCycle';
 import ManageMaintenanceCycle from './pages/EquipmentMaintenance/ManageMaintenanceCycle';
+import CreateInductionForm from './pages/InductionForm/CreateInductionForm';
+import ManageLicense from './pages/PermitLicenses/ManageLicense';
 
 // Component
 const Routes = () => {
@@ -115,6 +117,7 @@ const Routes = () => {
                 <Route exact path="/equipment-maintenance/manage-category/:catID" render={(props) => authGuard(ManageEquipmentCategory)(props)} />
                 <Route exact path="/licenses" render={(props) => authGuard(Licenses)(props)} />
                 <Route exact path="/licenses/add-license" render={(props) => authGuard(AddLicense)(props)} />
+                <Route exact path="/licenses/manage-license/:licenseID" render={(props) => authGuard(ManageLicense)(props)} />
                 <Route exact path="/training" render={(props) => authGuard(MyTraining)(props)} />
                 <Route exact path="/training/training-record/manage/:trainingRecordID" render={(props) => authGuard(ManageMyTrainingRecord)(props)} />
                 <Route exact path="/training/training-request/manage/:trainingReqID" render={(props) => authGuard(ManageMyTrainingRequest)(props)} />
@@ -127,8 +130,9 @@ const Routes = () => {
                 <Route path="/settings/manage-organization" render={(props) => authGuard(ManageOrganization)(props)} />
                 <Route path="/settings/manage-invites" render={(props) => authGuard(ManageInvites)(props)} />
                 <Route exact path="/settings/induction-templates" render={(props) => authGuard(ManageInductionTemplates)(props)} />
-                <Route exact path="/settings/induction-templates/induction-template/:templateID" render={(props) => authGuard(ManageInductionTemplate)(props)} />
-                <Route exact path="/settings/induction-templates/induction-template/:templateID/manage/:formID" render={(props) => authGuard(ManageInductionForm)(props)} />
+                <Route exact path="/settings/induction-templates/induction-template-versions/:templateID" render={(props) => authGuard(ManageInductionVersions)(props)} />
+                <Route exact path="/settings/induction-templates/induction-template-versions/:templateID/create" render={(props) => authGuard(CreateInductionForm)(props)} />
+                <Route exact path="/settings/induction-templates/induction-template-versions/:templateID/manage/:formID" render={(props) => authGuard(ManageInductionForm)(props)} />
                 <Route exact path="/settings/trainings" render={(props) => authGuard(ManageTrainings)(props)} />
                 <Route exact path="/settings/trainings/training-record/manage/:trainingID" render={(props) => authGuard(ManageTrainingRecord)(props)} />
                 <Route exact path="/settings/trainings/training-record/manage/:trainingID/post-training-evaluation" render={(props) => authGuard(PostEvaluationForm)(props)} />

@@ -65,12 +65,12 @@ const Licences = db.define(
             defaultValue: false
         },
         days_left: {
-            type: DataTypes.INTEGER.UNSIGNED,
+            type: DataTypes.INTEGER,
             allowNull: true,
             defaultValue: null
         },
         days_left_pct: {
-            type: DataTypes.INTEGER.UNSIGNED,
+            type: DataTypes.INTEGER,
             allowNull: true,
             defaultValue: null
         },
@@ -156,6 +156,7 @@ Licences.belongsToMany(Employees, {
 // dont need a history
 // but i think im going to leave this in for now
 // less rework
+// changed from hasMany to hasOne
 const LicenceUploads = db.define(
     'LicenceUploads',
     {
@@ -201,9 +202,9 @@ const LicenceUploads = db.define(
     }
 );
 
-Licences.hasMany(LicenceUploads, {
+Licences.hasOne(LicenceUploads, {
     foreignKey: 'fk_equipment_id',
-    as: 'uploads'
+    as: 'upload'
 });
 
 LicenceUploads.belongsTo(Licences, {

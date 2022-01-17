@@ -1,9 +1,5 @@
 const router = require('express').Router();
 
-const { MODULE } = require('../config/enums');
-const { uploadOne, destroyUploads } = require('../middlewares/multer');
-const { formDocumentsFolderPath } = require('../services/cloudinary');
-
 const { isLoggedIn } = require('../middlewares/auth');
 const { parseIdParams, companyAccess } = require('../middlewares/access');
 const { checkAccountStatus, checkCompanyStatus } = require('../middlewares/active');
@@ -11,7 +7,6 @@ const { checkAccountStatus, checkCompanyStatus } = require('../middlewares/activ
 const auth = [isLoggedIn, parseIdParams, checkAccountStatus, checkCompanyStatus, companyAccess];
 
 const equipmentController = require('../controllers/com.equipment.v3');
-const maintenanceController = require('../controllers/com.equipmentMaintenance');
 
 // CATEGORIES
 
@@ -125,25 +120,6 @@ router.delete(
     '/company/:companyId/equipment-maintenance-program/all-equipment/:equipmentId',
     auth,
     equipmentController.deleteOneEquipment
-);
-
-// MAINTENANCE
-
-router.post(
-    '/company/:companyId/equipment-maintenance-program/all-equipment/:equipmentId/maintenance',
-    auth,
-    maintenanceController.insertOneMaintenance
-);
-
-router.post(
-    '/company/:companyId/equipment-maintenance-program/all-equipment/:equipmentId/maintenance/:maintenanceId',
-    auth,
-    uploadOne({
-        field: 'maintenance',
-        to: (req, res) => formDocumentsFolderPath(req.params.companyId, MODULE.EMP)
-    }),
-    maintenanceController.insertMaintenanceUpload,
-    destroyUploads
 );
 
 module.exports = router;

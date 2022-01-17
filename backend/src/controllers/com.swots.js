@@ -1,5 +1,7 @@
 const Yup = require('yup');
 
+const { addDays } = require('date-fns');
+
 const {
     insertSwot,
     findBlockingSwot,
@@ -261,10 +263,13 @@ module.exports.approveSwot = async (req, res, next) => {
         });
 
         try {
+            const now = new Date();
+            const dueAt = addDays(now, 330);
+
             await toBeApproved.update({
                 status: DOCUMENT_STATUS.ACTIVE,
-                approved_at: new Date(),
-                due_at: addDays(new Date(), 330),
+                approved_at: now,
+                due_at: dueAt
             });
         }
         catch (error) {

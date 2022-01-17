@@ -8,6 +8,9 @@ const {
     Documents: { PLC }
 } = require('../schemas/Schemas');
 
+const { insertFile } = require('./files.v2');
+const { deleteFile } = require('../services/cloudinary.v1');
+
 const E = require('../errors/Errors');
 
 // FIXME this should be a common util in separate file
@@ -29,7 +32,7 @@ const companyCheck = async (fk_company_id, employeeIds = []) => {
 
 const clampNegative = (value) => value < 0 ? 0 : value;
 
-module.exports.insertLicence = async (fk_company_id, created_by, licence = {}) => {
+module.exports.insertLicence = async (companyId, createdBy, licence = {}) => {
     const {
         licence_name,
         licence_number,
@@ -42,7 +45,7 @@ module.exports.insertLicence = async (fk_company_id, created_by, licence = {}) =
     const iat = new Date(issued_at);
     const exp = expires_at ? null : new Date(expires_at);
 
-    const valid = await companyCheck(fk_company_id, assignees);
+    const valid = await companyCheck(companyId, assignees);
     if (!valid) throw new E.ForeignEmployeeError();
 
     let daysLeft = null,
@@ -58,8 +61,8 @@ module.exports.insertLicence = async (fk_company_id, created_by, licence = {}) =
     const transaction = await db.transaction();
     try {
         const insertedLicence = await PLC.Licences.create({
-            fk_company_id,
-            created_by,
+            fk_company_id: companyId,
+            created_by: createdBy,
             licence_name,
             licence_number,
             external_organisation,
@@ -87,48 +90,54 @@ module.exports.insertLicence = async (fk_company_id, created_by, licence = {}) =
 
 // ============================================================
 
-module.exports.insertRenewalUpload = async (fk_company_id, licence_id, created_by, renewed_at, file = {}) => {
+// TODO test me
+module.exports.insertRenewalUpload = async (licenceId, companyId, createdBy, renewedAt, upload) => {
     const licence = await PLC.Licences.findOne({
-        where: { licence_id, fk_company_id }
+        where: {
+            licence_id: licenceId,
+            fk_company_id: companyId
+        }
     });
 
     if (!licence) throw new E.NotFoundError('licence');
 
+    // check join table if employee is assigned to licence
     const joinCount = await PLC.Assignees.count({
-        where: { fk_licence_id: licence_id, fk_employee_id: created_by }
+        where: { fk_licence_id: licenceId, fk_employee_id: createdBy }
     });
 
     if (joinCount !== 1) throw new E.PermissionError('upload renewal for this licence');
 
-    const {
-        originalname: file_name,
-        filename: cloudinary_id,
-        path: cloudinary_uri
-    } = file;
+    const renewalDate = new Date(renewedAt);
 
-    const renewalDate = new Date(renewed_at);
+    const existingRenewal = await PLC.Uploads.findOne({
+        where: { fk_licence_id: licenceId },
+        include: 'file'
+    });
+
+    // new renewal replaces old
+
+    await deleteFile(existingRenewal.file.cloudinary_id);
+    await Promise.all([
+        existingRenewal.destroy(),
+        existingRenewal.file.destroy()
+    ]);
+
     const transaction = await db.transaction();
     try {
-        const uploadInsertion = PLC.Uploads.create({
-            fk_licence_id: licence_id,
-            created_by,
+        const newFile = await insertFile(createdBy, upload, transaction);
+
+        const insertedUpload = await PLC.Uploads.create({
+            fk_licence_id: licenceId,
+            created_by: createdBy,
             renewed_at: renewalDate,
-            file: {
-                file_name,
-                cloudinary_id,
-                cloudinary_uri,
-                created_by
-            }
-        }, { include: 'file', transaction });
-
-        const licenceUpdate = licence.update({
-            last_service_at: renewalDate
+            fk_file_id: newFile.file_id
         }, { transaction });
-
-        const [insertedUpload] = await Promise.all([uploadInsertion, licenceUpdate]);
 
         await transaction.commit();
         return insertedUpload;
+
+
     }
     catch (error) {
         await transaction.rollback();
@@ -164,9 +173,9 @@ const $includeUploads = {
 };
 
 module.exports.findLicence = {
-    all: (fk_company_id, includeUploads = false, archivedOnly = false) => {
+    all: (companyId, includeUploads = false, archivedOnly = false) => {
         const where = {
-            fk_company_id,
+            fk_company_id: companyId,
             archived_at: archivedOnly ? { [Op.not]: null } : null
         };
 
@@ -177,9 +186,9 @@ module.exports.findLicence = {
         return PLC.Licences.findAll({ where, include });
     },
 
-    allResponsible: async (fk_employee_id, includeUploads = false, archivedOnly = false) => {
+    allResponsible: async (employeeId, includeUploads = false, archivedOnly = false) => {
         const joinRows = await PLC.Assignees.findAll({
-            where: { fk_employee_id }
+            where: { fk_employee_id: employeeId }
         });
 
         const licenceIds = joinRows.map((row) => row.fk_licence_id);
@@ -196,9 +205,12 @@ module.exports.findLicence = {
         return PLC.Licences.findAll({ where, include });
     },
 
-    one: async (fk_company_id, licence_id, employee_id, includeUploads) => {
+    one: async (licenceId, companyId, employeeId, includeUploads = true) => {
         const licence = await PLC.Licences.findOne({
-            where: { equipment_id: licence_id, fk_company_id },
+            where: {
+                licence_id: licenceId,
+                fk_company_id: companyId
+            },
             include: includeUploads
                 ? [$includeAuthor, $includeAssignees, $includeUploads]
                 : [$includeAuthor, $includeAssignees]
@@ -206,12 +218,12 @@ module.exports.findLicence = {
 
         if (!licence) throw new E.NotFoundError('licence');
 
-        if (licence.created_by === employee_id) return licence;
+        if (licence.created_by === employeeId) return licence;
 
         const joinCount = await PLC.Assignees.count({
             where: {
-                fk_licence_id: licence_id,
-                fk_employee_id: employee_id
+                fk_licence_id: licenceId,
+                fk_employee_id: employeeId
             }
         });
 
@@ -223,7 +235,7 @@ module.exports.findLicence = {
 
 // ============================================================
 
-module.exports.editLicence = async (fk_company_id, licence_id, created_by, licence = {}) => {
+module.exports.editLicence = async (licenceId, companyId, createdBy, licence = {}) => {
     const {
         licence_name,
         licence_number,
@@ -231,42 +243,64 @@ module.exports.editLicence = async (fk_company_id, licence_id, created_by, licen
         expires_at
     } = licence;
 
+    const where = {
+        licence_id: licenceId,
+        fk_company_id: companyId,
+        created_by: createdBy
+    };
+
     const [affectedCount] = await PLC.Licences.update({
         licence_name,
         licence_number,
         external_organisation,
         expires_at
-    }, { where: { licence_id, fk_company_id, created_by } });
+    }, { where });
 
     if (affectedCount === 0) throw new E.NotFoundError('licence');
 };
 
 // ============================================================
 
-module.exports.archiveLicence = async (fk_company_id, licence_id, created_by) => {
+module.exports.archiveLicence = async (licenceId, companyId, createdBy) => {
+    const where = {
+        licence_id: licenceId,
+        fk_company_id: companyId,
+        created_by: createdBy
+    };
+
     const [affectedCount] = await PLC.Licences.update({
         archived_at: new Date()
-    }, { where: { equipment_id: licence_id, fk_company_id, created_by } });
+    }, { where });
 
     if (affectedCount === 0) throw new E.NotFoundError('licence');
 };
 
 // ============================================================
 
-module.exports.activateLicence = async (fk_company_id, licence_id, created_by) => {
+module.exports.activateLicence = async (licenceId, companyId, createdBy) => {
+    const where = {
+        licence_id: licenceId,
+        fk_company_id: companyId,
+        created_by: createdBy
+    };
+
     const [affectedCount] = await PLC.Licences.update({
         archived_at: null
-    }, { where: { equipment_id: licence_id, fk_company_id, created_by } });
+    }, { where });
 
     if (affectedCount === 0) throw new E.NotFoundError('licence');
 };
 
 // ============================================================
 
-module.exports.deleteLicence = async (fk_company_id, licence_id, created_by) => {
-    const licenceCount = await PLC.Licences.count({
-        where: { licence_id, fk_company_id, created_by }
-    });
+module.exports.deleteLicence = async (licenceId, companyId, createdBy) => {
+    const where = {
+        licence_id: licenceId,
+        fk_company_id: companyId,
+        created_by: createdBy
+    };
+
+    const licenceCount = await PLC.Licences.count({ where });
 
     if (licenceCount !== 1) throw new E.NotFoundError('equipment');
 
@@ -274,23 +308,39 @@ module.exports.deleteLicence = async (fk_company_id, licence_id, created_by) => 
 
     const transaction = await db.transaction();
     try {
-        const destroyed = await Promise.all([
+        await Promise.all([
             PLC.Licences.destroy({
-                where: { licence_id, fk_company_id, created_by }, transaction
+                where, transaction
             }),
             PLC.Assignees.destroy({
-                where: { fk_licence_id: licence_id }, transaction
+                where: { fk_licence_id: licenceId }, transaction
             }),
             PLC.Uploads.destroy({
-                where: { fk_licence_id: licence_id }, transaction
+                where: { fk_licence_id: licenceId }, transaction
             })
         ]);
 
         await transaction.commit();
-        return destroyed.reduce((accumulator, current) => accumulator + current, 0);
     }
     catch (error) {
         await transaction.rollback();
         throw error;
     }
 };
+
+// ============================================================
+
+// module.exports.deleteRenewal = async (renewalId, licenceId, createdBy) => {
+//     const renewal = PLC.Uploads.findOne({
+//         where: {
+//             licence_upload_id: renewalId,
+//             fk_licence_id: licenceId,
+//             created_by: createdBy
+//         },
+//         include: 'file'
+//     });
+
+//     if (!renewal) throw new E.NotFoundError('renewal');
+
+//     await deleteFile();
+// };

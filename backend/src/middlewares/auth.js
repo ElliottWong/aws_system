@@ -6,7 +6,6 @@ const { secret: jwtSecret } = require('../config/config').jwt;
 const { findAccountBy } = require('../models/accounts');
 
 const E = require('../errors/Errors');
-const r = require('../utils/response').responses;
 
 module.exports.isLoggedIn = async (req, res, next) => {
     try {

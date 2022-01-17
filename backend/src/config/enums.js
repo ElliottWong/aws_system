@@ -17,13 +17,22 @@ module.exports = {
         RO: 'm06_01', // risks and opportunities
         OAP: 'm06_02', // objective achievement program
         EMP: 'm07_01', // equipment maintenance program
-        PLC: 'm07_02' // permits licences certs
+        PLC: 'm07_02', // permits licences certs
+        TRAINING_REQUESTS: 'm07_03a',
+        TRAINING_EVALUATION: 'm07_03c',
+        INDUCTION: 'm07_03d'
     },
     DOCUMENT_STATUS: {
         ACTIVE: 'active',
         PENDING: 'pending',
         REJECTED: 'rejected',
         ARCHIVED: 'archived'
+    },
+    TRAINING_STATUS: {
+        ACTIVE: 'active',
+        PENDING: 'pending',
+        REJECTED: 'rejected',
+        CANCELLED: 'cancelled'
     },
     ACCOUNT_STATUS: {
         ACTIVE: 'active',

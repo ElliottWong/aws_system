@@ -10,7 +10,7 @@ const {
 const { DOCUMENT_STATUS } = require('../config/enums');
 
 const E = require('../errors/Errors');
-const { bulkCreateFileRecords } = require('./files');
+const { bulkCreateFileRecords } = require('./files.v1');
 
 // CREATE
 

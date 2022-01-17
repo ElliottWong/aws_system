@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 const { MODULE } = require('../config/enums');
 const { uploadOne, destroyUploads } = require('../middlewares/multer');
-const { formDocumentsFolderPath } = require('../services/cloudinary');
+const { formDocumentsFolderPath } = require('../services/cloudinary.v1');
 
 const { isLoggedIn } = require('../middlewares/auth');
 const { parseIdParams, companyAccess } = require('../middlewares/access');
@@ -15,31 +15,31 @@ const licenceController = require('../controllers/com.licences');
 // use query ?archived=1 or true for the two below routes to get archives
 
 router.get(
-    '/company/:companyId/all-licences',
+    '/company/:companyId/licence-registry/all-licences',
     auth,
     licenceController.findLicences
 );
 
 router.get(
-    '/company/:companyId/assigned-licences',
+    '/company/:companyId/licence-registry/assigned-licences',
     auth,
     licenceController.findResponsibleLicences
 );
 
 router.get(
-    '/company/:companyId/all-licences/:licenceId',
+    '/company/:companyId/licence-registry/all-licences/:licenceId',
     auth,
     licenceController.findLicenceById
 );
 
 router.post(
-    '/company/:companyId/all-licences',
+    '/company/:companyId/licence-registry/all-licences',
     auth,
     licenceController.insertLicence
 );
 
 router.post(
-    '/company/:companyId/all-licences/:licenceId/renewal',
+    '/company/:companyId/licence-registry/all-licences/:licenceId/renewal',
     auth,
     uploadOne({
         field: 'renewal',
@@ -50,27 +50,33 @@ router.post(
 );
 
 router.put(
-    '/company/:companyId/all-licences/:licenceId',
+    '/company/:companyId/licence-registry/all-licences/:licenceId',
     auth,
     licenceController.editLicence
 );
 
 router.put(
-    '/company/:companyId/all-licences/:licenceId/archive',
+    '/company/:companyId/licence-registry/all-licences/:licenceId/archive',
     auth,
     licenceController.archiveLicence
 );
 
 router.put(
-    '/company/:companyId/all-licences/:licenceId/activate',
+    '/company/:companyId/licence-registry/all-licences/:licenceId/activate',
     auth,
     licenceController.activateLicence
 );
 
 router.delete(
-    '/company/:companyId/all-licences/:licenceId',
+    '/company/:companyId/licence-registry/all-licences/:licenceId',
     auth,
     licenceController.deleteLicence
 );
+
+// router.delete(
+//     '/company/:companyId/licence-registry/all-licences/:licenceId/renewals/:renewalId',
+//     auth,
+//     licenceController.deleteRenewal
+// );
 
 module.exports = router;

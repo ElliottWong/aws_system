@@ -175,6 +175,7 @@ module.exports.findRights = async (employee_id, fk_company_id, module) => {
     // default to false
     let moduleEdit = false, moduleApprove = false;
 
+    // TODO figure out if this check can be done in SQL instead of looping thru rows
     // storing the array length outside is faster as
     // the loop does not have to keep reading it on every iteration
     const l = foundEmployee.roles.length;

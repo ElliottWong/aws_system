@@ -1,6 +1,6 @@
-const { findFileById } = require('../models/files');
+const { findFileById } = require('../models/files.v1');
 
-const c = require('../services/cloudinary');
+const c = require('../services/cloudinary.v1');
 const E = require('../errors/Errors');
 const r = require('../utils/response').responses;
 

@@ -1,5 +1,8 @@
 import StatusPill from '../common/StatusPill';
 import { NavLink } from 'react-router-dom';
+import * as RiIcons from 'react-icons/ri';
+import { IconContext } from 'react-icons';
+
 // ----------------------------------------------------
 // SWOT
 // ----------------------------------------------------
@@ -510,18 +513,9 @@ export const maintenanceCycleColumns = [
     {
         dataField: 'action_delete',
         text: '',
-        formatter: (cell, row) => {
+        formatter: (cell) => {
             console.log(cell);
-            return 'Delete';
-            // (
-            // <ManageDeleteArchivedDoc
-            //     deleteUrl={cell}
-            //     docHeaderUrl={`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance`}
-            //     setArchivedDocData={setArchivedDocData}
-            //     docType="equipment-maintenance"
-            //     idName="equipment_maintenance_id"
-            // />
-            // )
+            return cell
         }
     },
 ];
@@ -545,10 +539,6 @@ export const maintenanceRecordColumns = [
         text: 'Description'
     },
     {
-        dataField: 'maintenanceFrequency',
-        text: 'Maintenance Frequency'
-    },
-    {
         dataField: 'uploader',
         text: 'Uploader'
     },
@@ -559,9 +549,6 @@ export const maintenanceRecordColumns = [
     {
         dataField: 'action_download',
         text: '',
-        headerAttrs: {
-            hidden: true
-        },
         formatter: (cell, row) => {
             if (cell) {
                 return <NavLink to={cell} >Download</NavLink>
@@ -573,18 +560,9 @@ export const maintenanceRecordColumns = [
     {
         dataField: 'action_delete',
         text: '',
-        formatter: (cell, row) => {
+        formatter: (cell) => {
             console.log(cell);
-            return 'Delete';
-            // (
-            // <ManageDeleteArchivedDoc
-            //     deleteUrl={cell}
-            //     docHeaderUrl={`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance`}
-            //     setArchivedDocData={setArchivedDocData}
-            //     docType="equipment-maintenance"
-            //     idName="equipment_maintenance_id"
-            // />
-            // )
+            return cell
         }
     },
 ];

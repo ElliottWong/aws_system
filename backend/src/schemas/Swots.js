@@ -20,7 +20,7 @@ const SwotForms = db.define(
             type: 'TIMESTAMP',
             allowNull: true,
             defaultValue: null
-        },
+        }
     },
     {
         tableName: 'swot_forms',

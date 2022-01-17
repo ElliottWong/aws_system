@@ -14,23 +14,26 @@ import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 import TokenManager from '../../utilities/tokenManager';
 import { useHistory, NavLink } from 'react-router-dom';
 
+
 const AddEquipmentMaintenance = () => {
     const token = TokenManager.getToken();
     const decodedToken = TokenManager.getDecodedToken();
     const userCompanyID = decodedToken.company_id;
     const toastTiming = config.toastTiming;
     let history = useHistory();
+    const [rerender, setRerender] = useState(false); // value of state doesnt matter, only using it to force useffect to execute
 
     // State declarations
     const [loading, setLoading] = useState(false);
     const [inputTouched, setInputTouched] = useState(false);
     const [equipmentData, setEquipmentData] = useState({
         name: '',
-        category: '',
+        categories: [],
         reference_number: '',
         register_number: '',
         model: '',
         serial_number: '',
+        location: '',
     });
     const [categoryList, setCategoryList] = useState([]);
     const [renderErrorCard, setRenderErrorCard] = useState({
@@ -45,25 +48,53 @@ const AddEquipmentMaintenance = () => {
         if (buttonType === "addEquipment") {
             // Handler for add button
             console.log(equipmentData);
-            (async () => {
-                try {
-                    const resInsertOneEquipment = await axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment`,
-                        equipmentData, {
-                        headers: {
-                            "Authorization": `Bearer ${token}`
-                        }
-                    });
-                    console.log(resInsertOneEquipment);
-
-                } catch (error) {
-                    console.log(error);
+            // Confirmation dialogue for activating this account
+            const message = `Are you sure you want to add this equipment?`;
+            const handler = (onClose) => handleAddEquipment(onClose);
+            const heading = `Confirm Add?`;
+            const type = "primary"
+            const data = {
+                message,
+                handler,
+                heading,
+                type
+            };
+            confirmAlert({
+                customUI: ({ onClose }) => {
+                    return <CustomConfirmAlert {...data} onClose={onClose} />;
                 }
-            })();
+            });
         } else if (buttonType === "cancel") {
             // Handler for cancel button
             history.push("/equipment-maintenance");
-
         }
+
+        const handleAddEquipment = (onClose) => {
+            axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment`, equipmentData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then((res) => {
+                    console.log(res);
+                    setRerender((prevState) => !prevState);
+                    onClose();
+                    toast.success(<>Success!<br />Message: <b>New equipment has been added!</b></>);
+                })
+                .catch((err) => {
+                    console.log(err);
+                    console.log(err.response);
+                    let errCode = "Error!";
+                    let errMsg = "Error!"
+                    if (err.response !== undefined) {
+                        errCode = err.response.status;
+                        errMsg = err.response.data.message;
+                    }
+                    onClose();
+                    toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
+                });
+        }
+
     }
 
     // Handler for input 
@@ -71,6 +102,14 @@ const AddEquipmentMaintenance = () => {
         setEquipmentData((prevState) => ({
             ...prevState,
             [event.target.name]: event.target.value
+        }));
+    }
+
+    // Handler for input array
+    const handleInputArrayChange = (event) => {
+        setEquipmentData((prevState) => ({
+            ...prevState,
+            [event.target.name]: [event.target.value]
         }));
     }
 
@@ -86,8 +125,8 @@ const AddEquipmentMaintenance = () => {
                     </Col>
                     {/* Category */}
                     <Col className="c-Input c-Input__Category c-Input c-Input--edit">
-                        <label htmlFor="category">Category</label>
-                        <select onFocus={() => setInputTouched(true)} type="text" name="category" onChange={handleInputChange} value={equipmentData.category || 'Error'}>
+                        <label htmlFor="categories">Category</label>
+                        <select onFocus={() => setInputTouched(true)} type="text" name="categories" onChange={handleInputArrayChange} value={equipmentData.categories || 'Error'}>
                             <option>{!categoryList ? "No categories found!" : "Select Category"}</option>
                             {!categoryList ? null : categoryList.map((category, index) => (
                                 <option key={index} value={category.name}>
@@ -120,8 +159,10 @@ const AddEquipmentMaintenance = () => {
                         <label htmlFor="serial_number">Serial No.</label>
                         <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="serial_number" value={equipmentData.serial_number} />
                     </Col>
-                    {/* Filler */}
-                    <Col className='c-Input'>
+                    {/* Location */}
+                    <Col className="c-Input c-Input__Serial-no c-Input--edit">
+                        <label htmlFor="location">Location</label>
+                        <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="location" value={equipmentData.location} />
                     </Col>
                 </Row>
             </Container>
@@ -130,7 +171,7 @@ const AddEquipmentMaintenance = () => {
 
     useEffect(() => {
         (async () => {
-            try {                
+            try {
                 let tempCategoryData = [];
                 // Get all equipment categories
                 const resAllCategories = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories`);

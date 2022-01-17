@@ -34,6 +34,7 @@ module.exports.findEmployees = ({ where = {}, includeRoles, includeAddress, incl
 
 // ============================================================
 
+// TODO fix this? and use this in the controller
 module.exports.editEmployee = async (data = {}) => {
     const {
         fk_company_id, employee_id,

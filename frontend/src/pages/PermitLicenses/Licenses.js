@@ -58,16 +58,16 @@ const Licenses = () => {
 
                     if (canEdit) {
                         // Get all License in use
-                        const resAllLicenses = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/licences/all`);
+                        const resAllLicenses = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/licence-registry/all-licences`);
                         console.log(resAllLicenses);
                         tempLicenseData = resAllLicenses.data.results;
                         console.log(tempLicenseData);
 
                         // Get all archived equipment
-                        const resArchivedEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/equipment/archives`);
-                        console.log(resArchivedEquipments);
-                        tempArchivedLicenseData = resArchivedEquipments.data.results;
-                        console.log(tempArchivedLicenseData);
+                        // const resArchivedEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/equipment/archives`);
+                        // console.log(resArchivedEquipments);
+                        // tempArchivedLicenseData = resArchivedEquipments.data.results;
+                        // console.log(tempArchivedLicenseData);
                     } else {
                         const resSpecificEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/equipment/assignments`);
                         console.log(resSpecificEquipments);
@@ -97,27 +97,27 @@ const Licenses = () => {
                         });
                     });
 
-                    setArchivedEquipmentData(() => {
-                        return tempArchivedLicenseData.map((data, index) => {
-                            return {
-                                id: data.equipment_id,
-                                serialNo: index + 1,
-                                name: data.name,
-                                category: (() => {
-                                    let categoryString = ""
-                                    // eslint-disable-next-line array-callback-return
-                                    data.categories.map((catData, index) => {
-                                        categoryString += catData.name + ", ";
-                                    });
-                                    return categoryString.slice(0, -2);
-                                })(),
-                                refNo: data.reference_number,
-                                model: data.model,
-                                archived_on: dayjs(new Date(data.archived_at)).format("MMMM D, YYYY h:mm A"),
-                                action_view: `/equipment-maintenance/manage-equipment/${data.equipment_id}`
-                            }
-                        });
-                    });
+                    // setArchivedEquipmentData(() => {
+                    //     return tempArchivedLicenseData.map((data, index) => {
+                    //         return {
+                    //             id: data.equipment_id,
+                    //             serialNo: index + 1,
+                    //             name: data.name,
+                    //             category: (() => {
+                    //                 let categoryString = ""
+                    //                 // eslint-disable-next-line array-callback-return
+                    //                 data.categories.map((catData, index) => {
+                    //                     categoryString += catData.name + ", ";
+                    //                 });
+                    //                 return categoryString.slice(0, -2);
+                    //             })(),
+                    //             refNo: data.reference_number,
+                    //             model: data.model,
+                    //             archived_on: dayjs(new Date(data.archived_at)).format("MMMM D, YYYY h:mm A"),
+                    //             action_view: `/equipment-maintenance/manage-equipment/${data.equipment_id}`
+                    //         }
+                    //     });
+                    // });
                 }
             } catch (error) {
                 console.log(error);

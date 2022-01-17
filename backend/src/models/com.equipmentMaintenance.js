@@ -1,6 +1,5 @@
 const { addDays, differenceInCalendarDays } = require('date-fns');
 
-const { Sequelize, Op } = require('sequelize');
 const db = require('../config/connection');
 
 const {
@@ -9,8 +8,16 @@ const {
     Documents: { EMP }
 } = require('../schemas/Schemas');
 
-const { insertFile, deleteFile } = require('./files');
-const { isEquipmentOwner, isAssignedEquipment } = require('./com.equipment.v3').helpers;
+const { deleteFile } = require('./files.v1');
+
+const {
+    includes: {
+        maintenanceAssignees: $includeAssignees,
+        maintenanceUploads: $includeUploads
+    },
+    isEquipmentOwner,
+    isAssignedEquipment
+} = require('./com.equipment.v3').helpers;
 
 const E = require('../errors/Errors');
 
@@ -131,23 +138,136 @@ module.exports.insertOneMaintenance = async (equipmentId, companyId, createdBy, 
 
 // ============================================================
 
-module.exports.insertMaintenanceUpload = async (maintenanceId, equipmentId, createdBy, servicedAt, uploadedFile) => {
+module.exports.insertMaintenanceUpload = async (maintenanceId, equipmentId, createdBy, data = {}, upload) => {
     const [isAssigned] = await isAssignedEquipment(equipmentId, createdBy);
     if (!isAssigned) throw new E.PermissionError('upload for maintenance');
 
-    const transaction = await db.transaction();
-    try {
-        const { file_id } = await insertFile(createdBy, uploadedFile, transaction);
+    const {
+        serviced_at,
+        description
+    } = data;
 
-        const insertedMaintenanceUpload = await EMP.MaintenanceUploads.create({
+    const {
+        originalname: file_name,
+        filename: cloudinary_id,
+        path: cloudinary_uri
+    } = upload;
+
+    const file = {
+        file_name,
+        cloudinary_id,
+        cloudinary_uri,
+        created_by: createdBy
+    };
+
+    const insertedMaintenanceUpload = await EMP.MaintenanceUploads.create({
+        fk_maintenance_id: maintenanceId,
+        created_by: createdBy,
+        serviced_at,
+        description,
+        file
+    }, { include: 'file' });
+
+    return insertedMaintenanceUpload;
+};
+
+// ============================================================
+
+const isAssignedMaintenance = async (maintenanceId, employeeId) => {
+    const count = await EMP.MaintenanceAssignees.findAll({
+        where: {
             fk_maintenance_id: maintenanceId,
-            fk_file_id: file_id,
-            created_by: createdBy,
-            serviced_at: servicedAt
+            fk_employee_id: employeeId
+        }
+    });
+
+    const isAssigned = count.length === 1;
+    return isAssigned;
+};
+
+module.exports.findOneMaintenance = async function ({
+    maintenanceId,
+    equipmentId,
+    companyId,
+    employeeId,
+    includeAssignees = true,
+    includeUploads = true
+}) {
+    const [isOwner, isAssigned] = await Promise.all([
+        isEquipmentOwner(equipmentId, companyId, employeeId),
+        isAssignedMaintenance(maintenanceId, employeeId)
+    ]);
+
+    if (isOwner || isAssigned) {
+        let include = [];
+        if (includeAssignees) include = [...include, $includeAssignees];
+        if (includeUploads) include = [...include, $includeUploads];
+
+        const maintenance = await EMP.Maintenance.findOne({
+            where: {
+                maintenance_id: maintenanceId,
+                fk_company_id: companyId,
+                fk_equipment_id: equipmentId
+            },
+            include
         });
 
+        return maintenance;
+    }
+
+    throw new E.PermissionError('cannot view maintenance');
+};
+
+// ============================================================
+
+module.exports.editOneMaintenance = async (maintenanceId, equipmentId, companyId, createdBy, maintenance = {}) => {
+    const {
+        title,
+        description,
+        freq_multiplier,    // 1 - 99
+        freq_unit_time,     // 'week', 'month', 'year'
+        last_service_at,
+        assignees = []      // employeeIds[]
+    } = maintenance;
+
+    const isOwner = await isEquipmentOwner(equipmentId, companyId, createdBy);
+    if (!isOwner) throw new E.NotFoundError('equipment');
+
+    const where = {
+        maintenance_id: maintenanceId,
+        fk_company_id: companyId,
+        fk_equipment_id: equipmentId
+    };
+
+    const transaction = await db.transaction();
+    try {
+        await EMP.Maintenance.update({
+            title,
+            description,
+            freq_multiplier,
+            freq_unit_time,
+            last_service_at
+        }, { where, transaction });
+
+        if (assignees.length > 0) {
+            await EMP.MaintenanceAssignees.destroy({
+                where: {
+                    maintenance_id: maintenanceId,
+                    fk_equipment_id: equipmentId
+                },
+                transaction
+            });
+
+            const assigneeInsertions = assignees.map((employeeId) => ({
+                fk_equipment_id: equipmentId,
+                fk_maintenance_id: maintenanceId,
+                fk_employee_id: employeeId
+            }));
+
+            await EMP.MaintenanceAssignees.bulkCreate(assigneeInsertions, { transaction });
+        }
+
         await transaction.commit();
-        return insertedMaintenanceUpload;
     }
     catch (error) {
         await transaction.rollback();
@@ -216,17 +336,18 @@ module.exports.deleteOneMaintenance = async (maintenanceId, equipmentId, company
 
 // ============================================================
 
-module.exports.deleteMaintenanceUpload = async (maintenanceUploadId, createdBy) => {
+module.exports.deleteMaintenanceUpload = async (maintenanceUploadId, maintenanceId, createdBy) => {
     const maintenanceUpload = await EMP.MaintenanceUploads.findOne({
         where: {
             maintenance_upload_id: maintenanceUploadId,
+            fk_maintenance_id: maintenanceId,
             created_by: createdBy
         },
         include: 'file'
     });
 
-    if (maintenanceUpload) {
-        await deleteFile(maintenanceUpload.file.file_id, createdBy);
-        await maintenanceUpload.destroy();
-    }
+    if (!maintenanceUpload) throw new E.NotFoundError('maintenance upload');
+
+    await deleteFile(maintenanceUpload.file.file_id, createdBy);
+    await maintenanceUpload.destroy();
 };

@@ -20,7 +20,7 @@ var verifyEmailPromise = new AWS.SES({ apiVersion: "2010-12-01" })
 // Handle promise's fulfilled/rejected states
 verifyEmailPromise
   .then(function (data) {
-    console.log("First Email verification initiated");
+    console.log("Email verification initiated, check your email inbox");
   })
   .catch(function (err) {
     console.error(err, err.stack);

@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 const { uploadAny, destroyUploads } = require('../middlewares/multer');
-const { formDocumentsFolderPath } = require('../services/cloudinary');
+const { formDocumentsFolderPath } = require('../services/cloudinary.v1');
 
 const { isLoggedIn } = require('../middlewares/auth');
 const { parseIdParams, companyAccess } = require('../middlewares/access');

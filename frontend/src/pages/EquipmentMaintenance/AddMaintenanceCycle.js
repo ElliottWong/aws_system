@@ -14,7 +14,7 @@ import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 import TokenManager from '../../utilities/tokenManager';
 import { useHistory, NavLink } from 'react-router-dom';
 
-const AddMaintenanceCycle = ({match}) => {
+const AddMaintenanceCycle = ({ match }) => {
     const token = TokenManager.getToken();
     const decodedToken = TokenManager.getDecodedToken();
     const userCompanyID = decodedToken.company_id;
@@ -43,7 +43,7 @@ const AddMaintenanceCycle = ({match}) => {
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
 
     const handleBtn = (buttonType) => {
-        if (buttonType === "addEquipment") {
+        if (buttonType === "addCycle") {
             // Handler for add button
             console.log(maintenanceData);
             (async () => {
@@ -55,7 +55,7 @@ const AddMaintenanceCycle = ({match}) => {
                         }
                     });
                     console.log(resInsertOneEquipment);
-
+                    toast.success(<>Success!<br />Message: <b>New equipment has been added!</b></>);
                 } catch (error) {
                     console.log(error);
                 }
@@ -119,7 +119,7 @@ const AddMaintenanceCycle = ({match}) => {
 
     useEffect(() => {
         (async () => {
-            try {                
+            try {
                 let tempCategoryData = [];
                 // Get all equipment categories
                 const resAllCategories = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories`);
@@ -165,12 +165,12 @@ const AddMaintenanceCycle = ({match}) => {
                     </Breadcrumb>
                     {/* Top section */}
                     <div className="c-Manage-equipment__Top c-Main__Top">
-                        <h1>Add Equipment</h1>
+                        <h1>Add Maintenance Cycle</h1>
                         {/* Add and Cancel button section */}
                         <div className='c-Manage-equipment__Btns'>
                             {
                                 inputTouched ?
-                                    <button onClick={() => (handleBtn("addEquipment"))} type="button" className="c-Btn c-Btn--primary">Add</button>
+                                    <button onClick={() => (handleBtn("addCycle"))} type="button" className="c-Btn c-Btn--primary">Add</button>
                                     :
                                     <button type="button" disabled={true} className="c-Btn c-Btn--disabled">{loading ? "Loading..." : "Add"}</button>
                             }

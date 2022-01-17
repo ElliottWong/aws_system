@@ -21,7 +21,7 @@ const {
     }
 } = require('../schemas/Schemas');
 
-const c = require('../services/cloudinary');
+const c = require('../services/cloudinary.v1');
 
 const { enumValues, MODULE } = require('../config/enums');
 const moduleKeys = enumValues(MODULE);
@@ -68,6 +68,8 @@ const swotList = {
         'Competition from other companies'
     ]
 };
+
+const randomItem = (array = []) => array.at(Math.random() * array.length);
 
 const units = ['week', 'month', 'year'];
 
@@ -283,7 +285,7 @@ module.exports = async () => {
             approved_by: employees[0].employee_id,
             status: 'active',
             approved_at: new Date(),
-            due_at: addDays(new Date(), 330),
+            due_at: addDays(new Date(), 330)
         });
 
         const s = swotList.strengths.map((content, i) => {
@@ -581,10 +583,23 @@ module.exports = async () => {
         }
 
         // clause 7.3A
-        // for (let k = 0; k < 4; k++) {
-        //     await HR.TrainingRequests.create({
-
-        //     });
-        // }
+        const requestInsertions = [];
+        for (let k = 0; k < 5; k++) {
+            const create = HR.TrainingRequests.create({
+                fk_company_id: company.company_id,
+                created_by: employees[0].employee_id,
+                approved_by: employees[3].employee_id,
+                status: 'pending',
+                title: faker.commerce.productName(),
+                training_start: faker.date.future(0.1),
+                training_end: faker.date.future(0.5),
+                training_institution: faker.company.companyName(),
+                training_cost: `${faker.finance.currencyCode()} ${faker.datatype.number({ min: 1000, max: 10000 })}`,
+                recommendations: faker.lorem.sentences(2),
+                justification_text: faker.lorem.sentences(2)
+            });
+            requestInsertions.push(create);
+        }
+        await Promise.all(requestInsertions);
     }
 };

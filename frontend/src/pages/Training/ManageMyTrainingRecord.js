@@ -128,8 +128,8 @@ const ManageMyTrainingRecord = ({ match }) => {
                                 <p>S$1599.90</p>
                             </div>
                             <div className="c-Field">
-                                <h2>Evaluation Status</h2>
-                                <p>Na</p>
+                                <h2>Evaluation Status (Trainee)</h2>
+                                <StatusPill type="pending" />
                             </div>
                             <div className="c-Field">
                                 <h2>File (Evidence for Attendance)</h2>
@@ -148,6 +148,10 @@ const ManageMyTrainingRecord = ({ match }) => {
                             <div className="c-Field">
                                 <h2>Approver</h2>
                                 <p>@AppleKim</p>
+                            </div>
+                            <div className="c-Field">
+                                <h2>Evaluation Status (Approver)</h2>
+                                <StatusPill type="pending" />
                             </div>
                             <div className="c-Field">
                                 <h2>Attendance Status</h2>

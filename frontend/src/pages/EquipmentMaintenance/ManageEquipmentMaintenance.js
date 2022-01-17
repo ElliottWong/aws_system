@@ -1,19 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import PageLayout from '../../layout/PageLayout';
-import DocumentLayout from '../../layout/DocumentLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
 import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import { docManageEquipmentColumns, historyManageEquipmentColumns } from '../../config/tableColumns';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import BootstrapTable from 'react-bootstrap-table-next';
-import TabRow from '../../common/TabRow';
-import DocumentBtnSection from '../../common/DocumentBtnSection';
-import RenderDocument from '../../common/RenderDocument';
-import { TAB } from '../../config/enums';
 import dayjs from 'dayjs';
 import jwt_decode from "jwt-decode";
-import useCheckEditableAxios from '../../hooks/useCheckEditableAxios';
-import ManageDeleteArchivedDoc from '../../common/ManageDeleteArchivedDoc';
 import axios from 'axios';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import config from '../../config/config';
@@ -29,7 +21,7 @@ import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 import TokenManager from '../../utilities/tokenManager';
 import StatusPill from '../../common/StatusPill';
 import { useHistory, NavLink } from 'react-router-dom';
-import { maintenanceRecordColumns, } from '../../config/tableColumns';
+import { maintenanceCycleColumns, } from '../../config/tableColumns';
 
 const ManageEquipmentMaintenance = ({ match }) => {
     const token = TokenManager.getToken();
@@ -64,6 +56,7 @@ const ManageEquipmentMaintenance = ({ match }) => {
         regNo: 'Error',
         model: 'Error',
         serialNo: 'Error',
+        location: 'Error',
         archivedAt: null,
     });
     const [renderErrorCard, setRenderErrorCard] = useState({
@@ -91,6 +84,7 @@ const ManageEquipmentMaintenance = ({ match }) => {
 
                 setEquipmentData(() => {
                     return {
+                        id: tempEquipmentData.equipment_id,
                         name: tempEquipmentData.name,
                         category: (() => {
                             let categoryString = ""
@@ -104,6 +98,7 @@ const ManageEquipmentMaintenance = ({ match }) => {
                         regNo: tempEquipmentData.register_number,
                         model: tempEquipmentData.model,
                         serialNo: tempEquipmentData.serial_number,
+                        location: tempEquipmentData.location,
                         archivedAt: tempEquipmentData.archived_at
                     }
                 });
@@ -112,7 +107,7 @@ const ManageEquipmentMaintenance = ({ match }) => {
                     return tempEquipmentData.maintenance.map((data, index) => {
                         return {
                             id: data.maintenance_id,
-                            serialNo: 1,
+                            serialNo: index + 1,
                             maintenanceType: data.type,
                             responsible: (() => {
                                 let personArray = [];
@@ -126,20 +121,27 @@ const ManageEquipmentMaintenance = ({ match }) => {
                             })(),
                             maintenanceFrequency: (() => {
                                 console.log(data.freq_unit_time)
-                                if (data.freq_unit_time == 7) {
+                                if (data.freq_unit_time === 7) {
                                     return `${data.freq_multiplier} weeks`
                                 }
-                                if (data.freq_unit_time == 30) {
+                                if (data.freq_unit_time === 30) {
                                     return `${data.freq_multiplier} months`
                                 }
-                                if (data.freq_unit_time == 365) {
+                                if (data.freq_unit_time === 365) {
                                     return `${data.freq_multiplier} years`
                                 }
                             })(),
                             lastServiceDate: data.last_service_at,
                             status: `/equipment-maintenance/manage-equipment/${data.maintenance_id}`,
                             action_manage: `/equipment-maintenance/manage-equipment/${equipmentID}/manage-cycle/${data.maintenance_id}`,
-                            action_delete: 'asd',
+                            action_delete: (() => {
+                                console.log(data.maintenance_id);
+                                return (
+                                    <IconContext.Provider value={{ color: "#DC3545", size: "16px" }}>
+                                        <RiIcons.RiDeleteBin7Line className="c-Table-Btn--bin c-Table-Btn" onClick={() => (handleDeleteCycle(data.maintenance_id))} />
+                                    </IconContext.Provider>
+                                )
+                            })(),
                         }
                     });
                 });
@@ -147,89 +149,88 @@ const ManageEquipmentMaintenance = ({ match }) => {
                 console.log(error);
             }
         })();
-
-        //     var filteredArchivedDocData = axiosResponse.resultHeaderData.results.filter((resObj) => {
-        //         return resObj.status === 'archived';
-        //     });
-        //     var formattedArchivedDocData = filteredArchivedDocData.map((archivedData, index) => {
-        //         return ({
-        //             ...archivedData,
-        //             id: archivedData.swot_id,
-        //             serialNo: index + 1,
-        //             type:
-        //                 refNo:
-        //             regNo:
-        //                 model:
-        //             serialNo:
-        //                 lastServiceDate:
-        //             responsible:
-        //                 created_on:
-        //             archived_on:
-        //                 approved_by: `${archivedData.approver.firstname} ${archivedData.approver.lastname}`,
-        //             approved_on: dayjs(new Date(archivedData.approved_on)).format("MMMM D, YYYY h:mm A"),
-        //                 active_till: dayjs(new Date(archivedData.updated_at)).format("MMMM D, YYYY h:mm A"),
-        //                     action_view: `/swot/archived/${archivedData.swot_id}`,
-        //                         action_delete: `${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/swots/${archivedData.swot_id}`
-        //     });
-        // })
-        // setArchivedDocData(() => (formattedArchivedDocData));
-
-        // Set archives data (More refinements to be done)
-        // var filteredArchivedDocData = axiosResponse.resultHeaderData.results.filter((resObj) => {
-        //     return resObj.status === 'archived';
-        // });
-        // var formattedArchivedDocData = filteredArchivedDocData.map((archivedData, index) => {
-        //     return ({
-        //         ...archivedData,
-        //         id: archivedData.swot_id,
-        //         serialNo: index + 1,
-        //         type:
-        //         refNo:
-        //         regNo:
-        //         model:
-        //         serialNo:
-        //         lastServiceDate:
-        //         responsible:
-        //         created_on:
-        //         archived_on:
-        //         approved_by: `${archivedData.approver.firstname} ${archivedData.approver.lastname}`,
-        //         approved_on: dayjs(new Date(archivedData.approved_on)).format("MMMM D, YYYY h:mm A"),
-        //         active_till: dayjs(new Date(archivedData.updated_at)).format("MMMM D, YYYY h:mm A"),
-        //         action_view: `/swot/archived/${archivedData.swot_id}`,
-        //         action_delete: `${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/swots/${archivedData.swot_id}`
-        //     });
-        // })
-        // setArchivedDocData(() => (formattedArchivedDocData));
-
-        // Check if user can edit Equipment Maintenance Program attributes - add new equipment, configurations, etc
-        // axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_01/employees`, {
-        //     headers: {
-        //         'Authorization': `Bearer ${token}`
-        //     }
-        // })
-        //     .then((res) => {
-        //         let canEdit = false;
-        //         if (res.data.results !== undefined) {
-        //             res.data.results.forEach((data, index) => {
-        //                 if (data.employee_id === userID) {
-        //                     canEdit = true;
-        //                 }
-        //             });
-        //         }
-
-        //         if (canEdit === true) {
-        //             setIsEditor(() => (true));
-        //         }
-        //     })
-        //     .catch((err) => {
-        //         console.log(err);
-        //     });
     }, [equipmentData.archivedAt]);
+
+    // Handler for deleting maintenance record 
+    const handleDeleteCycle = (maintenanceID) => {
+        // Confirmation dialogue for deleting cycle
+        const message = `Are you sure you want to delete this maintenance cycle?`;
+        const handler = (onClose) => handleDelete(onClose, maintenanceID);
+        const heading = `Confirm Delete?`;
+        const type = "alert"
+        const data = {
+            message,
+            handler,
+            heading,
+            type
+        };
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return <CustomConfirmAlert {...data} onClose={onClose} />;
+            }
+        });
+
+        const handleDelete = (onClose, maintenanceID) => {
+            axios.delete(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment/${equipmentID}/all-maintenance/${maintenanceID}`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then((res) => {
+                    console.log(res);
+                    setRerender((prevState) => !prevState);
+                    onClose();
+                    toast.success(<>Success!<br />Message: <b>Maintenance cycle has been deleted!</b></>);
+                })
+                .catch((err) => {
+                    console.log(err);
+                    console.log(err.response);
+                    let errCode = "Error!";
+                    let errMsg = "Error!"
+                    if (err.response !== undefined) {
+                        errCode = err.response.status;
+                        errMsg = err.response.data.message;
+                    }
+                    onClose();
+                    toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
+                });
+        }
+    };
 
     const handleBtn = (buttonType) => {
         if (buttonType === "add") {
             // Handler for add button
-            history.push(`/equipment-maintenance/manage-equipment/${equipmentID}/add-cycle`);;
+            history.push(`/equipment-maintenance/manage-equipment/${equipmentID}/add-cycle`);
+        }
+
+        if (buttonType === "edit") {
+            // Handler for edit button
+            setIsEditing(true);
+        }
+
+        if (buttonType === "editEquipmentCancel") {
+            // Handler for edit button
+            setIsEditing(false);
+        }
+
+        if (buttonType === "editEquipmentSave") {
+            // Handler for edit button
+            (async () => {
+                try {
+                    console.log(equipmentData);
+                    const resUpdateEquipment = await axios.put(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment/${equipmentData.id}`,
+                        equipmentData, {
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+                    console.log(resUpdateEquipment);
+                    toast.success(<>Success!<br />Message: <b>Updated equipment details!</b></>);
+                    setIsEditing(false);
+                } catch (error) {
+                    console.log(error);
+                }
+            })();
         }
     }
 
@@ -331,6 +332,11 @@ const ManageEquipmentMaintenance = ({ match }) => {
                         <label htmlFor="refNo">Ref. No.</label>
                         <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="refNo" value={equipmentData.refNo} />
                     </Col>
+                    {/* Location */}
+                    <Col className="c-Input c-Input__Serial-no c-Input--edit">
+                        <label htmlFor="location">Location</label>
+                        <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="location" value={equipmentData.location} />
+                    </Col>
                 </Row>
 
                 {/* Row 2 */}
@@ -387,6 +393,11 @@ const ManageEquipmentMaintenance = ({ match }) => {
                     <Col className="c-Input c-Input__Ref-no c-Input--read-only">
                         <label htmlFor="refNo">Ref. No.</label>
                         <input readOnly type="text" name="refNo" value={equipmentData.refNo} />
+                    </Col>
+                    {/* Location */}
+                    <Col className="c-Input c-Input__Serial-no c-Input--read-only">
+                        <label htmlFor="location">Location</label>
+                        <input readOnly type="text" name="location" value={equipmentData.location} />
                     </Col>
                 </Row>
 
@@ -546,7 +557,7 @@ const ManageEquipmentMaintenance = ({ match }) => {
                             isEditing || renderErrorCard.render ?
                                 null :
                                 <button
-                                    onClick={() => (handleBtn("editEquipment"))}
+                                    onClick={() => (handleBtn("edit"))}
                                     type="button"
                                     className={"c-Btn c-Btn--primary"}
                                 >
@@ -616,7 +627,7 @@ const ManageEquipmentMaintenance = ({ match }) => {
                                     bordered={false}
                                     keyField='serialNo'
                                     data={maintenanceCyclesData}
-                                    columns={maintenanceRecordColumns}
+                                    columns={maintenanceCycleColumns}
                                     pagination={paginationFactory()}
                                 />
                                 :

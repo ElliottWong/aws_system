@@ -8,7 +8,7 @@ const {
     Documents: { EMP }
 } = require('../schemas/Schemas');
 
-const { deleteFile } = require('../services/cloudinary');
+const { deleteFile } = require('../services/cloudinary.v1');
 
 const E = require('../errors/Errors');
 

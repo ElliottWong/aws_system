@@ -7,9 +7,9 @@ const {
     Documents: { OrganisationCharts }
 } = require('../schemas/Schemas');
 
-const { insertFileRecord } = require('./files');
+const { insertFileRecord } = require('./files.v1');
 
-const c = require('../services/cloudinary');
+const c = require('../services/cloudinary.v1');
 const E = require('../errors/Errors');
 
 // CREATE

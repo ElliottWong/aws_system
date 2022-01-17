@@ -74,12 +74,12 @@ const Maintenance = db.define(
             allowNull: false
         },
         days_left: {
-            type: DataTypes.INTEGER.UNSIGNED,
+            type: DataTypes.INTEGER,
             allowNull: true,
             defaultValue: null
         },
         days_left_pct: {
-            type: DataTypes.INTEGER.UNSIGNED,
+            type: DataTypes.INTEGER,
             allowNull: true,
             defaultValue: null
         }

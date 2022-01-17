@@ -105,7 +105,7 @@ const ManageTrainingRequest = ({ match }) => {
                                 <p>I need to learn how to clean my house better! #wfh #uncondusive_working_environment</p>
                             </div>
                             <div className="c-Field">
-                                <h2>File (For Justification)</h2>
+                                <h2>Rejection Remarks</h2>
                                 <p>Na</p>
                             </div>
                         </div>
@@ -123,8 +123,8 @@ const ManageTrainingRequest = ({ match }) => {
                                 <p>@AppleKim</p>
                             </div>
                             <div className="c-Field">
-                                <h2>Other Recommendations</h2>
-                                <p>Nil</p>
+                                <h2>File (For Justification)</h2>
+                                <p>Na</p>
                             </div>
                             <div className="c-Field">
                                 <h2>Approval Status</h2>

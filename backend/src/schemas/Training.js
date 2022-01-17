@@ -4,7 +4,6 @@
 const { DataTypes } = require('sequelize');
 const db = require('../config/connection');
 
-const { commonTemplate } = require('./_common');
 const Companies = db.model('Companies');
 const Employees = db.model('Employees');
 const Files = db.model('Files');
@@ -108,10 +107,6 @@ const TrainingRequests = db.define(
             allowNull: true,
             defaultValue: null
         },
-
-        // ====================
-        // ignore below for now
-        // ====================
         attendance_upload: {
             type: DataTypes.INTEGER.UNSIGNED,
             allowNull: true,
@@ -144,6 +139,8 @@ const TrainingRequests = db.define(
         }
         // because system is stupid, 
         // users must indicate their evaluation completion manually
+        // it is possible to just loop thru an array and check for "answer" property
+        // to determine whether a question has been answered
     },
     {
         tableName: 'training_requests',
@@ -152,6 +149,33 @@ const TrainingRequests = db.define(
         updatedAt: 'updated_at'
     }
 );
+
+Companies.hasMany(TrainingRequests, {
+    foreignKey: 'fk_company_id'
+});
+
+TrainingRequests.belongsTo(Companies, {
+    foreignKey: 'fk_company_id',
+    as: 'company'
+});
+
+Employees.hasMany(TrainingRequests, {
+    foreignKey: 'created_by'
+});
+
+TrainingRequests.belongsTo(Employees, {
+    foreignKey: 'created_by',
+    as: 'author'
+});
+
+Employees.hasMany(TrainingRequests, {
+    foreignKey: 'approved_by'
+});
+
+TrainingRequests.belongsTo(Employees, {
+    foreignKey: 'approved_by',
+    as: 'approver'
+});
 
 Files.hasOne(TrainingRequests, {
     foreignKey: 'fk_file_id'

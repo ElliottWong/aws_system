@@ -33,12 +33,7 @@
             "stroustrup"
         ],
         "eqeqeq": "warn",
-        "no-unused-vars": [
-            "warn",
-            {
-                "caughtErrors": "all"
-            }
-        ],
+        "no-unused-vars": "warn",
         "arrow-parens": "warn",
         "prefer-const": "off",
         "eol-last": "warn"

@@ -1,6 +1,6 @@
 const { Companies } = require('../schemas/Schemas');
 
-const c = require('../services/cloudinary');
+const c = require('../services/cloudinary.v1');
 const E = require('../errors/Errors');
 
 // CREATE

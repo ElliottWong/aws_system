@@ -11,6 +11,16 @@
   box-shadow: 0 20px 75px rgb(0 0 0 / 13%);
   color: #666;
 
+  &--new-template {
+    input {
+      border-radius: 5px;
+      border: 1px solid black;
+      margin: 20px 0;
+      padding: 4px 10px;
+      width: 100%;
+    }
+  }
+
   &--training-record-file-upload {
     h1 {
       color: black;

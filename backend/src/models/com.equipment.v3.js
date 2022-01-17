@@ -485,14 +485,14 @@ module.exports.editOneEquipment = async (equipmentId, companyId, createdBy, equi
         categories = []
     } = equipment;
 
+    const isOwner = await isEquipmentOwner(equipmentId, companyId, createdBy);
+    if (!isOwner) throw new E.NotFoundError('equipment');
+
     const where = {
         equipment_id: equipmentId,
         fk_company_id: companyId,
         created_by: createdBy
     };
-
-    const isOwner = await isEquipmentOwner(equipmentId, companyId, createdBy);
-    if (!isOwner) throw new E.NotFoundError('equipment');
 
     const transaction = await db.transaction();
     try {
@@ -504,7 +504,7 @@ module.exports.editOneEquipment = async (equipmentId, companyId, createdBy, equi
             serial_number,
             model,
             location
-        }, { where });
+        }, { where, transaction });
 
         // if there are categories to set
         if (categories.length > 0) {

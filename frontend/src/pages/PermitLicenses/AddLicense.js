@@ -42,19 +42,19 @@ const AddLicense = () => {
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
 
     const handleBtn = (buttonType) => {
-        if (buttonType === "addEquipment") {
+        if (buttonType === "addLicence") {
             // Handler for add button
             console.log(licenseData);
             (async () => {
                 try {
-                    const resInsertOneEquipment = await axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/equipment/all`,
+                    const resInsertOneLicence = await axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/licence-registry/all-licences`,
                         licenseData, {
                         headers: {
                             "Authorization": `Bearer ${token}`
                         }
                     });
-                    console.log(resInsertOneEquipment);
-
+                    console.log(resInsertOneLicence);
+                    toast.success(<>Success!<br />Message: <b>New License has been added!</b></>);
                 } catch (error) {
                     console.log(error);
                 }
@@ -166,7 +166,7 @@ const AddLicense = () => {
                     {/* Breadcrumb */}
                     <Breadcrumb className="c-Equipment-maintenance__Breadcrumb l-Breadcrumb">
                         <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/equipment-maintenance">Equipment Maintenance Program</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/licenses">Register of Permits, Licenses, Approvals & Certificates</Breadcrumb.Item>
                         <Breadcrumb.Item active>Add License/Permit/Certificate</Breadcrumb.Item>
                     </Breadcrumb>
                     {/* Top section */}

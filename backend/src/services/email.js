@@ -1,20 +1,20 @@
 // should be replaced with AWS SES
 
-const { aws: aws } = require('../config/config');
+const { aws: aws } = require("../config/config");
 
 // Load the AWS SDK for Node.js
-const AWS = require('aws-sdk');
+const AWS = require("aws-sdk");
 
 AWS.config.update({
-    region: aws.region,
-    accessKeyId: aws.accessKeyId,
-    secretAccessKey: aws.secretAccessKey,
-    mainEmail: aws.mainEmail
+  region: aws.region,
+  accessKeyId: aws.accessKeyId,
+  secretAccessKey: aws.secretAccessKey,
+  mainEmail: aws.mainEmail,
 });
 
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
-const { nodemailer: nm, frontend } = require('../config/config');
+const { nodemailer: nm, frontend } = require("../config/config");
 
 // const transporter = nodemailer.createTransport({
 //   host: nm.hostname,
@@ -26,49 +26,49 @@ const { nodemailer: nm, frontend } = require('../config/config');
 // });
 
 module.exports.sendEmail = (recipient, subject, content) =>
-    new Promise((resolve, reject) => {
-        var params = {
-            Destination: {
-                //* Please use the identified email or else it cannot work
-                ToAddresses: [recipient]
-            },
-            Message: {
-                Body: {
-                    Html: {
-                        Charset: 'UTF-8',
-                        Data: content
-                    }
-                },
-                Subject: {
-                    Charset: 'UTF-8',
-                    Data: subject
-                }
-            },
-            //* Please use the identified email or else it cannot work
-            Source: aws.mainEmail /* required */
-        };
+  new Promise((resolve, reject) => {
+    var params = {
+      Destination: {
+        //* Please use the identified email or else it cannot work
+        ToAddresses: [recipient],
+      },
+      Message: {
+        Body: {
+          Html: {
+            Charset: "UTF-8",
+            Data: content,
+          },
+        },
+        Subject: {
+          Charset: "UTF-8",
+          Data: subject,
+        },
+      },
+      //* Please use the identified email or else it cannot work
+      Source: aws.mainEmail /* required */,
+    };
 
-        // Create the promise and SES service object
-        var sendPromise = new AWS.SES({ apiVersion: '2010-12-01' })
-            .sendEmail(params)
-            .promise();
+    // Create the promise and SES service object
+    var sendPromise = new AWS.SES({ apiVersion: "2010-12-01" })
+      .sendEmail(params)
+      .promise();
 
-        // Handle promise's fulfilled/rejected states
-        sendPromise
-            .then(function (data, info) {
-                console.log(data.MessageId);
-                resolve(info);
-            })
-            .catch(function (err, error) {
-                console.error(err, err.stack);
-                reject(error);
-            });
-    });
+    // Handle promise's fulfilled/rejected states
+    sendPromise
+      .then(function (data, info) {
+        console.log(data.MessageId);
+        resolve(info);
+      })
+      .catch(function (err, error) {
+        console.error(err, err.stack);
+        reject(error);
+      });
+  });
 
 // ============================================================
 
 module.exports.sendBulkEmail = (recipients, contents) =>
-    new Promise((resolve, reject) => {});
+  new Promise((resolve, reject) => {});
 
 // ============================================================
 
@@ -109,20 +109,43 @@ const documentApprovalHTML = (name, document, author) => `
     <p>The document <strong>${document}</strong> by ${author} requires your approval.</p>
 `;
 
-
 const updateSwotNoticeHTML = (name) => `
     <h4>Hi ${name}!</h4>
     <p>The SWOT have not been updated for 11 months, please update again!</p>
 `;
 
+const MaintenanceFirstNoticeHTML = (name, document) => `
+    <h4>Hi ${name}!</h4>
+    <p>The Maintenance of <strong>${document}</strong> have almost due, please update it</p>
+`;
+
+const MaintenanceSecondNoticeHTML = (name, document) => `
+    <h4>Hi ${name}!</h4>
+    <p>The Maintenance of <strong>${document}</strong> was over due, please update it</p>
+`;
+
+const LicenseFirstNoticeHTML = (name, license) => `
+    <h4>Hi ${name}!</h4>
+    <p>The License of <strong>${license}</strong>  have almost expired, please upload a new one again</p>
+`;
+
+const LicenseSecondNoticeHTML = (name, license) => `
+    <h4>Hi ${name}!</h4>
+    <p>The License of <strong>${license}</strong> have already expired, please upload a new one again</p>
+`;
+
 // ============================================================
 
 module.exports.templates = {
-    inviteUser: inviteUserHTML,
-    inviteSystemAdmin: inviteFirstSysadminHTML,
-    invitePlatformAdmin: invitePlatformAdminHTML,
-    requestOtp: requestOtpHTML,
-    passwordChanged: passwordChangedHTML,
-    documentApproval: documentApprovalHTML,
-    updateSwotNotice: updateSwotNoticeHTML
+  inviteUser: inviteUserHTML,
+  inviteSystemAdmin: inviteFirstSysadminHTML,
+  invitePlatformAdmin: invitePlatformAdminHTML,
+  requestOtp: requestOtpHTML,
+  passwordChanged: passwordChangedHTML,
+  documentApproval: documentApprovalHTML,
+  updateSwotNotice: updateSwotNoticeHTML,
+  MaintenanceFirstNotice: MaintenanceFirstNoticeHTML,
+  MaintenanceSecondNotice: MaintenanceSecondNoticeHTML,
+  LicenseFirstNotice: LicenseFirstNoticeHTML,
+  LicenseSecondNotice: LicenseSecondNoticeHTML
 };

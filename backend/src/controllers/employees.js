@@ -99,6 +99,7 @@ module.exports.findEmployeeById = async (req, res, next, isPlatformAdmin = false
 // does not include updating account (username/password)
 // FIXME needs more work
 // should really take out the isPlatformAdmin part
+// TODO refactor this and make use of model
 module.exports.editEmployee = async (req, res, next, isPlatformAdmin = false) => {
     try {
         const { decoded } = res.locals.auth;
