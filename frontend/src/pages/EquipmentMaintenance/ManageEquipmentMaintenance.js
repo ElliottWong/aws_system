@@ -1,27 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { Col, Container, Row } from 'react-bootstrap';
+import BootstrapTable from 'react-bootstrap-table-next';
+import paginationFactory from 'react-bootstrap-table2-paginator';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { confirmAlert } from 'react-confirm-alert';
+import { IconContext } from 'react-icons';
+import * as RiIcons from 'react-icons/ri';
+import { useHistory } from 'react-router-dom';
+import Select from "react-select";
+import { toast, ToastContainer } from 'react-toastify';
+import CustomConfirmAlert from '../../common/CustomConfirmAlert';
+import ErrorCard from '../../common/ErrorCard';
+import config from '../../config/config';
+import { maintenanceCycleColumns } from '../../config/tableColumns';
 import PageLayout from '../../layout/PageLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
-import dayjs from 'dayjs';
-import jwt_decode from "jwt-decode";
-import axios from 'axios';
-import paginationFactory from 'react-bootstrap-table2-paginator';
-import config from '../../config/config';
-import ErrorCard from '../../common/ErrorCard';
-import { Container, Row, Col } from 'react-bootstrap';
-import DateTimePicker from 'react-datetime-picker';
-import * as RiIcons from 'react-icons/ri';
-import { IconContext } from 'react-icons';
-import { ToastContainer, toast } from 'react-toastify';
-import Select from "react-select";
-import { confirmAlert } from 'react-confirm-alert';
-import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 import TokenManager from '../../utilities/tokenManager';
-import StatusPill from '../../common/StatusPill';
-import { useHistory, NavLink } from 'react-router-dom';
-import { maintenanceCycleColumns, } from '../../config/tableColumns';
 
 const ManageEquipmentMaintenance = ({ match }) => {
     const token = TokenManager.getToken();
@@ -51,7 +46,7 @@ const ManageEquipmentMaintenance = ({ match }) => {
     });
     const [equipmentData, setEquipmentData] = useState({
         name: 'Error',
-        category: 'Error',
+        category: [],
         refNo: 'Error',
         regNo: 'Error',
         model: 'Error',
@@ -59,6 +54,7 @@ const ManageEquipmentMaintenance = ({ match }) => {
         location: 'Error',
         archivedAt: null,
     });
+    const [categoryList, setCategoryList] = useState([]);
     const [renderErrorCard, setRenderErrorCard] = useState({
         render: false,
         errMsg: null,
@@ -76,23 +72,29 @@ const ManageEquipmentMaintenance = ({ match }) => {
         (async () => {
             try {
                 let tempEquipmentData = [];
+                let tempCategoryData = [];
 
                 const resOneEquipment = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment/${equipmentID}`);
                 console.log(resOneEquipment);
                 tempEquipmentData = resOneEquipment.data.results;
                 console.log(tempEquipmentData);
 
+                // Get all equipment categories
+                const resAllCategories = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories`);
+                console.log(resAllCategories);
+                tempCategoryData = resAllCategories.data.results;
+                console.log(tempCategoryData);
+
                 setEquipmentData(() => {
                     return {
                         id: tempEquipmentData.equipment_id,
                         name: tempEquipmentData.name,
                         category: (() => {
-                            let categoryString = ""
                             // eslint-disable-next-line array-callback-return
-                            tempEquipmentData.categories.map((catData, index) => {
-                                categoryString += catData.name + ", ";
+                            return tempEquipmentData.categories.map((catData) => {
+                                return catData.name;
                             });
-                            return categoryString.slice(0, -2);
+                            // return categoryString.slice(0, -2);
                         })(),
                         refNo: tempEquipmentData.reference_number,
                         regNo: tempEquipmentData.register_number,
@@ -101,6 +103,15 @@ const ManageEquipmentMaintenance = ({ match }) => {
                         location: tempEquipmentData.location,
                         archivedAt: tempEquipmentData.archived_at
                     }
+                });
+
+                setCategoryList(() => {
+                    return tempCategoryData.map((data) => {
+                        return {
+                            label: data.name,
+                            value: data.category_id
+                        }
+                    });
                 });
 
                 setMaintenanceCyclesData(() => {
@@ -120,7 +131,6 @@ const ManageEquipmentMaintenance = ({ match }) => {
                                 return personArray;
                             })(),
                             maintenanceFrequency: (() => {
-                                console.log(data.freq_unit_time)
                                 if (data.freq_unit_time === 7) {
                                     return `${data.freq_multiplier} weeks`
                                 }
@@ -150,6 +160,8 @@ const ManageEquipmentMaintenance = ({ match }) => {
             }
         })();
     }, [equipmentData.archivedAt]);
+
+    console.log(equipmentData);
 
     // Handler for deleting maintenance record 
     const handleDeleteCycle = (maintenanceID) => {
@@ -214,16 +226,27 @@ const ManageEquipmentMaintenance = ({ match }) => {
         }
 
         if (buttonType === "editEquipmentSave") {
-            // Handler for edit button
+            // Handler for save button
             (async () => {
                 try {
                     console.log(equipmentData);
                     const resUpdateEquipment = await axios.put(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment/${equipmentData.id}`,
-                        equipmentData, {
-                        headers: {
-                            "Authorization": `Bearer ${token}`
-                        }
-                    });
+                        {
+                            name: equipmentData.name,
+                            reference_number: equipmentData.refNo,
+                            register_number: equipmentData.regNo,
+                            serial_number: equipmentData.serialNo,
+                            model: equipmentData.model,
+                            location: equipmentData.location,
+                            categories: equipmentData.category.map((data) => {
+                                return data.value;
+                            })
+                        },
+                        {
+                            headers: {
+                                "Authorization": `Bearer ${token}`
+                            }
+                        });
                     console.log(resUpdateEquipment);
                     toast.success(<>Success!<br />Message: <b>Updated equipment details!</b></>);
                     setIsEditing(false);
@@ -311,6 +334,15 @@ const ManageEquipmentMaintenance = ({ match }) => {
         return value.includes(inputValue) || otherKey.length > 0;
     };
 
+    // Handler for input array
+    const handleInputArrayChange = (options) => {
+        console.log(options);
+        setEquipmentData((prevState) => ({
+            ...prevState,
+            category: options
+        }));
+    }
+
     // Only rendered when document is in editing mode
     const renderInputFieldEditSection = () => {
         return (
@@ -325,7 +357,13 @@ const ManageEquipmentMaintenance = ({ match }) => {
                     {/* Category */}
                     <Col className="c-Input c-Input__Category c-Input c-Input--edit">
                         <label htmlFor="category">Category</label>
-                        <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="category" value={equipmentData.category} />
+                        <Select
+                            isMulti
+                            options={categoryList}
+                            placeholder="Select Category"
+                            onChange={handleInputArrayChange}
+                            name="categories"
+                        />
                     </Col>
                     {/* Ref. No. */}
                     <Col className="c-Input c-Input__Ref-no c-Input--edit">
@@ -387,7 +425,14 @@ const ManageEquipmentMaintenance = ({ match }) => {
                     {/* Category */}
                     <Col className="c-Input c-Input__Category c-Input--read-only">
                         <label htmlFor="category">Category</label>
-                        <input readOnly type="text" name="category" value={equipmentData.category} />
+                        <input readOnly type="text" name="category" value={(() => {
+                            let catStr = "";
+                            equipmentData.category.forEach((data) => {
+                                catStr += data + ", "
+                            });
+
+                            return catStr.slice(0, -2);;
+                        })()} />
                     </Col>
                     {/* Ref. No. */}
                     <Col className="c-Input c-Input__Ref-no c-Input--read-only">
@@ -583,7 +628,6 @@ const ManageEquipmentMaintenance = ({ match }) => {
                     {/* Danger Zone */}
                     <h2 className="c-Danger-zone__Title">Danger Zone</h2>
                     <div className="c-Danger-zone__Row">
-                        {console.log(equipmentData.archivedAt)}
                         {
                             equipmentData.archivedAt === null ?
                                 <>
@@ -620,7 +664,6 @@ const ManageEquipmentMaintenance = ({ match }) => {
 
                     {/* Maintenance Cycles Table section */}
                     <div className="c-Manage-equipment-maintenance__Cycles-table c-Main__Cycles-table">
-                        {console.log(maintenanceCyclesData)}
                         {
                             maintenanceCyclesData.length !== 0 ?
                                 <BootstrapTable

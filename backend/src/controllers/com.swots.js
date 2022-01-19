@@ -50,27 +50,47 @@ module.exports.insertSwot = async (req, res, next) => {
             throw new E.ParamTypeError('approved_by', req.body.approved_by, 1);
 
         // check author for edit rights
-        const { edit, employee: authorEmployee } = await findRights(created_by, companyId, 'm04_01');
+        const { edit, employee: authorEmployee } = await findRights(
+            created_by,
+            companyId,
+            'm04_01'
+        );
         if (!edit) throw new E.PermissionError('edit');
 
         // check approver for appove rights
-        const { approve, employee: approvingEmployee } = await findRights(approved_by, companyId, 'm04_01');
+        const { approve, employee: approvingEmployee } = await findRights(
+            approved_by,
+            companyId,
+            'm04_01'
+        );
         if (!approve) throw new E.PermissionError('approve');
 
         // check if the employees are from the same company
         if (authorEmployee.fk_company_id !== approvingEmployee.fk_company_id)
             throw new E.ForeignOrganisationError();
 
-        const { swot_id, status } = await insertSwot({ companyId, ...req.body, created_by, approved_by });
+        const { swot_id, status } = await insertSwot({
+            companyId,
+            ...req.body,
+            created_by,
+            approved_by
+        });
 
         const emailContent = templates.documentApproval(
+            `${approvingEmployee.firstname} ${approvingEmployee.lastname}`,
             `${authorEmployee.firstname} ${authorEmployee.lastname}`,
-            'Policies',
-            `${authorEmployee.firstname} ${authorEmployee.lastname}`
+            'SWOT',
+            'swot',
+            'SWOT'
         );
 
-        sendEmail(approvingEmployee.email, 'A document requires your approval', emailContent)
-            .catch((error) => console.log(`Non-fatal: Failed to send email\n${error}`));
+        sendEmail(
+            approvingEmployee.email,
+            'A document requires your approval',
+            emailContent
+        ).catch((error) =>
+            console.log(`Non-fatal: Failed to send email\n${error}`)
+        );
 
         res.status(201).send(r.success201({ swot_id, status }));
         return next();
@@ -113,7 +133,8 @@ module.exports.findSwotById = async (req, res, next) => {
             where: {
                 fk_company_id: companyId,
                 swot_id: swotId
-            }, swotId,
+            },
+            swotId,
             limit: 1,
             includeItems: true
         });
@@ -152,15 +173,13 @@ module.exports.findSwotsByStatus = async (req, res, next) => {
             const limitSchema = Yup.number().positive().integer().min(1).default(3);
             const offsetSchema = Yup.number().positive().integer().min(0).default(0);
 
-            search.limit = await limitSchema.validate(limit)
-                .catch(() => {
-                    throw new E.ParamValueError('limit');
-                });
+            search.limit = await limitSchema.validate(limit).catch(() => {
+                throw new E.ParamValueError('limit');
+            });
 
-            search.offset = await offsetSchema.validate(offset)
-                .catch(() => {
-                    throw new E.ParamValueError('offset');
-                });
+            search.offset = await offsetSchema.validate(offset).catch(() => {
+                throw new E.ParamValueError('offset');
+            });
 
             // get shallow documents
             search.includeItems = false;
@@ -189,7 +208,11 @@ module.exports.rejectSwot = async (req, res, next) => {
         const { companyId, swotId } = req.params;
 
         // check for permission for reject
-        const { approve } = await findRights(rejected_by, companyId, 'm04_01');
+        const { approve, employee: approvingEmployee } = await findRights(
+            rejected_by,
+            companyId,
+            'm04_01'
+        );
         if (!approve) throw new E.PermissionError('reject');
 
         const [toBeRejected] = await findSwots({
@@ -209,7 +232,35 @@ module.exports.rejectSwot = async (req, res, next) => {
             status: DOCUMENT_STATUS.REJECTED
         });
 
-        // TODO email notification
+        // authors
+        const created_by = parseInt(toBeRejected.created_by);
+        if (isNaN(created_by))
+            throw new E.ParamTypeError('created_by', req.body.created_by, 1);
+
+        // check authors for appove rights
+        const { employee: authorEmployee } = await findRights(
+            created_by,
+            companyId,
+            'm04_01'
+        );
+
+        //* TODO EMAIL FOR REJECTED
+
+        const emailContent = templates.documentApproval(
+            `${approvingEmployee.firstname} ${approvingEmployee.lastname}`,
+            `${authorEmployee.firstname} ${authorEmployee.lastname}`,
+            'SWOT nono',
+            'swot',
+            'SWOT'
+        );
+
+        sendEmail(
+            approvingEmployee.email,
+            'A document requires your approval',
+            emailContent
+        ).catch((error) =>
+            console.log(`Non-fatal: Failed to send email\n${error}`)
+        );
 
         res.status(200).send(r.success200());
         return next();
@@ -273,7 +324,7 @@ module.exports.approveSwot = async (req, res, next) => {
             });
         }
         catch (error) {
-            // if for some reason fail to update 
+            // if for some reason fail to update
             // pending form to become active
             // reverse change on active swot
             await currentActive?.update({
@@ -308,7 +359,9 @@ module.exports.deleteSwot = async (req, res, next) => {
             where: (Op) => ({
                 fk_company_id: companyId,
                 swot_id: swotId,
-                status: { [Op.or]: [DOCUMENT_STATUS.ARCHIVED, DOCUMENT_STATUS.REJECTED] }
+                status: {
+                    [Op.or]: [DOCUMENT_STATUS.ARCHIVED, DOCUMENT_STATUS.REJECTED]
+                }
             }),
             limit: 1,
             includeItems: false
@@ -318,7 +371,9 @@ module.exports.deleteSwot = async (req, res, next) => {
         if (toBeDeleted.status === DOCUMENT_STATUS.REJECTED) {
             // if the person deleting this rejected document is not its author
             if (toBeDeleted.created_by !== deleted_by)
-                throw new E.EmployeeError('Cannot delete another employee\'s rejected document');
+                throw new E.EmployeeError(
+                    'Cannot delete another employee\'s rejected document'
+                );
             await deleteSwot(companyId, swotId, true);
         }
         else {

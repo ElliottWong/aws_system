@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { Col, Container, Row } from 'react-bootstrap';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import DateTimePicker from 'react-datetime-picker';
+import { useHistory } from 'react-router-dom';
+import Select from "react-select";
+import { toast, ToastContainer } from 'react-toastify';
+import ErrorCard from '../../common/ErrorCard';
+import config from '../../config/config';
 import PageLayout from '../../layout/PageLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import jwt_decode from "jwt-decode";
-import axios from 'axios';
-import config from '../../config/config';
-import ErrorCard from '../../common/ErrorCard';
-import { Container, Row, Col } from 'react-bootstrap';
-import { ToastContainer, toast } from 'react-toastify';
-import { confirmAlert } from 'react-confirm-alert';
-import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 import TokenManager from '../../utilities/tokenManager';
-import { useHistory, NavLink } from 'react-router-dom';
 
 const AddMaintenanceCycle = ({ match }) => {
     const token = TokenManager.getToken();
@@ -26,14 +24,15 @@ const AddMaintenanceCycle = ({ match }) => {
     const [loading, setLoading] = useState(false);
     const [inputTouched, setInputTouched] = useState(false);
     const [maintenanceData, setMaintenanceData] = useState({
-        name: '',
-        category: '',
-        reference_number: '',
-        register_number: '',
-        model: '',
-        serial_number: '',
+        type: '',
+        responsible: '',
+        freq_multiplier: '',
+        freq_unit_time: '',
+        freq_unit_time_UI: '',
+        last_service_at: new Date(),
+        assignees: []
     });
-    const [categoryList, setCategoryList] = useState([]);
+    const [userList, setUserList] = useState([]);
     const [renderErrorCard, setRenderErrorCard] = useState({
         render: false,
         errMsg: null,
@@ -48,16 +47,24 @@ const AddMaintenanceCycle = ({ match }) => {
             console.log(maintenanceData);
             (async () => {
                 try {
-                    const resInsertOneEquipment = await axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment`,
+                    const resInsertOneMaintenance = await axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment/${equipmentID}/all-maintenance`,
                         maintenanceData, {
                         headers: {
                             "Authorization": `Bearer ${token}`
                         }
                     });
-                    console.log(resInsertOneEquipment);
+                    console.log(resInsertOneMaintenance);
                     toast.success(<>Success!<br />Message: <b>New equipment has been added!</b></>);
-                } catch (error) {
-                    console.log(error);
+                } catch (err) {
+                    console.log(err);
+                    console.log(err.response);
+                    let errCode = "Error!";
+                    let errMsg = "Error!"
+                    if (err.response !== undefined) {
+                        errCode = err.response.status;
+                        errMsg = err.response.data.message;
+                    }
+                    toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
                 }
             })();
         } else if (buttonType === "cancel") {
@@ -74,6 +81,45 @@ const AddMaintenanceCycle = ({ match }) => {
         }));
     }
 
+    // Handler for input 
+    const handleTimeInputChange = (event) => {
+        let unitTime;
+        // if(event.target.value === "Days") unitTime = 1;
+        if (event.target.value === "Weeks") unitTime = "week";
+        if (event.target.value === "Months") unitTime = "month";
+        if (event.target.value === "Years") unitTime = "year";
+
+        // Set string value for backend endpoint
+        setMaintenanceData((prevState) => ({
+            ...prevState,
+            [event.target.name]: unitTime
+        }));
+
+        // Set string value for frontend
+        setMaintenanceData((prevState) => ({
+            ...prevState,
+            freq_unit_time_UI: event.target.value
+        }));
+    }
+
+    // Handler for setting last service date 
+    const setLastServiceDate = (date) => {
+        console.log(date);
+        setMaintenanceData((prevState) => ({
+            ...prevState,
+            last_service_at: date
+        }));
+    }
+
+    // Handler for input array
+    const handleInputArrayChange = (options) => {
+        console.log(options);
+        setMaintenanceData((prevState) => ({
+            ...prevState,
+            assignees: options
+        }));
+    }
+
     const renderInputFieldEditSection = () => {
         return (
             <Container className="l-Manage-equipment__Inputs">
@@ -85,32 +131,38 @@ const AddMaintenanceCycle = ({ match }) => {
                         <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="type" value={maintenanceData.type} />
                     </Col>
                     {/* Responsible */}
-                    <Col className="c-Input c-Input__Category c-Input c-Input--edit">
-                        <label htmlFor="responsible">Responsible</label>
-                        <select onFocus={() => setInputTouched(true)} type="text" name="responsible" onChange={handleInputChange} value={maintenanceData.responsible || 'Error'}>
-                            <option>{!categoryList ? "No users found!" : "Select Users"}</option>
-                            {!categoryList ? null : categoryList.map((category, index) => (
-                                <option key={index} value={category.name}>
-                                    {category.name}
-                                </option>
-                            ))}
-                        </select>
+                    <Col className="c-Input c-Input__Responsible c-Input c-Input--edit">
+                        <label htmlFor="responsible">Responsible Users</label>
+                        <Select
+                            isMulti
+                            options={userList}
+                            placeholder="Select Users"
+                            onChange={handleInputArrayChange}
+                        />
                     </Col>
                     {/* Maintenance Frequency */}
-                    <Col className="c-Input c-Input__Ref-no c-Input--edit">
+                    <Col className="c-Input c-Input__Maintenance-frequency c-Input--edit">
                         <label htmlFor="maintenanceFrequency">Maintenance Frequency</label>
-                        <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="maintenanceMultiplier" value={maintenanceData.maintenanceMultiplier} />
-                        <select onFocus={() => setInputTouched(true)} type="text" name="maintenanceUnitTime" onChange={handleInputChange} value={maintenanceData.maintenanceUnitTime}>
-                            <option>Select Time Unit</option>
-                            <option>Days</option>
-                            <option>Weeks</option>
-                            <option>Months</option>
-                        </select>
+                        <div className='c-Input__Maintenance-frequency--input'>
+                            <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="freq_multiplier" value={maintenanceData.freq_multiplier} />
+                            <select onFocus={() => setInputTouched(true)} type="text" name="freq_unit_time" onChange={handleTimeInputChange} value={maintenanceData.freq_unit_time_UI}>
+                                <option>Select Time Unit</option>
+                                {/* <option>Days</option> */}
+                                <option>Weeks</option>
+                                <option>Months</option>
+                                <option>Years</option>
+                            </select>
+                        </div>
                     </Col>
                     {/* Last Service Date */}
                     <Col className="c-Input c-Input__Reg-no c-Input--edit">
-                        <label htmlFor="lastServiceDate">Last Service Date</label>
-                        <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="lastServiceDate" value={maintenanceData.lastServiceDate} />
+                        <label htmlFor="last_service_at">Last Service Date</label>
+                        <DateTimePicker
+                            onChange={setLastServiceDate}
+                            value={maintenanceData.last_service_at}
+                            className="c-Form__Date"
+                            format="dd/MM/y"
+                        />
                     </Col>
                 </Row>
             </Container>
@@ -120,19 +172,17 @@ const AddMaintenanceCycle = ({ match }) => {
     useEffect(() => {
         (async () => {
             try {
-                let tempCategoryData = [];
+                let tempUsersData = [];
                 // Get all equipment categories
-                const resAllCategories = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories`);
-                console.log(resAllCategories);
-                tempCategoryData = resAllCategories.data.results;
-                console.log(tempCategoryData);
+                const resAllUsers = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_01/employees`);
+                console.log(resAllUsers);
+                tempUsersData = resAllUsers.data.results;
+                console.log(tempUsersData);
 
-                setCategoryList(() => {
-                    if (tempCategoryData.length === 0) {
-                        return null;
-                    }
-                    return tempCategoryData.map((data) => ({
-                        name: `${data.name}`
+                setUserList(() => {
+                    return tempUsersData.map((data) => ({
+                        label: data.account.username,
+                        value: data.employee_id
                     }));
                 });
             } catch (error) {
@@ -154,14 +204,14 @@ const AddMaintenanceCycle = ({ match }) => {
                 draggable
                 pauseOnHover
             />
-            <PageLayout sideNavStatus={sideNavStatus} setSideNavStatus={setSideNavStatus} title='Equipment Maintenance' activeLink="/equipment-maintenance/add-equipment">
+            <PageLayout sideNavStatus={sideNavStatus} setSideNavStatus={setSideNavStatus} title='Manage Maintenance Cycle' activeLink="/equipment-maintenance">
                 <div className="c-Manage-equipment-maintenance c-Main">
                     {/* Breadcrumb */}
                     <Breadcrumb className="c-Equipment-maintenance__Breadcrumb l-Breadcrumb">
                         <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
                         <Breadcrumb.Item href="/equipment-maintenance">Equipment Maintenance Program</Breadcrumb.Item>
                         <Breadcrumb.Item href={`/equipment-maintenance/manage-equipment/${equipmentID}`}>Manage Equipment</Breadcrumb.Item>
-                        <Breadcrumb.Item active>Add Equipment</Breadcrumb.Item>
+                        <Breadcrumb.Item active>Add Maintenance Cycle</Breadcrumb.Item>
                     </Breadcrumb>
                     {/* Top section */}
                     <div className="c-Manage-equipment__Top c-Main__Top">

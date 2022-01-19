@@ -22,7 +22,7 @@ import ErrorCard from '../../common/ErrorCard';
 import { Container, Row, Col } from 'react-bootstrap';
 import { useHistory, NavLink } from 'react-router-dom';
 import StatusPill from '../../common/StatusPill';
-import { historyEquipmentMaintenanceColumns, licenseColumns } from '../../config/tableColumns';
+import { historyLicenseColumns, licenseColumns } from '../../config/tableColumns';
 import TokenManager from '../../utilities/tokenManager.js';
 
 const Licenses = () => {
@@ -36,7 +36,7 @@ const Licenses = () => {
     // State Declarations
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
     const [licenseData, setLicenseData] = useState([]);
-    const [archivedEquipmentData, setArchivedEquipmentData] = useState([]);
+    const [archivedLicenseData, setArchivedLicenseData] = useState([]);
 
     useEffect(() => {
         let componentMounted = true;
@@ -63,11 +63,11 @@ const Licenses = () => {
                         tempLicenseData = resAllLicenses.data.results;
                         console.log(tempLicenseData);
 
-                        // Get all archived equipment
-                        // const resArchivedEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/equipment/archives`);
-                        // console.log(resArchivedEquipments);
-                        // tempArchivedLicenseData = resArchivedEquipments.data.results;
-                        // console.log(tempArchivedLicenseData);
+                        // Get all archived licenses
+                        const resArchivedLicenses = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/licence-registry/all-licences?archived=1`);
+                        console.log(resArchivedLicenses);
+                        tempArchivedLicenseData = resArchivedLicenses.data.results;
+                        console.log(tempArchivedLicenseData);
                     } else {
                         const resSpecificEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/equipment/assignments`);
                         console.log(resSpecificEquipments);
@@ -81,7 +81,13 @@ const Licenses = () => {
                                 serialNo: index + 1,
                                 license: data.licence_name,
                                 licenseNo: data.licence_number,
-                                expDate: data.expires_at,
+                                expDate: (() => {
+                                    if (data.expires_at) {
+                                        return data.expires_at
+                                    } else {
+                                        return 'NA'
+                                    }
+                                })(),
                                 externalAgency: data.external_organisation,
                                 responsibleUser: (() => {
                                     let userString = ""
@@ -92,32 +98,39 @@ const Licenses = () => {
                                     return userString.slice(0, -2);
                                 })(),
                                 status: '',
-                                action_manage: `/licenses/manage-licenses/${data.licence_id}`
+                                action_manage: `/licenses/manage-license/${data.licence_id}`
                             }
                         });
                     });
 
-                    // setArchivedEquipmentData(() => {
-                    //     return tempArchivedLicenseData.map((data, index) => {
-                    //         return {
-                    //             id: data.equipment_id,
-                    //             serialNo: index + 1,
-                    //             name: data.name,
-                    //             category: (() => {
-                    //                 let categoryString = ""
-                    //                 // eslint-disable-next-line array-callback-return
-                    //                 data.categories.map((catData, index) => {
-                    //                     categoryString += catData.name + ", ";
-                    //                 });
-                    //                 return categoryString.slice(0, -2);
-                    //             })(),
-                    //             refNo: data.reference_number,
-                    //             model: data.model,
-                    //             archived_on: dayjs(new Date(data.archived_at)).format("MMMM D, YYYY h:mm A"),
-                    //             action_view: `/equipment-maintenance/manage-equipment/${data.equipment_id}`
-                    //         }
-                    //     });
-                    // });
+                    setArchivedLicenseData(() => {
+                        return tempArchivedLicenseData.map((data, index) => {
+                            return {
+                                id: data.equipment_id,
+                                serialNo: index + 1,
+                                license: data.licence_name,
+                                licenseNo: data.licence_number,
+                                expDate: (() => {
+                                    if (data.expires_at) {
+                                        return data.expires_at
+                                    } else {
+                                        return 'N.A'
+                                    }
+                                })(),
+                                externalAgency: data.external_organisation,
+                                responsibleUser: (() => {
+                                    let userString = ""
+                                    // eslint-disable-next-line array-callback-return
+                                    data.assignees.map((userData, index) => {
+                                        userString += userData.account.username + ", ";
+                                    });
+                                    return userString.slice(0, -2);
+                                })(),
+                                archived_on: dayjs(new Date(data.archived_at)).format("MMMM D, YYYY h:mm A"),
+                                action_manage: `/licenses/manage-license/${data.licence_id}`
+                            }
+                        });
+                    });
                 }
             } catch (error) {
                 console.log(error);
@@ -188,8 +201,8 @@ const Licenses = () => {
                             wrapperClasses="c-Equipment-maintenance__Archives-table"
                             bordered={false}
                             keyField='serialNo'
-                            data={archivedEquipmentData}
-                            columns={historyEquipmentMaintenanceColumns}
+                            data={archivedLicenseData}
+                            columns={historyLicenseColumns}
                             pagination={paginationFactory()}
                         />
                     </div>

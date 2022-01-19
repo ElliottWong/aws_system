@@ -22,25 +22,28 @@ const PostEvaluationForm = ({ match }) => {
     const pathname = location.pathname;
     const pathnameArr = pathname.split("/");
 
-
     // State declarations
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
     const [questions, setQuestions] = useState([]);
-    const trainingRecordID = match.params.trainingRecordID;
     const [formType, setFormType] = useState(null);
 
+    const trainingRecordID = match.params.trainingRecordID;
+
     useEffect(() => {
-        // As an approver
-        if (pathnameArr[1] === "settings") {
-            setFormType(() => "approver");
-        }
-        // As a trainee
-        else if (pathnameArr[1] === "training") {
-            setFormType(() => "trainee");
-        }
-        else {
+
+        if (pathnameArr[1] === "training") {
+            // As an approver
+            if (pathnameArr[2] === "manage") {
+                setFormType(() => "approver");
+            }
+            // As a trainee
+            else {
+                setFormType(() => "trainee");
+            }
+        } else {
             history.push("/page-not-found");
         }
+
     }, []);
 
     const handleSubmitPostEvaluation = () => {
@@ -64,10 +67,22 @@ const PostEvaluationForm = ({ match }) => {
                 <div className="c-Post-evaluation-form c-Main">
                     {/* Breadcrumb */}
                     <Breadcrumb className="c-Post-evaluation-form__Breadcrumb l-Breadcrumb">
-                        <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/training">Trainings</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/training/training-record">Manage My Training Record</Breadcrumb.Item>
-                        <Breadcrumb.Item active>Post Training Evaluation</Breadcrumb.Item>
+                        {
+                            formType === "approver" ?
+                                <>
+                                    <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
+                                    <Breadcrumb.Item href="/training">Trainings</Breadcrumb.Item>
+                                    <Breadcrumb.Item href={`/training/training-record/manage/${trainingRecordID}`}>Manage My Training Record</Breadcrumb.Item>
+                                    <Breadcrumb.Item active>Post Training Evaluation</Breadcrumb.Item>
+                                </> :
+                                <>
+                                    <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
+                                    <Breadcrumb.Item href="/training/manage">Manage Trainings</Breadcrumb.Item>
+                                    <Breadcrumb.Item href={`/training/manage/training-record/manage/${trainingRecordID}`}>Manage Training</Breadcrumb.Item>
+                                    <Breadcrumb.Item active>Post Training Evaluation</Breadcrumb.Item>
+                                </>
+                        }
+
                     </Breadcrumb>
                     {/* Top section */}
                     <div className="c-Post-evaluation-form__Top c-Main__Top">
@@ -111,8 +126,8 @@ const PostEvaluationForm = ({ match }) => {
                                     <div className="c-Document-form__Heading">
                                         <h1>{formType === "approver" ? "Approver" : "Trainee"} Section</h1>
                                     </div>
-                                    <div className = "c-Document-form__Fields">
-                                        
+                                    <div className="c-Document-form__Fields">
+
                                     </div>
                                 </div>
                             </div>

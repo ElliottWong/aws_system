@@ -1,26 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import PageLayout from '../../layout/PageLayout';
-import DocumentLayout from '../../layout/DocumentLayout';
-import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
-import TabRow from '../../common/TabRow';
-import DocumentBtnSection from '../../common/DocumentBtnSection';
-import RenderDocument from '../../common/RenderDocument';
-import { TAB } from '../../config/enums';
-import useDocAxios from '../../hooks/useDocAxios';
-import dayjs from 'dayjs';
-import { ToastContainer } from 'react-toastify';
-import jwt_decode from "jwt-decode";
 import axios from 'axios';
+import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { useHistory } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import config from '../../config/config';
-import ErrorCard from '../../common/ErrorCard';
-import { Container, Row, Col } from 'react-bootstrap';
-import { useHistory, NavLink } from 'react-router-dom';
-import StatusPill from '../../common/StatusPill';
-import { historyEquipmentMaintenanceColumns, equipmentMaintenanceColumns, categoryColumns } from '../../config/tableColumns';
+import { categoryColumns, equipmentMaintenanceColumns, historyEquipmentMaintenanceColumns } from '../../config/tableColumns';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
 import TokenManager from '../../utilities/tokenManager.js';
 
 const EquipmentMaintenance = () => {
@@ -36,19 +25,24 @@ const EquipmentMaintenance = () => {
     const [equipmentData, setEquipmentData] = useState([]);
     const [categoryData, setCategoryData] = useState([]);
     const [archivedEquipmentData, setArchivedEquipmentData] = useState([]);
+    const [filteredCategoryID, setFilteredCategoryID] = useState(null);
+    const [categoryFilterDisplayName, setCategoryFilterDisplayName] = useState('');
 
     useEffect(() => {
         let componentMounted = true;
 
         (async () => {
             try {
-                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_01/employees`);
+                // Can approve people can create new equipment
+                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/approve/m07_01/employees`);
+                // Can edit people can upload new maintenance record
+                // More code next time 
                 if (componentMounted) {
-                    let canEdit = false;
+                    let canApprove = false;
                     // Check if user can create new equipment
                     resClausePermission.data.results.forEach((data, index) => {
                         if (data.employee_id === userID) {
-                            canEdit = true;
+                            canApprove = true;
                         }
                     });
 
@@ -56,12 +50,21 @@ const EquipmentMaintenance = () => {
                     let tempCategoryData = [];
                     let tempArchivedEquimentData = [];
 
-                    if (canEdit) {
-                        // Get all equipment in use
-                        const resAllEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment`);
-                        console.log(resAllEquipments);
-                        tempEquipmentData = resAllEquipments.data.results;
-                        console.log(tempEquipmentData);
+                    if (canApprove) {
+                        // Check if user tries to filter equipment by category
+                        if (!filteredCategoryID) {
+                            // Get all equipment in use
+                            const resAllEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment`);
+                            console.log(resAllEquipments);
+                            tempEquipmentData = resAllEquipments.data.results;
+                            console.log(tempEquipmentData);
+                        } else {
+                            // Get all equipment of filtered category
+                            const resAllEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories/${filteredCategoryID}/all-equipment`);
+                            console.log(resAllEquipments);
+                            tempEquipmentData = resAllEquipments.data.results.equipment;
+                            console.log(tempEquipmentData);
+                        }
 
                         // Get all equipment categories
                         const resAllCategories = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories`);
@@ -74,10 +77,23 @@ const EquipmentMaintenance = () => {
                         console.log(resArchivedEquipments);
                         tempArchivedEquimentData = resArchivedEquipments.data.results;
                         console.log(tempArchivedEquimentData);
-                    } else {
-                        const resSpecificEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/assigned-equipment`);
-                        console.log(resSpecificEquipments);
-                        tempEquipmentData = resSpecificEquipments.data.results;
+                    }
+                    // need seperate into else if can edit then else in future
+                    else {
+                        if (!filteredCategoryID) {
+                            // Get all assigned equipment in use
+                            const resSpecificEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/assigned-equipment`);
+                            console.log(resSpecificEquipments);
+                            tempEquipmentData = resSpecificEquipments.data.results;
+                            console.log(tempEquipmentData);
+                        }
+                        else {
+                            // Get all assigned equipment of filtered category
+                            const resSpecificEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories/${filteredCategoryID}/assigned-equipment`);
+                            console.log(resSpecificEquipments);
+                            tempEquipmentData = resSpecificEquipments.data.results;
+                            console.log(tempEquipmentData);
+                        }
                     }
 
                     setCategoryData(() => {
@@ -101,7 +117,7 @@ const EquipmentMaintenance = () => {
                                 category: (() => {
                                     let categoryString = ""
                                     // eslint-disable-next-line array-callback-return
-                                    data.categories.map((catData, index) => {
+                                    data.categories.map((catData) => {
                                         categoryString += catData.name + ", ";
                                     });
                                     return categoryString.slice(0, -2);
@@ -122,7 +138,7 @@ const EquipmentMaintenance = () => {
                                 category: (() => {
                                     let categoryString = ""
                                     // eslint-disable-next-line array-callback-return
-                                    data.categories.map((catData, index) => {
+                                    data.categories.map((catData) => {
                                         categoryString += catData.name + ", ";
                                     });
                                     return categoryString.slice(0, -2);
@@ -144,7 +160,7 @@ const EquipmentMaintenance = () => {
             componentMounted = false;
         });
 
-    }, []);
+    }, [filteredCategoryID]);
 
     // Handlers
     const handleBtn = () => {
@@ -154,6 +170,11 @@ const EquipmentMaintenance = () => {
     const handleBtnAddCategory = () => {
         history.push("/equipment-maintenance/add-category");
     };
+
+    // Handler for input 
+    const handleInputChange = (event) => {
+        setFilteredCategoryID(event.target.value);
+    }
 
     return (
         <>
@@ -186,6 +207,18 @@ const EquipmentMaintenance = () => {
                         >
                             Add New Equipment
                         </button>
+                    </div>
+                    {/* Filter */}
+                    <div className='c-Equipment-maintenance__Filter'>
+                        <h4>Filter (Category)</h4>
+                        <select type="text" name="filterCategory" onChange={handleInputChange} value={filteredCategoryID || 'Error'}>
+                            <option>{!categoryData ? "No categories found!" : "All"}</option>
+                            {!categoryData ? null : categoryData.map((category, index) => (
+                                <option key={index} value={category.id}>
+                                    {category.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     {/* Table section */}
                     <div className="c-Equipment-maintenance__Table">

@@ -33,7 +33,7 @@ const checkCompanyEmployees = async (companyId, employeeIds = []) => {
     // we find an employee by their employee id and company id
     // if that does not have any results (ie not 1)
     // the employee does not exist within the company/system
-    const invalid = employees.some((count) => count !== 1);
+    const invalid = employees.some((count) => !(count === 1));
     return !invalid;
 };
 
@@ -63,16 +63,44 @@ const convertUnitTime = (value) => {
         case 'year':
             return 365;
         default:
-            throw new E.ParamValueError('freq_unit_time', 'expected "week", "month" or "year"');
+            throw new E.ParamValueError('freq_unit_time', '"week", "month" or "year"');
     }
 };
 
 const clampNegative = (value) => value < 0 ? 0 : value;
 
+const isAssignedMaintenance = async (maintenanceId, employeeId) => {
+    const count = await EMP.MaintenanceAssignees.findAll({
+        where: {
+            fk_maintenance_id: maintenanceId,
+            fk_employee_id: employeeId
+        }
+    });
+
+    const isAssigned = count.length === 1;
+    return isAssigned;
+};
+
+const calculateFrequency = (multiplier, unitTime, lastServiceAt) => {
+    const nextServiceAt = addDays(lastServiceAt, multiplier * unitTime);
+
+    const now = new Date();
+    const daysLeft = differenceInCalendarDays(nextServiceAt, now);
+    const totalDays = differenceInCalendarDays(nextServiceAt, lastServiceAt);
+    const daysLeftPct = clampNegative((daysLeft / totalDays) * 100);
+
+    return {
+        nextServiceAt,
+        daysLeft,
+        daysLeftPct
+    };
+};
+
 module.exports.helpers = {
     checkCompanyEmployees,
     checkMultiplierRange,
-    convertUnitTime
+    convertUnitTime,
+    isAssignedMaintenance
 };
 
 // ============================================================
@@ -82,7 +110,7 @@ module.exports.insertOneMaintenance = async (equipmentId, companyId, createdBy, 
     if (!isOwner) throw new E.PermissionError('create maintenance for equipment');
 
     const {
-        title,
+        type,
         description,
         freq_multiplier,    // 1 - 99
         freq_unit_time,     // 'week', 'month', 'year'
@@ -94,22 +122,22 @@ module.exports.insertOneMaintenance = async (equipmentId, companyId, createdBy, 
     const unitTime = convertUnitTime(freq_unit_time);
 
     const lastServiceAt = new Date(last_service_at);
-    const nextServiceAt = addDays(lastServiceAt, multiplier * unitTime);
 
-    const now = new Date();
-    const daysLeft = differenceInCalendarDays(nextServiceAt, now);
-    const totalDays = differenceInCalendarDays(nextServiceAt, lastServiceAt);
-    const daysLeftPct = clampNegative((daysLeft / totalDays) * 100);
+    const {
+        nextServiceAt,
+        daysLeft,
+        daysLeftPct
+    } = calculateFrequency(multiplier, unitTime, lastServiceAt);
 
-    const valid = await checkCompanyEmployees(companyId, assignees);
-    if (!valid) throw new E.ForeignEmployeeError();
+    const validAssignments = await checkCompanyEmployees(companyId, assignees);
+    if (!validAssignments) throw new E.ForeignEmployeeError();
 
     const transaction = await db.transaction();
     try {
         const insertedMaintenance = await EMP.Maintenance.create({
             fk_company_id: companyId,
             fk_equipment_id: equipmentId,
-            title,
+            type,
             description,
             freq_multiplier: multiplier,
             freq_unit_time: unitTime,
@@ -138,8 +166,8 @@ module.exports.insertOneMaintenance = async (equipmentId, companyId, createdBy, 
 
 // ============================================================
 
-module.exports.insertMaintenanceUpload = async (maintenanceId, equipmentId, createdBy, data = {}, upload) => {
-    const [isAssigned] = await isAssignedEquipment(equipmentId, createdBy);
+module.exports.insertMaintenanceUpload = async (maintenanceId, createdBy, data = {}, upload) => {
+    const isAssigned = await isAssignedMaintenance(maintenanceId, createdBy);
     if (!isAssigned) throw new E.PermissionError('upload for maintenance');
 
     const {
@@ -160,30 +188,57 @@ module.exports.insertMaintenanceUpload = async (maintenanceId, equipmentId, crea
         created_by: createdBy
     };
 
-    const insertedMaintenanceUpload = await EMP.MaintenanceUploads.create({
-        fk_maintenance_id: maintenanceId,
-        created_by: createdBy,
-        serviced_at,
-        description,
-        file
-    }, { include: 'file' });
+    const servicedAt = new Date(serviced_at);
 
-    return insertedMaintenanceUpload;
+    const transaction = await db.transaction();
+    try {
+        const [insertedUpload, maintenance] = await Promise.all([
+            EMP.MaintenanceUploads.create({
+                fk_maintenance_id: maintenanceId,
+                created_by: createdBy,
+                serviced_at: servicedAt,
+                description,
+                file
+            }, { include: 'file', transaction }),
+
+            EMP.Maintenance.findOne({
+                where: { maintenance_id: maintenanceId },
+                attributes: ['freq_multiplier', 'freq_unit_time']
+            })
+        ]);
+
+        const {
+            freq_multiplier: multiplier,
+            freq_unit_time: unitTime
+        } = maintenance;
+
+        const {
+            nextServiceAt,
+            daysLeft,
+            daysLeftPct
+        } = calculateFrequency(multiplier, unitTime, servicedAt);
+
+        const where = { maintenance_id: maintenanceId };
+
+        await EMP.Maintenance.update({
+            first_notification: false,      // reset notifications
+            second_notification: false,
+            last_service_at: servicedAt,
+            next_service_at: nextServiceAt, // new service
+            days_left: daysLeft,
+            days_left_pct: daysLeftPct
+        }, { where, transaction });
+
+        await transaction.commit();
+        return insertedUpload;
+    }
+    catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
 };
 
 // ============================================================
-
-const isAssignedMaintenance = async (maintenanceId, employeeId) => {
-    const count = await EMP.MaintenanceAssignees.findAll({
-        where: {
-            fk_maintenance_id: maintenanceId,
-            fk_employee_id: employeeId
-        }
-    });
-
-    const isAssigned = count.length === 1;
-    return isAssigned;
-};
 
 module.exports.findOneMaintenance = async function ({
     maintenanceId,
@@ -222,16 +277,43 @@ module.exports.findOneMaintenance = async function ({
 
 module.exports.editOneMaintenance = async (maintenanceId, equipmentId, companyId, createdBy, maintenance = {}) => {
     const {
-        title,
+        type,
         description,
-        freq_multiplier,    // 1 - 99
-        freq_unit_time,     // 'week', 'month', 'year'
-        last_service_at,
-        assignees = []      // employeeIds[]
+        freq_multiplier = false,    // 1 - 99
+        freq_unit_time = false,     // 'week', 'month', 'year'
+        last_service_at = false,
+        assignees = []              // employeeIds[]
     } = maintenance;
 
     const isOwner = await isEquipmentOwner(equipmentId, companyId, createdBy);
     if (!isOwner) throw new E.NotFoundError('equipment');
+
+    // default to false means no value from request
+    // we keep undef as that means no change
+    const multiplier = freq_multiplier === false
+        ? undefined
+        : checkMultiplierRange(freq_multiplier);
+
+    const unitTime = freq_unit_time === false
+        ? undefined
+        : convertUnitTime(freq_unit_time);
+
+    const lastServiceAt = last_service_at === false
+        ? undefined
+        : new Date(last_service_at);
+
+    const isFrequencyAffected = !!multiplier || !!unitTime || !!lastServiceAt;
+
+    // declare undef
+    let nextServiceAt, daysLeft, daysLeftPct;
+
+    // if any of these values are in the request,
+    // we need to recalculate the freq
+    if (isFrequencyAffected) ({
+        nextServiceAt,
+        daysLeft,
+        daysLeftPct
+    } = calculateFrequency(multiplier, unitTime, lastServiceAt));
 
     const where = {
         maintenance_id: maintenanceId,
@@ -242,11 +324,14 @@ module.exports.editOneMaintenance = async (maintenanceId, equipmentId, companyId
     const transaction = await db.transaction();
     try {
         await EMP.Maintenance.update({
-            title,
+            type,
             description,
-            freq_multiplier,
-            freq_unit_time,
-            last_service_at
+            freq_multiplier: multiplier,
+            freq_unit_time: unitTime,
+            last_service_at: lastServiceAt,
+            next_service_at: nextServiceAt,
+            days_left: daysLeft,
+            days_left_pct: daysLeftPct
         }, { where, transaction });
 
         if (assignees.length > 0) {
@@ -316,7 +401,7 @@ module.exports.deleteOneMaintenance = async (maintenanceId, equipmentId, company
 
         const destroyMaintenanceUploads = EMP.MaintenanceUploads.destroy({
             where: {
-                fk_maintenance_id: { maintenanceId }
+                fk_maintenance_id: maintenanceId
             }
         }, { transaction });
 

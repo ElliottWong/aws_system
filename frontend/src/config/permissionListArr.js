@@ -68,13 +68,15 @@ export const normalPermissionListArr = [
     {
         moduleCode: "m07_01",
         description: {
-            edit: "Permission to edit all Equipment Maintenance Program attributes",
+            edit: "Permission to be assigned to Equipment Maintenance items",
+            approve: "Permission to Create Equipment Maintenance Program attributes"
         }
     },
     {
         moduleCode: "m07_02",
         description: {
-            edit: "Permission to edit all Register of Permits, Licences & Cert attributes",
+            edit: "Permission to be assigned to Permis/licenses items",
+            approve: "Permission to Create Permits/licenses"
         }
     },
 ];

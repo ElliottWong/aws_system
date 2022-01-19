@@ -514,7 +514,6 @@ export const maintenanceCycleColumns = [
         dataField: 'action_delete',
         text: '',
         formatter: (cell) => {
-            console.log(cell);
             return cell
         }
     },
@@ -631,6 +630,56 @@ export const licenseColumns = [
     },
 ];
 
+export const historyLicenseColumns = [
+    {
+        dataField: 'id',
+        text: 'Id',
+        hidden: true
+    },
+    {
+        dataField: 'serialNo',
+        text: '#',
+    },
+    {
+        dataField: 'license',
+        text: 'License/Permit/Certificate',
+    },
+    {
+        dataField: 'licenseNo',
+        text: 'License No.',
+    },
+    {
+        dataField: 'expDate',
+        text: 'Exp. Date',
+    },
+    {
+        dataField: 'externalAgency',
+        text: 'Responsible External Agency',
+    },
+    {
+        dataField: 'responsibleUser',
+        text: 'Responsible User',
+    },
+    {
+        dataField: 'archived_on',
+        text: 'Archived On',
+    },
+    {
+        dataField: 'action_manage',
+        text: 'Manage',
+        headerAttrs: {
+            hidden: true
+        },
+        formatter: (cell, row) => {
+            if (cell) {
+                return <NavLink to={cell} >Manage</NavLink>
+            } else {
+                return "N.a."
+            }
+        }
+    },
+];
+
 // ----------------------------------------------------
 // End of Register of Permits, Licenses, Approvals & Certificates
 // ----------------------------------------------------
@@ -659,19 +708,27 @@ export const myTrainingRecordsColumns = [
         text: 'Approver'
     },
     {
-        dataField: 'start_date',
-        text: 'Start Date'
-    },
-    {
-        dataField: 'end_date',
-        text: 'End Date'
-    },
-    {
-        dataField: 'evaluation',
-        text: 'Evaluation',
+        dataField: 'supervisor_evaluation_done',
+        text: 'Evaluation (Approver)',
         formatter: (cell, row) => {
-            if (cell === undefined) {
+            if (cell === undefined || row.attendance === false) {
                 return <p>Nil</p>
+            }
+            if (cell === false) {
+                return <StatusPill type ="pending" />
+            }
+            return <StatusPill type="active" />
+        }
+    },
+    {
+        dataField: 'trainee_evaluation_done',
+        text: 'Evaluation (Trainee)',
+        formatter: (cell, row) => {
+            if (cell === undefined || row.attendance === false) {
+                return <p>Nil</p>
+            }
+            if (cell === false) {
+                return <StatusPill type ="pending" />
             }
             return <StatusPill type="active" />
         }
@@ -682,6 +739,10 @@ export const myTrainingRecordsColumns = [
         formatter: (cell, row) => {
             if (cell === undefined) {
                 return <p>Nil</p>
+            }
+
+            if (cell === false) {
+                return <StatusPill type ="pending" />
             }
             return <StatusPill type="active" />
         }
@@ -726,8 +787,11 @@ export const myTrainingRequestsColumns = [
         dataField: 'request_status',
         text: 'Request status',
         formatter: (cell, row) => {
-            if (row.done_at === undefined) {
-                return <p>Nil</p>
+            if (cell === "pending") {
+                return <StatusPill type ="pending" />
+            }
+            if (cell === "rejected") {
+                return <StatusPill type = "rejected"/>
             }
             return <StatusPill type="active" />
         }

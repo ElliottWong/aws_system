@@ -4,22 +4,30 @@ const StatusPill = ({ type }) => {
     const renderType = () => {
         if (type === "active") {
             return "Active";
-        } else if (type === "overdue") {
+        } 
+        else if (type === "completed") {
+            return "Completed";
+        }
+        else if (type === "overdue") {
             return "Overdue";
-        } else if (type === "almostDue") {
+        } 
+        else if (type === "rejected") {
+            return "Rejected"
+        }
+        else if (type === "almostDue") {
             return "Almost Due";
         } else if (type === "pending") {
             return "Pending";
         } 
         else {
-            return "Active";
+            return "Na";
         }
     };
 
     const renderClassName = () => {
-        if (type === "active") {
+        if (type === "active" || type === "completed") {
             return "active";
-        } else if (type === "overdue") {
+        } else if (type === "overdue" || type === "rejected") {
             return "overdue";
         } else if (type === "almostDue") {
             return "almost-due";
@@ -27,7 +35,7 @@ const StatusPill = ({ type }) => {
             return "pending";
         } 
         else {
-            return "active";
+            return "Na";
         }
     };
 

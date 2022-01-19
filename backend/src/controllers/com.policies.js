@@ -64,10 +64,13 @@ module.exports.insertPolicy = async (req, res, next) => {
             title, policies
         });
 
+
         const emailContent = templates.documentApproval(
+            `${approvingEmployee.firstname} ${approvingEmployee.lastname}`,
             `${authorEmployee.firstname} ${authorEmployee.lastname}`,
-            'Policies',
-            `${authorEmployee.firstname} ${authorEmployee.lastname}`
+            'Company Policy',
+            'company-policy',
+            'Company Policy'
         );
 
         sendEmail(approvingEmployee.email, 'A document requires your approval', emailContent)

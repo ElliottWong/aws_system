@@ -65,9 +65,11 @@ module.exports.insertAchievemnt = async (req, res, next) => {
         }, req.uploads);
 
         const emailContent = templates.documentApproval(
+            `${approvingEmployee.firstname} ${approvingEmployee.lastname}`,
             `${authorEmployee.firstname} ${authorEmployee.lastname}`,
             'Objective Achievement Program',
-            `${authorEmployee.firstname} ${authorEmployee.lastname}`
+            'objective-achievement-program',
+            'Objective Achievement Program'
         );
 
         sendEmail(approvingEmployee.email, 'A document requires your approval', emailContent)

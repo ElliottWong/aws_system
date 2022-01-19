@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import { Col, Container, Row } from 'react-bootstrap';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { confirmAlert } from 'react-confirm-alert';
+import { useHistory } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import CustomConfirmAlert from '../../common/CustomConfirmAlert';
+import ErrorCard from '../../common/ErrorCard';
+import config from '../../config/config';
 import PageLayout from '../../layout/PageLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import jwt_decode from "jwt-decode";
-import axios from 'axios';
-import config from '../../config/config';
-import ErrorCard from '../../common/ErrorCard';
-import { Container, Row, Col } from 'react-bootstrap';
-import { ToastContainer, toast } from 'react-toastify';
-import { confirmAlert } from 'react-confirm-alert';
-import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 import TokenManager from '../../utilities/tokenManager';
-import { useHistory, NavLink } from 'react-router-dom';
-import dayjs from 'dayjs';
 
 const ManageEquipmentCategory = ({ match }) => {
     const token = TokenManager.getToken();
@@ -24,6 +22,7 @@ const ManageEquipmentCategory = ({ match }) => {
     const categoryID = match.params.catID;
 
     // State declarations
+    const [rerender, setRerender] = useState(false); // value of state doesnt matter, only using it to force useffect to execute
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(false);
     const [inputTouched, setInputTouched] = useState(false);
@@ -115,6 +114,57 @@ const ManageEquipmentCategory = ({ match }) => {
         )
     }
 
+    // Handler for deleting maintenance cycle 
+    const handleDeleteCategory = (actionType) => {
+        if (actionType === "deleteCategory") {
+            // Confirmation dialogue for activating this account
+            const message = `Are you sure you want to delete this Category?`;
+            const handler = (onClose) => handleDelete(onClose);
+            const heading = `Confirm Delete?`;
+            const type = "alert"
+            const data = {
+                message,
+                handler,
+                heading,
+                type
+            };
+            confirmAlert({
+                customUI: ({ onClose }) => {
+                    return <CustomConfirmAlert {...data} onClose={onClose} />;
+                }
+            });
+        }
+
+        const handleDelete = (onClose) => {
+            axios.delete(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories/${categoryID}`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then((res) => {
+                    console.log(res);
+                    setRerender((prevState) => !prevState);
+                    onClose();
+                    setTimeout(() => {
+                        toast.success(<>Success!<br />Message: <b>Category has been deleted!</b></>);
+                    }, 0);
+                    history.push("/equipment-maintenance");
+                })
+                .catch((err) => {
+                    console.log(err);
+                    console.log(err.response);
+                    let errCode = "Error!";
+                    let errMsg = "Error!"
+                    if (err.response !== undefined) {
+                        errCode = err.response.status;
+                        errMsg = err.response.data.message;
+                    }
+                    onClose();
+                    toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
+                });
+        }
+    };
+
     useEffect(() => {
         (async () => {
             try {
@@ -197,6 +247,17 @@ const ManageEquipmentCategory = ({ match }) => {
                                 }
                             </>
                     }
+
+                    {/* Danger Zone */}
+                    <h2 className="c-Danger-zone__Title">Danger Zone</h2>
+                    <div className="c-Danger-zone__Row">
+                        <div className='c-Danger-zone__Item'>
+                            <button type="button" className="c-Btn c-Btn--alert-border" onClick={() => handleDeleteCategory('deleteCategory')}>Delete Category</button>
+                            <div className="c-Row__Info">
+                                <p>This action cannot be undone</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </PageLayout>
         </>

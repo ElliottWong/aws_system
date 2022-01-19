@@ -8,7 +8,7 @@ const {
     Documents: { PLC }
 } = require('../schemas/Schemas');
 
-const { insertFile } = require('./files.v2');
+const { insertFile, deleteFileEntirely } = require('./files.v2');
 const { deleteFile } = require('../services/cloudinary.v1');
 
 const E = require('../errors/Errors');
@@ -40,7 +40,41 @@ const isAssignedLicence = async (licenceId, employeeId) => {
     return count > 0;
 };
 
+const isLicenceOwner = async (licenceId, companyId, employeeId) => {
+    const licence = await PLC.Licences.findOne({
+        where: {
+            licence_id: licenceId,
+            fk_company_id: companyId,
+            created_by: employeeId
+        }
+    });
+    return [!!licence, licence];
+};
+
+// null in formdata is likely a string
+const parseNull = (value) => value === 'null' ? null : value;
+
 const clampNegative = (value) => value < 0 ? 0 : value;
+
+const calculateFrequency = (start, end) => {
+    const issuedAt = new Date(start);
+
+    if (!end) {
+        const expiresAt = null, daysLeft = null, daysLeftPct = null;
+        return { issuedAt, expiresAt, daysLeft, daysLeftPct };
+    }
+
+    const expiresAt = new Date(end);
+    const now = new Date();
+
+    const daysLeft = differenceInCalendarDays(expiresAt, now);
+    const totalDays = differenceInCalendarDays(expiresAt, issuedAt);
+    const daysLeftPct = clampNegative((daysLeft / totalDays) * 100);
+
+    return { issuedAt, expiresAt, daysLeft, daysLeftPct };
+};
+
+// ============================================================
 
 module.exports.insertLicence = async (companyId, createdBy, licence = {}) => {
     const {
@@ -52,21 +86,15 @@ module.exports.insertLicence = async (companyId, createdBy, licence = {}) => {
         assignees = []
     } = licence;
 
-    const iat = new Date(issued_at);
-    const exp = expires_at ? new Date(expires_at) : null;
-
     const valid = await companyCheck(companyId, assignees);
     if (!valid) throw new E.ForeignEmployeeError();
 
-    let daysLeft = null,
-        daysLeftPct = null;
-
-    if (exp !== null) {
-        const now = new Date();
-        daysLeft = differenceInCalendarDays(exp, now);
-        const totalDays = differenceInCalendarDays(exp, iat);
-        daysLeftPct = clampNegative((daysLeft / totalDays) * 100);
-    }
+    const {
+        issuedAt,
+        expiresAt,
+        daysLeft,
+        daysLeftPct
+    } = calculateFrequency(issued_at, expires_at);
 
     const transaction = await db.transaction();
     try {
@@ -76,8 +104,8 @@ module.exports.insertLicence = async (companyId, createdBy, licence = {}) => {
             licence_name,
             licence_number,
             external_organisation,
-            issued_at: iat,
-            expires_at: exp,
+            issued_at: issuedAt,
+            expires_at: expiresAt,
             days_left: daysLeft,
             days_left_pct: daysLeftPct
         }, { transaction });
@@ -101,7 +129,7 @@ module.exports.insertLicence = async (companyId, createdBy, licence = {}) => {
 // ============================================================
 
 // TODO test me
-module.exports.insertRenewalUpload = async (licenceId, companyId, createdBy, renewedAt, upload) => {
+module.exports.insertRenewalUpload = async (licenceId, companyId, createdBy, dates = {}, upload) => {
     const licence = await PLC.Licences.findOne({
         where: {
             licence_id: licenceId,
@@ -111,39 +139,65 @@ module.exports.insertRenewalUpload = async (licenceId, companyId, createdBy, ren
 
     if (!licence) throw new E.NotFoundError('licence');
 
-    const isAssigned = await isAssignedLicence(licence, createdBy);
-    if (isAssigned) throw new E.PermissionError('upload renewal for this licence');
-
-    const renewalDate = new Date(renewedAt);
+    const isAssigned = await isAssignedLicence(licenceId, createdBy);
+    if (!isAssigned) throw new E.PermissionError('upload renewal for this licence');
 
     const existingRenewal = await PLC.Uploads.findOne({
-        where: { fk_licence_id: licenceId },
-        include: 'file'
+        where: { fk_licence_id: licenceId }
     });
 
-    // new renewal replaces old
+    // expires_at defaults to false
+    // means not provided by request
+    const { issued_at, expires_at = false } = dates;
 
-    await deleteFile(existingRenewal.file.cloudinary_id);
-    await Promise.all([
-        existingRenewal.destroy(),
-        existingRenewal.file.destroy()
-    ]);
+    const start = parseNull(issued_at) || licence.issued_at;
+    const end = expires_at === false
+        ? licence.expires_at // use existing value
+        : parseNull(expires_at); // a value is provided in request, use that
+
+    const {
+        issuedAt,
+        expiresAt,
+        daysLeft,
+        daysLeftPct
+    } = calculateFrequency(start, end);
 
     const transaction = await db.transaction();
     try {
-        const newFile = await insertFile(createdBy, upload, transaction);
+        const { file_id } = await insertFile(createdBy, upload, transaction);
 
-        const insertedUpload = await PLC.Uploads.create({
-            fk_licence_id: licenceId,
-            created_by: createdBy,
-            renewed_at: renewalDate,
-            fk_file_id: newFile.file_id
+        const updateLicence = licence.update({
+            issued_at: issuedAt,
+            expires_at: expiresAt,
+            days_left: daysLeft,
+            days_left_pct: daysLeftPct
         }, { transaction });
 
+        const updateRenewal = existingRenewal
+            // if there is an existing row
+            ? existingRenewal.update({
+                fk_file_id: file_id,
+                created_by: createdBy,
+                issued_at: issuedAt,
+                expires_at: expiresAt
+            }, { transaction })
+            // else create a new one
+            : PLC.Uploads.create({
+                fk_licence_id: licence.licence_id,
+                fk_file_id: file_id,
+                created_by: createdBy,
+                issued_at: issuedAt,
+                expires_at: expiresAt
+            }, { transaction });
+
+        await Promise.all([updateLicence, updateRenewal]);
+
+        // delete old file
+        if (existingRenewal) {
+            await deleteFileEntirely(existingRenewal.fk_file_id);
+        }
+
         await transaction.commit();
-        return insertedUpload;
-
-
     }
     catch (error) {
         await transaction.rollback();
@@ -242,23 +296,58 @@ module.exports.editLicence = async (licenceId, companyId, createdBy, licence = {
         licence_name,
         licence_number,
         external_organisation,
-        expires_at
+        issued_at,
+        expires_at = false, // undef from request -> false
+        assignees = []
     } = licence;
 
-    const where = {
-        licence_id: licenceId,
-        fk_company_id: companyId,
-        created_by: createdBy
-    };
+    const [isOwner, found] = await isLicenceOwner(licenceId, companyId, createdBy);
+    if (!isOwner) throw new E.NotFoundError('licence');
 
-    const [affectedCount] = await PLC.Licences.update({
-        licence_name,
-        licence_number,
-        external_organisation,
-        expires_at
-    }, { where });
+    const start = issued_at || found.issued_at;
+    const end = expires_at === false
+        ? found.expires_at // use existing value
+        : expires_at; // a value is provided in request, use that
 
-    if (affectedCount === 0) throw new E.NotFoundError('licence');
+    const {
+        issuedAt,
+        expiresAt,
+        daysLeft,
+        daysLeftPct
+    } = calculateFrequency(start, end);
+
+    const transaction = await db.transaction();
+    try {
+        await found.update({
+            licence_name,
+            licence_number,
+            external_organisation,
+            issued_at: issuedAt,
+            expires_at: expiresAt,
+            days_left: daysLeft,
+            days_left_pct: daysLeftPct
+        });
+
+        if (assignees.length > 0) {
+            await PLC.Assignees.destroy({
+                where: { fk_licence_id: licenceId },
+                transaction
+            });
+
+            const assigneeInsertions = assignees.map((employeeId) => ({
+                fk_licence_id: licenceId,
+                fk_employee_id: employeeId
+            }));
+
+            await PLC.Assignees.bulkCreate(assigneeInsertions, { transaction });
+        }
+
+        await transaction.commit();
+    }
+    catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
 };
 
 // ============================================================

@@ -15,6 +15,8 @@ const { parseBoolean } = require('../utils/request');
 const E = require('../errors/Errors');
 const r = require('../utils/response').responses;
 
+
+
 module.exports.insertOneMaintenance = async (req, res, next) => {
     try {
         const { fk_employee_id: createdBy } = res.locals.account;
@@ -39,7 +41,6 @@ module.exports.insertMaintenanceUpload = async (req, res, next) => {
 
         const { maintenance_upload_id } = await insertMaintenanceUpload(
             maintenanceId,
-            equipmentId,
             createdBy,
             req.body,
             req.upload
@@ -68,6 +69,7 @@ module.exports.findOneMaintenance = async (req, res, next) => {
             includeAssignees: true,
             includeUploads: true
         });
+        if (!maintenance) throw new E.NotFoundError('maintenance');
 
         res.status(200).send(r.success200(maintenance));
         return next();

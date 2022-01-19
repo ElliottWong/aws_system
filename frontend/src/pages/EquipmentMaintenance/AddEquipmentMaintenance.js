@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { Col, Container, Row } from 'react-bootstrap';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { confirmAlert } from 'react-confirm-alert';
+import { useHistory } from 'react-router-dom';
+import Select from "react-select";
+import { toast, ToastContainer } from 'react-toastify';
+import CustomConfirmAlert from '../../common/CustomConfirmAlert';
+import ErrorCard from '../../common/ErrorCard';
+import config from '../../config/config';
 import PageLayout from '../../layout/PageLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import jwt_decode from "jwt-decode";
-import axios from 'axios';
-import config from '../../config/config';
-import ErrorCard from '../../common/ErrorCard';
-import { Container, Row, Col } from 'react-bootstrap';
-import { ToastContainer, toast } from 'react-toastify';
-import { confirmAlert } from 'react-confirm-alert';
-import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 import TokenManager from '../../utilities/tokenManager';
-import { useHistory, NavLink } from 'react-router-dom';
-
 
 const AddEquipmentMaintenance = () => {
     const token = TokenManager.getToken();
@@ -70,7 +68,12 @@ const AddEquipmentMaintenance = () => {
         }
 
         const handleAddEquipment = (onClose) => {
-            axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment`, equipmentData, {
+            axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment`, {
+                ...equipmentData,
+                categories: equipmentData.categories.map((data) => {
+                    return data.value;
+                })
+            }, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -79,7 +82,10 @@ const AddEquipmentMaintenance = () => {
                     console.log(res);
                     setRerender((prevState) => !prevState);
                     onClose();
-                    toast.success(<>Success!<br />Message: <b>New equipment has been added!</b></>);
+                    setTimeout(() => {
+                        toast.success(<>Success!<br />Message: <b>New equipment has been added!</b></>);
+                    }, 0);
+                    history.push("/equipment-maintenance");
                 })
                 .catch((err) => {
                     console.log(err);
@@ -106,10 +112,11 @@ const AddEquipmentMaintenance = () => {
     }
 
     // Handler for input array
-    const handleInputArrayChange = (event) => {
+    const handleInputArrayChange = (options) => {
+        console.log(options);
         setEquipmentData((prevState) => ({
             ...prevState,
-            [event.target.name]: [event.target.value]
+            categories: options
         }));
     }
 
@@ -126,14 +133,13 @@ const AddEquipmentMaintenance = () => {
                     {/* Category */}
                     <Col className="c-Input c-Input__Category c-Input c-Input--edit">
                         <label htmlFor="categories">Category</label>
-                        <select onFocus={() => setInputTouched(true)} type="text" name="categories" onChange={handleInputArrayChange} value={equipmentData.categories || 'Error'}>
-                            <option>{!categoryList ? "No categories found!" : "Select Category"}</option>
-                            {!categoryList ? null : categoryList.map((category, index) => (
-                                <option key={index} value={category.name}>
-                                    {category.name}
-                                </option>
-                            ))}
-                        </select>
+                        <Select
+                            isMulti
+                            options={categoryList}
+                            placeholder="Select Category"
+                            onChange={handleInputArrayChange}
+                            name="categories"
+                        />
                     </Col>
                     {/* Ref. No. */}
                     <Col className="c-Input c-Input__Ref-no c-Input--edit">
@@ -145,15 +151,15 @@ const AddEquipmentMaintenance = () => {
                         <label htmlFor="register_number">Reg. No.</label>
                         <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="register_number" value={equipmentData.register_number} />
                     </Col>
+                </Row>
+
+                {/* Row 2 */}
+                <Row className="l-Manage-equipment__Inputs--row2 l-Manage-equipment__Inputs--row">
                     {/* Model/Brand */}
                     <Col className="c-Input c-Input__Model-brand c-Input--edit">
                         <label htmlFor="model">Model/Brand</label>
                         <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="model" value={equipmentData.model} />
                     </Col>
-                </Row>
-
-                {/* Row 2 */}
-                <Row className="l-Manage-equipment__Inputs--row2 l-Manage-equipment__Inputs--row">
                     {/* Serial No. */}
                     <Col className="c-Input c-Input__Serial-no c-Input--edit">
                         <label htmlFor="serial_number">Serial No.</label>
@@ -184,7 +190,8 @@ const AddEquipmentMaintenance = () => {
                         return null;
                     }
                     return tempCategoryData.map((data) => ({
-                        name: `${data.name}`
+                        label: `${data.name}`,
+                        value: data.category_id
                     }));
                 });
             } catch (error) {
@@ -206,7 +213,7 @@ const AddEquipmentMaintenance = () => {
                 draggable
                 pauseOnHover
             />
-            <PageLayout sideNavStatus={sideNavStatus} setSideNavStatus={setSideNavStatus} title='Equipment Maintenance' activeLink="/equipment-maintenance/add-equipment">
+            <PageLayout sideNavStatus={sideNavStatus} setSideNavStatus={setSideNavStatus} title='Add Equipment' activeLink="/equipment-maintenance/add-equipment">
                 <div className="c-Manage-equipment-maintenance c-Main">
                     {/* Breadcrumb */}
                     <Breadcrumb className="c-Equipment-maintenance__Breadcrumb l-Breadcrumb">

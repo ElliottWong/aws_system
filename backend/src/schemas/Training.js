@@ -77,10 +77,6 @@ const TrainingRequests = db.define(
             type: DataTypes.STRING(32),
             allowNull: false
         },
-        recommendations: {
-            type: DataTypes.STRING(255),
-            allowNull: false
-        },
         justification_text: {
             type: DataTypes.STRING(255),
             allowNull: true,
@@ -178,12 +174,21 @@ TrainingRequests.belongsTo(Employees, {
 });
 
 Files.hasOne(TrainingRequests, {
-    foreignKey: 'fk_file_id'
+    foreignKey: 'justification_upload'
 });
 
 TrainingRequests.belongsTo(Files, {
-    foreignKey: 'fk_file_id',
+    foreignKey: 'justification_upload',
     as: 'justification_file'
+});
+
+Files.hasOne(TrainingRequests, {
+    foreignKey: 'attendance_upload'
+});
+
+TrainingRequests.belongsTo(Files, {
+    foreignKey: 'attendance_upload',
+    as: 'attendance_file'
 });
 
 const TrainingEvaluationTemplates = db.define(

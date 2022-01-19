@@ -70,9 +70,11 @@ module.exports.insertQmsScope = async (req, res, next) => {
         });
 
         const emailContent = templates.documentApproval(
+            `${approvingEmployee.firstname} ${approvingEmployee.lastname}`,
             `${authorEmployee.firstname} ${authorEmployee.lastname}`,
-            'Policies',
-            `${authorEmployee.firstname} ${authorEmployee.lastname}`
+            'Scope of QMS',
+            'scope-of-qms',
+            'Scope of QMS'
         );
 
         sendEmail(approvingEmployee.email, 'A document requires your approval', emailContent)

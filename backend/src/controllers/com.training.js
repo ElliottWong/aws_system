@@ -1,7 +1,7 @@
 const {
     insertTraining,
     insertAttendance,
-    findTrainingRequests
+    findTraining
 } = require('../models/com.training');
 
 const { MODULE } = require('../config/enums');
@@ -71,7 +71,7 @@ module.exports.insertAttendance = async (req, res, next) => {
 //         const { fk_employee_id: employeeId } = res.locals.account;
 //         const { companyId } = req.params;
 
-//         const training = await findTrainingRequests.in(companyId);
+//         const training = await findTraining.requests(companyId);
 
 //         res.status(200).send(r.success200(training));
 //         return next();
@@ -91,7 +91,27 @@ module.exports.findEmployeeRequests = async (req, res, next) => {
         // only self can see
         if (eid !== employeeId) throw new E.PermissionError('view training');
 
-        const training = await findTrainingRequests.by(employeeId, companyId);
+        const training = await findTraining.requestsBy(employeeId, companyId);
+
+        res.status(200).send(r.success200(training));
+        return next();
+    }
+    catch (error) {
+        return next(error);
+    }
+};
+
+// ============================================================
+
+module.exports.findEmployeeRecords = async (req, res, next) => {
+    try {
+        const { fk_employee_id: employeeId } = res.locals.account;
+        const { companyId, employeeId: eid } = req.params;
+
+        // only self can see
+        if (eid !== employeeId) throw new E.PermissionError('view training');
+
+        const training = await findTraining.recordsBy(employeeId, companyId);
 
         res.status(200).send(r.success200(training));
         return next();
@@ -108,7 +128,7 @@ module.exports.findPendingRequests = async (req, res, next) => {
         const { fk_employee_id: employeeId } = res.locals.account;
         const { companyId } = req.params;
 
-        const training = await findTrainingRequests.pendingFor(employeeId, companyId);
+        const training = await findTraining.requestsPendingFor(employeeId, companyId);
 
         res.status(200).send(r.success200(training));
         return next();
@@ -125,7 +145,7 @@ module.exports.findRequest = async (req, res, next) => {
         const { fk_employee_id: employeeId } = res.locals.account;
         const { companyId, trainingId } = req.params;
 
-        const training = await findTrainingRequests.one(trainingId, employeeId, companyId);
+        const training = await findTraining.request(trainingId, employeeId, companyId);
 
         res.status(200).send(r.success200(training));
         return next();

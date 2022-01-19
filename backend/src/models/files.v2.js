@@ -51,23 +51,17 @@ module.exports.findFileById = (fileId, includeCloudinary = false) => {
 // only deletes a file from database
 // but not from cloudinary
 // no transactions
-module.exports.deleteFile = (fileId, createdBy) => Files.destroy({
-    where: {
-        file_id: fileId,
-        created_by: createdBy
-    }
+module.exports.deleteFile = (fileId) => Files.destroy({
+    where: { file_id: fileId }
 });
 
 // ============================================================
 
 // delete file from cloudinary and database
 // no transactions
-module.exports.deleteFileEntirely = async (fileId, createdBy) => {
+module.exports.deleteFileEntirely = async (fileId) => {
     const file = await Files.findOne({
-        where: {
-            file_id: fileId,
-            created_by: createdBy
-        }
+        where: { file_id: fileId }
     });
 
     // should always be deleted in this order

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import PageLayout from '../../layout/PageLayout';
 import DocumentLayout from '../../layout/DocumentLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
@@ -13,15 +14,61 @@ import { useHistory } from 'react-router-dom';
 import StatusPill from '../../common/StatusPill';
 import { confirmAlert } from 'react-confirm-alert';
 import FileSelect from '../../common/FileSelect';
+import TokenManager from '../../utilities/tokenManager.js';
 
-const ManageTrainingRecord = ({match}) => {
+const ManageTrainingRecord = ({ match }) => {
     const toastTiming = config.toastTiming;
     const history = useHistory();
-    const trainingRecordID = match.params.trainingRecordID;
+    const trainingRecordID = match.params.trainingID;
+    const decodedToken = TokenManager.getDecodedToken();
+    const userCompanyID = decodedToken.company_id;
+    const userID = decodedToken.employee_id;
 
     // State declarations
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
     const [boolCompletedTraining, setBoolCompletedTraining] = useState(false);
+    const [trainingRecord, setTrainingRecord] = useState({});
+
+    useEffect(() => {
+        let componentMounted = true;
+
+        (async () => {
+            try {
+                const resTrainingRecord = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/training/all-requests/${trainingRecordID}`);
+
+                if (componentMounted) {
+                    const tempTrainingRecord = resTrainingRecord.data.results;
+                    console.log(tempTrainingRecord);
+                    setTrainingRecord(() => ({
+                        id: tempTrainingRecord.training_id,
+                        organisation: tempTrainingRecord.training_institution,
+                        course_title: tempTrainingRecord.title,
+                        cost: tempTrainingRecord.training_cost,
+                        approver: tempTrainingRecord.approved_at,
+                        supervisor_evaluation_done: tempTrainingRecord.supervisor_evaluation_done,
+                        trainee_evaluation_done: tempTrainingRecord.trainee_evaluation_done,
+                        start_date: dayjs(tempTrainingRecord.training_start).format("D MMM YYYY"),
+                        end_date: dayjs(tempTrainingRecord.training_end).format("D MMM YYYY"),
+                        attendance: (() => {
+                            if (tempTrainingRecord.attendance_upload === null) {
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        })(),
+                    }));
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        })();
+        setBoolCompletedTraining(() => true); // temporary
+
+        return (() => {
+            componentMounted = false;
+        })
+    }, []);
+
 
     const handleCompletePostEvaluation = () => {
         history.push("/training/training-record/post-training-evaluation");
@@ -40,13 +87,12 @@ const ManageTrainingRecord = ({match}) => {
                 draggable
                 pauseOnHover
             />
-            <PageLayout sideNavStatus={sideNavStatus} setSideNavStatus={setSideNavStatus} title='Manage Training Record' activeLink="/settings">
+            <PageLayout sideNavStatus={sideNavStatus} setSideNavStatus={setSideNavStatus} title='Manage Training Record' activeLink="/training">
                 <div className="c-Manage-training-record c-Main">
                     {/* Breadcrumb */}
                     <Breadcrumb className="c-Manage-training-record__Breadcrumb l-Breadcrumb">
                         <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/settings">Settings</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/settings/trainings">Manage Trainings</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/training/manage">Manage Trainings</Breadcrumb.Item>
                         <Breadcrumb.Item active>Manage Training Record</Breadcrumb.Item>
                     </Breadcrumb>
                     {/* Top section */}
@@ -64,19 +110,25 @@ const ManageTrainingRecord = ({match}) => {
                         <div className="c-Fields__Left">
                             <div className="c-Field">
                                 <h2>Course Title</h2>
-                                <p>Housekeeping Essentials Workshop</p>
+                                <p>{trainingRecord.course_title}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>Organisation/Institution</h2>
-                                <p>Samsung Asia Pte Ltd</p>
+                                <p>{trainingRecord.organisation}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>Cost</h2>
-                                <p>S$1599.90</p>
+                                <p>{trainingRecord.cost}</p>
                             </div>
                             <div className="c-Field">
-                                <h2>Evaluation Status</h2>
-                                <p>Na</p>
+                                <h2>Evaluation Status (Trainee)</h2>
+                                {
+                                    !trainingRecord.attendance ?
+                                        <p>Nil</p> :
+                                        trainingRecord.trainee_evaluation_done ?
+                                            <StatusPill type="pending" /> :
+                                            <StatusPill type="completed" />
+                                }
                             </div>
                             <div className="c-Field">
                                 <h2>File (Evidence for Attendance)</h2>
@@ -86,19 +138,34 @@ const ManageTrainingRecord = ({match}) => {
                         <div className="c-Fields__Right">
                             <div className="c-Field">
                                 <h2>Start Date</h2>
-                                <p>6/1/2022</p>
+                                <p>{trainingRecord.start_date}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>End Date</h2>
-                                <p>7/1/2022</p>
+                                <p>{trainingRecord.end_date}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>Approver</h2>
                                 <p>@AppleKim</p>
                             </div>
                             <div className="c-Field">
+                                <h2>Evaluation Status (Approver)</h2>
+                                {
+                                    !trainingRecord.attendance ?
+                                        <p>Nil</p> :
+                                        trainingRecord.supervisor_evaluation_done ?
+                                            <StatusPill type="pending" /> :
+                                            <StatusPill type="completed" />
+                                }
+                            </div>
+                            <div className="c-Field">
                                 <h2>Attendance Status</h2>
-                                <StatusPill type="pending" />
+                                {
+                                    trainingRecord.attendance ?
+                                        <StatusPill type="completed" /> :
+                                        <StatusPill type="pending" />
+                                }
+
                             </div>
                         </div>
                     </div>

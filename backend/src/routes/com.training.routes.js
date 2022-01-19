@@ -22,6 +22,12 @@ router.get(
     trainingController.findEmployeeRequests
 );
 
+router.get(
+    '/company/:companyId/employee/:employeeId/training-records',
+    auth,
+    trainingController.findEmployeeRecords
+);
+
 // all training requests in a company
 // router.get(
 //     '/company/:companyId/training/all-requests'

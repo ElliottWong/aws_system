@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { Col, Container, Row } from 'react-bootstrap';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { useHistory } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import ErrorCard from '../../common/ErrorCard';
+import config from '../../config/config';
 import PageLayout from '../../layout/PageLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import jwt_decode from "jwt-decode";
-import axios from 'axios';
-import config from '../../config/config';
-import ErrorCard from '../../common/ErrorCard';
-import { Container, Row, Col } from 'react-bootstrap';
-import { ToastContainer, toast } from 'react-toastify';
-import { confirmAlert } from 'react-confirm-alert';
-import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 import TokenManager from '../../utilities/tokenManager';
-import { useHistory, NavLink } from 'react-router-dom';
+import DateTimePicker from 'react-datetime-picker';
+import Select from "react-select";
 
 const AddLicense = () => {
     const token = TokenManager.getToken();
@@ -74,6 +72,15 @@ const AddLicense = () => {
         }));
     }
 
+    // Handler for setting last service date 
+    const setLastServiceDate = (date) => {
+        console.log(date);
+        setLicenseData((prevState) => ({
+            ...prevState,
+            expDate: date
+        }));
+    }
+
     const renderInputFieldEditSection = () => {
         return (
             <Container className="l-Manage-equipment__Inputs">
@@ -92,7 +99,12 @@ const AddLicense = () => {
                     {/* Exp. Date */}
                     <Col className="c-Input c-Input__Reg-no c-Input--edit">
                         <label htmlFor="expDate">Exp. Date</label>
-                        <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="expDate" value={licenseData.expDate} />
+                        <DateTimePicker
+                            onChange={setLastServiceDate}
+                            value={licenseData.expDate}
+                            className="c-Form__Date"
+                            format="dd/MM/y"
+                        />
                     </Col>
                 </Row>
 
@@ -106,40 +118,46 @@ const AddLicense = () => {
                     {/* Responsible User */}
                     <Col className="c-Input c-Input__Category c-Input c-Input--edit">
                         <label htmlFor="responsibleUser">Responsible User</label>
-                        <select onFocus={() => setInputTouched(true)} type="text" name="responsibleUser" onChange={handleInputChange} value={licenseData.responsibleUser || 'Error'}>
-                            <option>{!userList ? "No users found!" : "Select User"}</option>
-                            {!userList ? null : userList.map((user, index) => (
-                                <option key={index} value={user.username}>
-                                    {user.username}
-                                </option>
-                            ))}
-                        </select>
+                        <Select
+                            isMulti
+                            options={userList}
+                            placeholder="Select Users"
+                            onChange={handleInputArrayChange}
+                        />
                     </Col>
                 </Row>
             </Container>
         )
     }
 
+    // Handler for input array
+    const handleInputArrayChange = (options) => {
+        console.log(options);
+        setLicenseData((prevState) => ({
+            ...prevState,
+            assignees: options
+        }));
+    }
+
+
     useEffect(() => {
         (async () => {
             try {
-                // Get all users with permission to 
-                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_02/employees`);
+                // Get all users with permission to add license
+                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/approve/m07_02/employees`);
                 console.log(resClausePermission);
 
                 let tempUserData = [];
                 // Get all equipment categories
                 const resAllCategories = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories`);
                 console.log(resAllCategories);
-                tempUserData = resAllCategories.data.results;
+                tempUserData = resClausePermission.data.results;
                 console.log(tempUserData);
 
                 setUserList(() => {
-                    if (tempUserData.length === 0) {
-                        return null;
-                    }
                     return tempUserData.map((data) => ({
-                        name: `${data.name}`
+                        label: data.account.username,
+                        value: data.employee_id
                     }));
                 });
             } catch (error) {

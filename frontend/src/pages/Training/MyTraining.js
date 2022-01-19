@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import PageLayout from '../../layout/PageLayout';
 import DocumentLayout from '../../layout/DocumentLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
@@ -10,82 +11,85 @@ import dayjs from 'dayjs';
 import { ToastContainer } from 'react-toastify';
 import config from '../../config/config';
 import { useHistory } from 'react-router-dom';
+import TokenManager from '../../utilities/tokenManager.js';
 
 const MyTraining = () => {
     const toastTiming = config.toastTiming;
     const history = useHistory();
+    const decodedToken = TokenManager.getDecodedToken();
+    const userCompanyID = decodedToken.company_id;
+    const userID = decodedToken.employee_id;
 
     // State declarations
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
+    const [myTrainingRecords, setMyTrainingRecords] = useState([]);
+    const [myTrainingRequests, setMyTrainingRequests] = useState([]);
 
-    // Table info
-    const myTrainingRecordsData = [
-        {
-            id: 1,
-            serialNo: 1,
-            course_title: "Direct Integration Consultant Upskilling Workshop",
-            approver: "@AppleKim",
-            start_date: dayjs(new Date()).format("D MMM YYYY"),
-            end_date: dayjs(new Date()).format("D MMM YYYY"),
-            evaluation: (() => {
-                // if (new Date() < new Date()) {
-                //     return "active";
-                // } 
-                // TODO: algorithm to determine status
-                return undefined;
-            })(),
-            attendance: (() => {
-                return undefined
-            })(),
-            action_manage: ""
-        },
-        {
-            id: 2,
-            serialNo: 2,
-            course_title: "Human Quality Engineer Upskilling Workshop",
-            approver: "@AppleKim",
-            start_date: dayjs(new Date()).format("D MMM YYYY"),
-            end_date: dayjs(new Date()).format("D MMM YYYY"),
-            evaluation: (() => {
-                // if (new Date() < new Date()) {
-                //     return "active";
-                // } 
-                // TODO: algorithm to determine status
-                return undefined;
-            })(),
-            attendance: (() => {
-                return undefined
-            })(),
-            action_manage: ""
-        },
-    ];
+    useEffect(() => {
+        let componentMounted = true;
 
-    const myTrainingRequestsData = [
-        {
-            id: 1,
-            serialNo: 1,
-            course_title: "Direct Integration Consultant Upskilling Workshop",
-            approver: "@AppleKim",
-            start_date: dayjs(new Date()).format("D MMM YYYY"),
-            end_date: dayjs(new Date()).format("D MMM YYYY"),
-            request_status: (() => {
-                return undefined
-            })(),
-            action_manage: ""
-        },
-        {
-            id: 2,
-            serialNo: 2,
-            course_title: "Human Quality Engineer Upskilling Workshop",
-            approver: "@AppleKim",
-            start_date: dayjs(new Date()).format("D MMM YYYY"),
-            end_date: dayjs(new Date()).format("D MMM YYYY"),
-            request_status: (() => {
-                return undefined
-            })(),
-            action_manage: ""
-        },
-    ];
+        (async () => {
+            try {
+                // Get training requests of this user //TODO
+                const resMyTrainingRequests = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/employee/${userID}/training-requests`);
+
+                // Get training records of this user
+                const resMyTrainingRecords = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/employee/${userID}/training-records`);
+
+                if (componentMounted) {
+                    const tempMyTrainingRequests = resMyTrainingRequests.data.results;
+                    const tempMyTrainingRecords = resMyTrainingRecords.data.results;
+                    console.log(resMyTrainingRequests);
+                    console.log(resMyTrainingRecords);
+                    setMyTrainingRequests(() => tempMyTrainingRequests.map((data, index) => ({
+                        id: data.training_id,
+                        serialNo: index + 1,
+                        course_title: data.title,
+                        approver: data.approved_at,
+                        start_date: dayjs(data.training_start).format("D MMM YYYY"),
+                        end_date: dayjs(data.training_end).format("D MMM YYYY"),
+                        attendance: (() => {
+                            if (data.attendance_upload === null) {
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        })(),
+                        request_status: data.status,
+                        supervisor_evaluation_done: data.supervisor_evaluation_done,
+                        trainee_evaluation_done: data.trainee_evaluation_done,
+                        action_manage: `/training/training-request/manage/${data.training_id}`
+                    })));
+
+                    setMyTrainingRecords(() => tempMyTrainingRecords.map((data, index) => ({
+                        id: data.training_id,
+                        serialNo: index + 1,
+                        course_title: data.title,
+                        approver: data.approved_at,
+                        start_date: dayjs(data.training_start).format("D MMM YYYY"),
+                        end_date: dayjs(data.training_end).format("D MMM YYYY"),
+                        attendance: (() => {
+                            if (data.attendance_upload === null) {
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        })(),
+                        request_status: data.status,
+                        supervisor_evaluation_done: data.supervisor_evaluation_done,
+                        trainee_evaluation_done: data.trainee_evaluation_done,
+                        action_manage: `/training/training-record/manage/${data.training_id}`
+                    })));
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        })();
+
+        return (() => {
+            componentMounted = false;
+        });
+    }, []);
 
     return (
         <>
@@ -115,13 +119,17 @@ const MyTraining = () => {
                     <div className="c-Training__Records">
                         <h2>My Training Records</h2>
                         <div className="c-Training__Table">
-                            <BootstrapTable
-                                bordered={false}
-                                keyField='serialNo'
-                                data={myTrainingRecordsData}
-                                columns={myTrainingRecordsColumns}
-                            // pagination={paginationFactory()}
-                            />
+                            {
+                                myTrainingRecords.length === 0 ?
+                                    "No records found!" :
+                                    <BootstrapTable
+                                        bordered={false}
+                                        keyField='serialNo'
+                                        data={myTrainingRecords}
+                                        columns={myTrainingRecordsColumns}
+                                    // pagination={paginationFactory()}
+                                    />
+                            }
                         </div>
                     </div>
 
@@ -129,17 +137,22 @@ const MyTraining = () => {
                     <div className="c-Training__Requests c-Requests">
                         <div className="c-Requests__Top">
                             <h2>My Training Requests</h2>
-                            <button onClick={() => history.push("/training/training-request/create")} type = "button" className = "c-Btn c-Btn--primary">Create Training Request</button>
+                            <button onClick={() => history.push("/training/training-request/create")} type="button" className="c-Btn c-Btn--primary">Create Training Request</button>
                         </div>
 
                         <div className="c-Training__Table">
-                            <BootstrapTable
-                                bordered={false}
-                                keyField='serialNo'
-                                data={myTrainingRequestsData}
-                                columns={myTrainingRequestsColumns}
-                            // pagination={paginationFactory()}
-                            />
+                            {
+                                myTrainingRequests.length === 0 ?
+                                    "No records found!" :
+                                    <BootstrapTable
+                                        bordered={false}
+                                        keyField='serialNo'
+                                        data={myTrainingRequests}
+                                        columns={myTrainingRequestsColumns}
+                                    // pagination={paginationFactory()}
+                                    />
+                            }
+
                         </div>
                     </div>
 

@@ -6,6 +6,8 @@ const db = require('../config/connection');
 const Companies = db.model('Companies');
 const Employees = db.model('Employees');
 
+const { testModule } = require('../config/enums');
+
 const Roles = db.define(
     'Roles',
     {
@@ -121,7 +123,7 @@ const RoleRights = db.define(
                     // this regex tests whether the input fits the format
                     // regex literal
                     // lowercase m, 2 digits 0-9, underscore, 2 digits 0-9
-                    if (!/^m[0-9]{2}_[0-9]{2}$/.test(value)) throw new Error('Invalid format for module codes');
+                    if (!testModule(value)) throw new Error('Invalid format for module codes');
                 }
             }
         },

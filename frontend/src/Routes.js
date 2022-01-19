@@ -123,6 +123,13 @@ const Routes = () => {
                 <Route exact path="/training/training-request/manage/:trainingReqID" render={(props) => authGuard(ManageMyTrainingRequest)(props)} />
                 <Route exact path="/training/training-record/manage/:trainingRecordID/post-training-evaluation" render={(props) => authGuard(PostEvaluationForm)(props)} />
                 <Route exact path="/training/training-request/create" render={(props) => authGuard(CreateTrainingRequest)(props)} />
+                <Route exact path="/training/manage" render={(props) => authGuard(ManageTrainings)(props)}/>
+                <Route exact path="/training/manage/training-record/manage/:trainingID" render={(props) => authGuard(ManageTrainingRecord)(props)} />
+                <Route exact path="/training/manage/training-record/manage/:trainingID/post-training-evaluation" render={(props) => authGuard(PostEvaluationForm)(props)} />
+                <Route exact path="/training/manage/training-request/manage/:trainingID" render={(props) => authGuard(ManageTrainingRequest)(props)} />
+                <Route exact path="/training/manage/post-evaluation-templates" render={(props) => authGuard(ManagePostEvaluationTemplates)(props)} />
+                <Route exact path="/training/manage/post-evaluation-templates/manage/:templateID" render={(props) => authGuard(ManageEvaluationTemplate)(props)} />
+                <Route exact path="/training/manage/post-evaluation-templates/create" render={(props) => authGuard(CreateEvaluationTemplate)(props)} />
                 <Route exact path="/settings" render={(props) => authGuard(Settings)(props)} />
                 <Route path="/settings/manage-account" render={(props) => authGuard(ManageAccount)(props)} />
                 <Route exact path="/settings/manage-users" render={(props) => authGuard(ManageUsers)(props)} />
@@ -133,13 +140,6 @@ const Routes = () => {
                 <Route exact path="/settings/induction-templates/induction-template-versions/:templateID" render={(props) => authGuard(ManageInductionVersions)(props)} />
                 <Route exact path="/settings/induction-templates/induction-template-versions/:templateID/create" render={(props) => authGuard(CreateInductionForm)(props)} />
                 <Route exact path="/settings/induction-templates/induction-template-versions/:templateID/manage/:formID" render={(props) => authGuard(ManageInductionForm)(props)} />
-                <Route exact path="/settings/trainings" render={(props) => authGuard(ManageTrainings)(props)} />
-                <Route exact path="/settings/trainings/training-record/manage/:trainingID" render={(props) => authGuard(ManageTrainingRecord)(props)} />
-                <Route exact path="/settings/trainings/training-record/manage/:trainingID/post-training-evaluation" render={(props) => authGuard(PostEvaluationForm)(props)} />
-                <Route exact path="/settings/trainings/training-request/manage/:trainingID" render={(props) => authGuard(ManageTrainingRequest)(props)} />
-                <Route exact path="/settings/trainings/post-evaluation-templates" render={(props) => authGuard(ManagePostEvaluationTemplates)(props)} />
-                <Route exact path="/settings/trainings/post-evaluation-templates/manage/:templateID" render={(props) => authGuard(ManageEvaluationTemplate)(props)} />
-                <Route exact path="/settings/trainings/post-evaluation-templates/create-template" render={(props) => authGuard(CreateEvaluationTemplate)(props)} />
                 <Route path="*" render={() => <PageNotFound />} />
             </Switch>
         </Router>

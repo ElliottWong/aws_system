@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import PageLayout from '../../layout/PageLayout';
 import DocumentLayout from '../../layout/DocumentLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
@@ -14,16 +15,60 @@ import StatusPill from '../../common/StatusPill';
 import { confirmAlert } from 'react-confirm-alert';
 import FileSelect from '../../common/FileSelect';
 import CustomConfirmAlert from '../../common/CustomConfirmAlert';
+import TokenManager from '../../utilities/tokenManager.js';
 
 const ManageMyTrainingRecord = ({ match }) => {
     const toastTiming = config.toastTiming;
     const history = useHistory();
     const trainingRecordID = match.params.trainingRecordID;
+    const decodedToken = TokenManager.getDecodedToken();
+    const userCompanyID = decodedToken.company_id;
+    const userID = decodedToken.employee_id;
 
     // State declarations
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
     const [boolCompletedTraining, setBoolCompletedTraining] = useState(false);
+    const [myTrainingRecord, setMyTrainingRecord] = useState({});
 
+    useEffect(() => {
+        let componentMounted = true;
+
+        (async () => {
+            try {
+                const resMyTrainingRequest = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/training/all-requests/${trainingRecordID}`);
+
+                if (componentMounted) {
+                    const tempMyTrainingRecord = resMyTrainingRequest.data.results;
+                    console.log(tempMyTrainingRecord);
+                    setMyTrainingRecord(() => ({
+                        id: tempMyTrainingRecord.training_id,
+                        organisation: tempMyTrainingRecord.training_institution,
+                        course_title: tempMyTrainingRecord.title,
+                        cost: tempMyTrainingRecord.training_cost,
+                        approver: tempMyTrainingRecord.approved_at,
+                        supervisor_evaluation_done: tempMyTrainingRecord.supervisor_evaluation_done,
+                        trainee_evaluation_done: tempMyTrainingRecord.trainee_evaluation_done,
+                        start_date: dayjs(tempMyTrainingRecord.training_start).format("D MMM YYYY"),
+                        end_date: dayjs(tempMyTrainingRecord.training_end).format("D MMM YYYY"),
+                        attendance: (() => {
+                            if (tempMyTrainingRecord.attendance_upload === null) {
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        })(),
+                    }));
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        })();
+        setBoolCompletedTraining(() => true); // temporary
+
+        return (() => {
+            componentMounted = false;
+        })
+    }, []);
 
     // Handlers
     const handleUploadFileBtn = () => {
@@ -77,9 +122,7 @@ const ManageMyTrainingRecord = ({ match }) => {
         };
     };
 
-    useEffect(() => {
-        setBoolCompletedTraining(() => true); // temporary
-    }, []);
+
 
     return (
         <>
@@ -117,19 +160,25 @@ const ManageMyTrainingRecord = ({ match }) => {
                         <div className="c-Fields__Left">
                             <div className="c-Field">
                                 <h2>Course Title</h2>
-                                <p>Housekeeping Essentials Workshop</p>
+                                <p>{myTrainingRecord.course_title}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>Organisation/Institution</h2>
-                                <p>Samsung Asia Pte Ltd</p>
+                                <p>{myTrainingRecord.organisation}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>Cost</h2>
-                                <p>S$1599.90</p>
+                                <p>{myTrainingRecord.cost}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>Evaluation Status (Trainee)</h2>
-                                <StatusPill type="pending" />
+                                {
+                                    !myTrainingRecord.attendance ?
+                                        <p>Nil</p> :
+                                        myTrainingRecord.trainee_evaluation_done ?
+                                            <StatusPill type="pending" /> :
+                                            <StatusPill type="completed" />
+                                }
                             </div>
                             <div className="c-Field">
                                 <h2>File (Evidence for Attendance)</h2>
@@ -139,11 +188,11 @@ const ManageMyTrainingRecord = ({ match }) => {
                         <div className="c-Fields__Right">
                             <div className="c-Field">
                                 <h2>Start Date</h2>
-                                <p>6/1/2022</p>
+                                <p>{myTrainingRecord.start_date}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>End Date</h2>
-                                <p>7/1/2022</p>
+                                <p>{myTrainingRecord.end_date}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>Approver</h2>
@@ -151,11 +200,22 @@ const ManageMyTrainingRecord = ({ match }) => {
                             </div>
                             <div className="c-Field">
                                 <h2>Evaluation Status (Approver)</h2>
-                                <StatusPill type="pending" />
+                                {
+                                    !myTrainingRecord.attendance ?
+                                        <p>Nil</p> :
+                                        myTrainingRecord.supervisor_evaluation_done ?
+                                            <StatusPill type="pending" /> :
+                                            <StatusPill type="completed" />
+                                }
                             </div>
                             <div className="c-Field">
                                 <h2>Attendance Status</h2>
-                                <StatusPill type="pending" />
+                                {
+                                    myTrainingRecord.attendance ?
+                                        <StatusPill type="completed" /> :
+                                        <StatusPill type="pending" />
+                                }
+
                             </div>
                         </div>
                     </div>

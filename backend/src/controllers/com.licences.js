@@ -41,15 +41,12 @@ module.exports.insertRenewalUpload = async (req, res, next) => {
         const { fk_employee_id: createdBy } = res.locals.account;
         const { companyId, licenceId } = req.params;
 
-        const { renewed_at } = req.body;
-
-        const { licence_upload_id } = await insertRenewalUpload(
-            licenceId, companyId,
-            createdBy, renewed_at,
-            req.upload
+        await insertRenewalUpload(
+            licenceId, companyId, createdBy,
+            req.body, req.upload
         );
 
-        res.status(201).send(r.success201({ licence_upload_id }));
+        res.status(201).send(r.success201());
         return next();
     }
     catch (error) {

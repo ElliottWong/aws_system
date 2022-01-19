@@ -1,11 +1,28 @@
 .c-Equipment-maintenance {
-    &__Table {
-        padding: 50px 0;
+  .c-Equipment-maintenance__Filter {
+    display: flex;
+    justify-content: left;
+    align-items: left;
+    flex-direction: row;
+    width: 100%;
+    max-width: 100%;
+    padding-top: 10px;
+    select {
+      margin-left: 20px;
+      width: 20%;
     }
+    h4 {
+      font-size: $font-medium;
+      font-weight: bold;
+    }
+  }
+  &__Table {
+    padding: 30px 0;
+  }
 
-    &__Archives {
-        .c-Equipment-maintenance__Archives-table {
-            padding-top: 25px;
-        }
+  &__Archives {
+    .c-Equipment-maintenance__Archives-table {
+      padding-top: 25px;
     }
+  }
 }

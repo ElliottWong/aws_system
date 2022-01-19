@@ -56,12 +56,14 @@ module.exports.insertInterestedParties = async (req, res, next) => {
         if (authorEmployee.fk_company_id !== approvingEmployee.fk_company_id)
             throw new E.ForeignOrganisationError();
 
-        const { party_id, status } = await insertParty({ companyId, ...req.body });
+        const { party_id, status } = await insertParty({ ...req.body, created_by, companyId });
 
         const emailContent = templates.documentApproval(
+            `${approvingEmployee.firstname} ${approvingEmployee.lastname}`,
             `${authorEmployee.firstname} ${authorEmployee.lastname}`,
             'Interested Parties',
-            `${authorEmployee.firstname} ${authorEmployee.lastname}`
+            'interested-party',
+            'Interested Parties'
         );
 
         sendEmail(approvingEmployee.email, 'A document requires your approval', emailContent)

@@ -11,6 +11,8 @@ const path = require('path').posix;
 
 const { cloudinary: c } = require('../config/config');
 
+const { testModule } = require('../config/enums');
+
 cloudinary.config({
     cloud_name: c.cloudName,
     api_key: c.apiKey,
@@ -148,7 +150,7 @@ module.exports.createFolder = (fullFolderPath) => cloudinary.api.create_folder(f
 // ============================================================
 
 module.exports.formDocumentsFolderPath = (companyId, moduleCode, file = null) => {
-    if (!/^m[0-9]{2}_[0-9]{2}$/.test(moduleCode)) throw new Error('Invalid format for module codes');
+    if (!testModule(moduleCode)) throw new Error('Invalid format for module codes');
     let result;
     if (file !== null) result = path.join(c.baseFolderPath, `org_${companyId}`, 'documents', moduleCode, file);
     else result = path.join(c.baseFolderPath, `org_${companyId}`, 'documents', moduleCode);

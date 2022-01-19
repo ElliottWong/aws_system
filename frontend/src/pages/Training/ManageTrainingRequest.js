@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import PageLayout from '../../layout/PageLayout';
 import DocumentLayout from '../../layout/DocumentLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
@@ -13,6 +14,9 @@ import { useHistory } from 'react-router-dom';
 import StatusPill from '../../common/StatusPill';
 import { confirmAlert } from 'react-confirm-alert';
 import FileSelect from '../../common/FileSelect';
+import TokenManager from '../../utilities/tokenManager.js';
+import FileDownload from 'js-file-download';
+import { toast } from 'react-toastify';
 
 const ManageTrainingRequest = ({ match }) => {
 
@@ -20,13 +24,59 @@ const ManageTrainingRequest = ({ match }) => {
     const history = useHistory();
     const trainingReqID = match.params.trainingReqID;
     const rejectRemarks = useRef("");
+    const decodedToken = TokenManager.getDecodedToken();
+    const token = TokenManager.getToken();
+    const userCompanyID = decodedToken.company_id;
 
     // State declarations
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
+    const [trainingRequest, setTrainingRequest] = useState({});
 
+
+    useEffect(() => {
+        let componentMounted = true;
+
+        (async () => {
+            try {
+                const resTrainingRecord = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/training/all-requests/${trainingReqID}`);
+
+                if (componentMounted) {
+                    const tempTrainingRecord = resTrainingRecord.data.results;
+                    console.log(tempTrainingRecord);
+                    setTrainingRequest(() => ({
+                        id: tempTrainingRecord.training_id,
+                        organisation: tempTrainingRecord.training_institution,
+                        course_title: tempTrainingRecord.title,
+                        cost: tempTrainingRecord.training_cost,
+                        approver: tempTrainingRecord.approved_at,
+                        supervisor_evaluation_done: tempTrainingRecord.supervisor_evaluation_done,
+                        trainee_evaluation_done: tempTrainingRecord.trainee_evaluation_done,
+                        start_date: dayjs(tempTrainingRecord.training_start).format("D MMM YYYY"),
+                        end_date: dayjs(tempTrainingRecord.training_end).format("D MMM YYYY"),
+                        attendance: (() => {
+                            if (tempTrainingRecord.attendance_upload === null) {
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        })(),
+                    }));
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        })();
+
+        return (() => {
+            componentMounted = false;
+        })
+    }, []);
+
+    // #region Handlers
     const handleApprove = () => {
 
     };
+
 
     const handleReject = () => {
         confirmAlert({
@@ -53,6 +103,36 @@ const ManageTrainingRequest = ({ match }) => {
         };
     };
 
+    const handleDownloadFile = async () => {
+
+        try {
+            const fileInfoRes = await axios.get(`${process.env.REACT_APP_BASEURL}/file/info/${trainingRequest.justification_upload}`);
+            const fileRes = await axios.get(`${process.env.REACT_APP_BASEURL}/file/download/${trainingRequest.justification_upload}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                responseType: 'blob'
+            });
+            console.log(fileInfoRes);
+            console.log(fileRes);
+            FileDownload(fileRes.data, fileInfoRes.data.results.file_name);
+            toast.success(<>Success!<br />Message: <b>Document has been downloaded successfully!</b></>);
+        } catch (err) {
+            console.log(err);
+            let errCode = "Error!";
+            let errMsg = "Error!"
+            if (err.response !== undefined) {
+                errCode = err.response.status;
+                errMsg = err.response.data.message;
+            }
+
+            toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
+        }
+
+    };
+
+    // #endregion
+
 
     return (
         <>
@@ -67,13 +147,12 @@ const ManageTrainingRequest = ({ match }) => {
                 draggable
                 pauseOnHover
             />
-            <PageLayout sideNavStatus={sideNavStatus} setSideNavStatus={setSideNavStatus} title='Manage Training Request' activeLink="/settings">
+            <PageLayout sideNavStatus={sideNavStatus} setSideNavStatus={setSideNavStatus} title='Manage Training Request' activeLink="/training">
                 <div className="c-Manage-training-request c-Main">
                     {/* Breadcrumb */}
                     <Breadcrumb className="c-Manage-training-request__Breadcrumb l-Breadcrumb">
                         <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/settings">Settings</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/settings/trainings">Manage Trainings</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/training/manage">Manage Trainings</Breadcrumb.Item>
                         <Breadcrumb.Item active>Manage Training Request</Breadcrumb.Item>
                     </Breadcrumb>
                     {/* Top section */}
@@ -90,45 +169,50 @@ const ManageTrainingRequest = ({ match }) => {
                         <div className="c-Fields__Left">
                             <div className="c-Field">
                                 <h2>Course Title</h2>
-                                <p>Housekeeping Essentials Workshop</p>
+                                <p>{trainingRequest.course_title}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>Organisation/Institution</h2>
-                                <p>Samsung Asia Pte Ltd</p>
+                                <p>{trainingRequest.organisation}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>Cost</h2>
-                                <p>S$1599.90</p>
+                                <p>{trainingRequest.cost}</p>
+         
                             </div>
                             <div className="c-Field">
                                 <h2>Justification</h2>
-                                <p>I need to learn how to clean my house better! #wfh #uncondusive_working_environment</p>
+                                <p>{trainingRequest.justification_text}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>Rejection Remarks</h2>
-                                <p>Na</p>
+                                <p>{trainingRequest.remarks ? trainingRequest.remarks : "Na"}</p>
                             </div>
                         </div>
                         <div className="c-Fields__Right">
-                            <div className="c-Field">
+                        <div className="c-Field">
                                 <h2>Start Date</h2>
-                                <p>6/1/2022</p>
+                                <p>{trainingRequest.start_date}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>End Date</h2>
-                                <p>7/1/2022</p>
+                                <p>{trainingRequest.end_date}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>To be Approved by</h2>
                                 <p>@AppleKim</p>
                             </div>
-                            <div className="c-Field">
+                            <div className="c-Field c-Field__File">
                                 <h2>File (For Justification)</h2>
-                                <p>Na</p>
+                                {
+                                    trainingRequest.justification_upload ?
+                                        <button type="button" className="c-Btn c-Btn--primary" onClick = {handleDownloadFile}>Download</button> :
+                                        <p>Na</p>
+                                }
                             </div>
                             <div className="c-Field">
                                 <h2>Approval Status</h2>
-                                <StatusPill type="pending" />
+                                <StatusPill type={trainingRequest.approval_status} />
                             </div>
                         </div>
                     </div>

@@ -117,6 +117,7 @@ module.exports.findCategoryWithAllEquipment = async (req, res, next) => {
 
 // ============================================================
 
+// FIXME problematic
 module.exports.findCategoryWithAssignedEquipment = async (req, res, next) => {
     try {
         const { fk_employee_id: employeeId } = res.locals.account;

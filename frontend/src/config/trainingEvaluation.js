@@ -9,12 +9,12 @@ export const defaultTemplate = {
             created_at: null,
             effective_at: null
         },
-        form: {
-            trainee_id: null,
-            supervisor_id: null,
-            created_at: '',
-            updated_at: '' // maybe
-        }
+        // form: {
+        //     trainee_id: null,
+        //     supervisor_id: null,
+        //     created_at: '',
+        //     updated_at: '' // maybe
+        // }
     },
     evaluation: {
         // we can include qns no and use array.sort(callback)

@@ -45,7 +45,22 @@ const sideNavListArr = [
     },
     {
         link: "/training",
-        display: "7.3 Training"
+        display: "7.3 Training",
+        subLinksArr: [
+            {
+                header: "Training Pages",
+                subLinks: [
+                    {
+                        link: "",
+                        display: "My Training"
+                    },
+                    {
+                        link: "/manage",
+                        display: "Manage Trainings"
+                    }
+                ]
+            }
+        ]
     },
     {
         link: "/settings",
@@ -92,10 +107,6 @@ const sideNavListArr = [
                     {
                         link: "/induction-templates",
                         display: "Manage Induction Templates"
-                    },
-                    {
-                        link: "/trainings",
-                        display: "Manage Trainings"
                     }
                 ]
             }

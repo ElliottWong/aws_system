@@ -360,7 +360,7 @@ const RespNAuthorityManageRole = ({ match }) => {
                                                     <input type="checkbox" onChange={handleCheckboxChange} checked={checkCheckboxChecked(data.moduleCode + " edit") || false} name={data.moduleCode + " edit"} value={`${data.moduleCode} edit`} />
                                                 </div>
                                                 {
-                                                    data.moduleCode === "m05_03" || data.moduleCode === "m01_01" || data.moduleCode === "m02_01" || data.moduleCode === "m03_01" || data.moduleCode === "m07_01" || data.moduleCode === "m07_02" ?
+                                                    data.moduleCode === "m05_03" || data.moduleCode === "m01_01" || data.moduleCode === "m02_01" || data.moduleCode === "m03_01" ?
                                                         null :
 
                                                         < div className="c-Configs-Permissions__Checkbox">

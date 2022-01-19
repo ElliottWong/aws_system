@@ -152,10 +152,8 @@ Licences.belongsToMany(Employees, {
     as: 'assignees'
 });
 
-// dennis says can replace the previous upload,
-// dont need a history
-// but i think im going to leave this in for now
-// less rework
+// originally designed to be one to many
+// now is one to one
 // changed from hasMany to hasOne
 const LicenceUploads = db.define(
     'LicenceUploads',
@@ -189,9 +187,15 @@ const LicenceUploads = db.define(
                 key: 'employee_id'
             }
         },
-        renewed_at: {
+        // can allow for a history of renewals
+        issued_at: {
             type: DataTypes.DATEONLY,
             allowNull: false
+        },
+        expires_at: {
+            type: DataTypes.DATEONLY,
+            allowNull: true,
+            defaultValue: null
         }
     },
     {
@@ -203,12 +207,12 @@ const LicenceUploads = db.define(
 );
 
 Licences.hasOne(LicenceUploads, {
-    foreignKey: 'fk_equipment_id',
+    foreignKey: 'fk_licence_id',
     as: 'upload'
 });
 
 LicenceUploads.belongsTo(Licences, {
-    foreignKey: 'fk_equipment_id',
+    foreignKey: 'fk_licence_id',
     as: 'licence'
 });
 

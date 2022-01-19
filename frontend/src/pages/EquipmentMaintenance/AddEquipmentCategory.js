@@ -49,8 +49,8 @@ const AddEquipmentCategory = () => {
                         }
                     });
                     console.log(resInsertOneCategory);
-                    toast.success(<>Success!<br />Message: <b>Inserted new category!</b></>);
                     setLoading(false);
+                    toast.success(<>Success!<br />Message: <b>Inserted new category!</b></>);
                 } catch (error) {
                     console.log(error);
                     setLoading(false);
@@ -60,7 +60,6 @@ const AddEquipmentCategory = () => {
         } else if (buttonType === "cancel") {
             // Handler for cancel button
             history.push("/equipment-maintenance");
-
         }
     }
 

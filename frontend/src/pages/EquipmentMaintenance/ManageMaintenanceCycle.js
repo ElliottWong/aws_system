@@ -1,28 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import { Col, Container, Row } from 'react-bootstrap';
+import BootstrapTable from 'react-bootstrap-table-next';
+import paginationFactory from 'react-bootstrap-table2-paginator';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { confirmAlert } from 'react-confirm-alert';
+import DateTimePicker from 'react-datetime-picker';
+import { IconContext } from 'react-icons';
+import * as RiIcons from 'react-icons/ri';
+import { useHistory } from 'react-router-dom';
+import Select from "react-select";
+import { toast, ToastContainer } from 'react-toastify';
+import CustomConfirmAlert from '../../common/CustomConfirmAlert';
+import ErrorCard from '../../common/ErrorCard';
+import StatusPill from '../../common/StatusPill';
+import config from '../../config/config';
+import { maintenanceRecordColumns } from '../../config/tableColumns';
 import PageLayout from '../../layout/PageLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import { maintenanceRecordColumns } from '../../config/tableColumns';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
-import { TAB } from '../../config/enums';
-import dayjs from 'dayjs';
-import jwt_decode from "jwt-decode";
-import axios from 'axios';
-import paginationFactory from 'react-bootstrap-table2-paginator';
-import config from '../../config/config';
-import ErrorCard from '../../common/ErrorCard';
-import { Container, Row, Col } from 'react-bootstrap';
-import DateTimePicker from 'react-datetime-picker';
-import * as RiIcons from 'react-icons/ri';
-import { IconContext } from 'react-icons';
-import { ToastContainer, toast } from 'react-toastify';
-import Select from "react-select";
-import { confirmAlert } from 'react-confirm-alert';
-import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 import TokenManager from '../../utilities/tokenManager';
-import StatusPill from '../../common/StatusPill';
-import { useHistory, NavLink } from 'react-router-dom';
 
 const ManageMaintenanceCycle = ({ match }) => {
     const token = TokenManager.getToken();
@@ -30,6 +27,7 @@ const ManageMaintenanceCycle = ({ match }) => {
     const userCompanyID = decodedToken.company_id;
     const userID = decodedToken.employee_id;
     const toastTiming = config.toastTiming;
+    let history = useHistory();
     const [rerender, setRerender] = useState(false); // value of state doesnt matter, only using it to force useffect to execute
 
     // State declarations
@@ -49,6 +47,7 @@ const ManageMaintenanceCycle = ({ match }) => {
     const [allUsernameData, setallUsernameData] = useState({
         username: []
     });
+    const [userList, setUserList] = useState([]);
     const [maintenanceCyclesData, setMaintenanceCyclesData] = useState([]);
     const [renderErrorCard, setRenderErrorCard] = useState({
         render: false,
@@ -68,6 +67,12 @@ const ManageMaintenanceCycle = ({ match }) => {
         (async () => {
             try {
                 let tempEquipmentData = [];
+                let tempPersonsData = [];
+
+                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_01/employees`);
+                console.log(resClausePermission);
+                tempPersonsData = resClausePermission.data.results;
+                console.log(tempPersonsData);
 
                 const resOneEquipment = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment/${equipmentID}/all-maintenance/${maintenanceID}`);
                 console.log(resOneEquipment);
@@ -77,20 +82,18 @@ const ManageMaintenanceCycle = ({ match }) => {
                 setMaintenanceCyclesData(() => {
                     return {
                         id: tempEquipmentData.maintenance_id,
-                        serialNo: 1,
                         maintenanceType: tempEquipmentData.type,
                         responsible: (() => {
-                            let personArray = [];
-                            let personString = ""
-                            tempEquipmentData.assignees.map((eachPerson) => {
-                                personString += eachPerson.account.username + ", ";
+                            return tempEquipmentData.assignees.map((eachPerson) => {
+                                return {
+                                    label: eachPerson.account.username,
+                                    value: eachPerson.employee_id
+                                }
                             });
-                            personArray.push(personString.slice(0, -2));
-                            personString = "";
-                            return personArray;
                         })(),
+                        freq_unit_time: tempEquipmentData.freq_unit_time,
+                        freq_multiplier: tempEquipmentData.freq_multiplier,
                         maintenanceFrequency: (() => {
-                            console.log(tempEquipmentData.freq_unit_time)
                             if (tempEquipmentData.freq_unit_time === 7) {
                                 return `${tempEquipmentData.freq_multiplier} weeks`
                             }
@@ -101,7 +104,7 @@ const ManageMaintenanceCycle = ({ match }) => {
                                 return `${tempEquipmentData.freq_multiplier} years`
                             }
                         })(),
-                        lastServiceDate: tempEquipmentData.last_service_at,
+                        lastServiceDate: new Date(tempEquipmentData.last_service_at),
                         status: (() => {
                             let placeholder = '';
                             if (placeholder === undefined) {
@@ -110,6 +113,13 @@ const ManageMaintenanceCycle = ({ match }) => {
                             return <StatusPill type="active" />
                         })(),
                     }
+                });
+
+                setUserList(() => {
+                    return tempPersonsData.map((data) => ({
+                        label: data.account.username,
+                        value: data.employee_id
+                    }));
                 });
 
                 setMaintenanceRecordsData(() => {
@@ -135,7 +145,7 @@ const ManageMaintenanceCycle = ({ match }) => {
                                 <IconContext.Provider value={{ color: "#DC3545", size: "16px" }}>
                                     <RiIcons.RiDeleteBin7Line className="c-Table-Btn--bin c-Table-Btn" onClick={() => (handleDeleteRecord(tempEquipmentData.maintenance_record_id))} />
                                 </IconContext.Provider>
-                            )                
+                            )
                         })(),
                     }
                 });
@@ -148,6 +158,42 @@ const ManageMaintenanceCycle = ({ match }) => {
     const handleBtn = (buttonType) => {
         if (buttonType === "upload") {
             // Handler for upload button
+        }
+
+        if (buttonType === "editEquipment") {
+            // Handler for edit button
+            setIsEditing(true);
+        }
+
+        if (buttonType === "editEquipmentCancel") {
+            // Handler for cancel button
+            setIsEditing(false);
+        }
+
+        if (buttonType === "editEquipmentSave") {
+            // Handler for save button
+            (async () => {
+                try {
+                    console.log(maintenanceCyclesData);
+                    const resUpdateCycle = await axios.put(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment/${equipmentID}/all-maintenance/${maintenanceID}`,
+                        {
+                            title: maintenanceCyclesData.maintenanceType,
+                            freq_multiplier: maintenanceCyclesData.freq_multiplier,
+                            freq_unit_time: maintenanceCyclesData.freq_unit_time,
+                            last_service_at: maintenanceCyclesData.lastServiceDate,
+                            assignees: maintenanceCyclesData.assignees,
+                        },
+                        {
+                            headers: {
+                                "Authorization": `Bearer ${token}`
+                            }
+                        });
+                    console.log(resUpdateCycle);
+                    toast.success(<>Success!<br />Message: <b>Updated Maintenance Cycle!</b></>);
+                } catch (error) {
+                    console.log(error);
+                }
+            })();
         }
     }
 
@@ -228,6 +274,45 @@ const ManageMaintenanceCycle = ({ match }) => {
         return value.includes(inputValue) || otherKey.length > 0;
     };
 
+    // Handler for setting last service date 
+    const setLastServiceDate = (date) => {
+        console.log(date);
+        setMaintenanceCyclesData((prevState) => ({
+            ...prevState,
+            lastServiceDate: date
+        }));
+    }
+
+    // Handler for input array
+    const handleInputArrayChange = (options) => {
+        console.log(options);
+        setMaintenanceCyclesData((prevState) => ({
+            ...prevState,
+            assignees: options
+        }));
+    }
+
+    // Handler for input 
+    const handleTimeInputChange = (event) => {
+        let unitTime;
+        // if(event.target.value === "Days") unitTime = 1;
+        if (event.target.value === "Weeks") unitTime = "week";
+        if (event.target.value === "Months") unitTime = "month";
+        if (event.target.value === "Years") unitTime = "year";
+
+        // Set string value for backend endpoint
+        setMaintenanceCyclesData((prevState) => ({
+            ...prevState,
+            [event.target.name]: unitTime
+        }));
+
+        // Set string value for frontend
+        setMaintenanceCyclesData((prevState) => ({
+            ...prevState,
+            freq_unit_time_UI: event.target.value
+        }));
+    }
+    console.log(maintenanceCyclesData.lastServiceDate);
     // Only rendered when document is in editing mode
     const renderInputFieldEditSection = () => {
         return (
@@ -242,18 +327,25 @@ const ManageMaintenanceCycle = ({ match }) => {
                     {/* Responsible */}
                     <Col className="c-Input c-Input__Category c-Input c-Input--edit">
                         <label htmlFor="responsible">Responsible</label>
-                        <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="responsible" value={maintenanceCyclesData.responsible} />
+                        <Select
+                            isMulti
+                            options={userList}
+                            placeholder="Select Users"
+                            onChange={handleInputArrayChange}
+                        />
                     </Col>
                     {/* Maintenance Frequency */}
                     <Col className="c-Input c-Input__Ref-no c-Input--edit">
                         <label htmlFor="maintenanceFrequency">Maintenance Frequency</label>
-                        <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="maintenanceMultiplier" value={maintenanceCyclesData.maintenanceMultiplier} />
-                        <select onFocus={() => setInputTouched(true)} type="text" name="maintenanceUnitTime" onChange={handleInputChange} value={maintenanceCyclesData.maintenanceUnitTime}>
-                            <option>Select Time Unit</option>
-                            <option>Days</option>
-                            <option>Weeks</option>
-                            <option>Months</option>
-                        </select>
+                        <div className='c-Input__Maintenance-frequency--input'>
+                            <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="freq_multiplier" value={maintenanceCyclesData.freq_multiplier} />
+                            <select onFocus={() => setInputTouched(true)} type="text" name="freq_unit_time" onChange={handleTimeInputChange} value={maintenanceCyclesData.freq_unit_time_UI}>
+                                <option>Select Time Unit</option>
+                                <option>Weeks</option>
+                                <option>Months</option>
+                                <option>Years</option>
+                            </select>
+                        </div>
                     </Col>
                 </Row>
 
@@ -262,7 +354,12 @@ const ManageMaintenanceCycle = ({ match }) => {
                     {/* Last Service Date */}
                     <Col className="c-Input c-Input__Reg-no c-Input--edit">
                         <label htmlFor="lastServiceDate">Last Service Date</label>
-                        <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="lastServiceDate" value={maintenanceCyclesData.lastServiceDate} />
+                        <DateTimePicker
+                            onChange={setLastServiceDate}
+                            value={maintenanceCyclesData.lastServiceDate}
+                            className="c-Form__Date"
+                            format="dd/MM/y"
+                        />
                     </Col>
                     {/* Filler */}
                     <Col className="c-Input c-Input__Model-brand c-Input--edit">
@@ -298,7 +395,13 @@ const ManageMaintenanceCycle = ({ match }) => {
                     {/* Responsible */}
                     <Col className="c-Input c-Input__Category c-Input--read-only">
                         <label htmlFor="responsible">Responsible</label>
-                        <input readOnly type="text" name="responsible" value={maintenanceCyclesData.responsible} />
+                        <input readOnly type="text" name="responsible" value={(() => {
+                            let personStr = "";
+                            maintenanceCyclesData.responsible?.forEach((data) => {
+                                personStr += data.label + ", "
+                            });
+                            return personStr.slice(0, -2);;
+                        })()} />
                     </Col>
                     {/* Maintenance Frequency */}
                     <Col className="c-Input c-Input__Ref-no c-Input--read-only">
@@ -357,7 +460,10 @@ const ManageMaintenanceCycle = ({ match }) => {
                     console.log(res);
                     setRerender((prevState) => !prevState);
                     onClose();
-                    toast.success(<>Success!<br />Message: <b>Maintenance cycle has been deleted!</b></>);
+                    setTimeout(() => {
+                        toast.success(<>Success!<br />Message: <b>Maintenance Cycle has been deleted!</b></>);
+                    }, 0);
+                    history.push(`/equipment-maintenance/manage-equipment/${equipmentID}`);
                 })
                 .catch((err) => {
                     console.log(err);
@@ -539,7 +645,6 @@ const ManageMaintenanceCycle = ({ match }) => {
 
                     {/* Maintenance Records Table section */}
                     <div className="c-Manage-equipment-maintenance__Cycles-table c-Main__Cycles-table">
-                        {console.log(maintenanceRecordsData)}
                         {
                             maintenanceCyclesDataPlaceholder.length !== 0 ?
                                 <BootstrapTable

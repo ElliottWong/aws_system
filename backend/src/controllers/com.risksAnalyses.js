@@ -66,9 +66,11 @@ module.exports.insertAnalysis = async (req, res, next) => {
         });
 
         const emailContent = templates.documentApproval(
+            `${approvingEmployee.firstname} ${approvingEmployee.lastname}`,
             `${authorEmployee.firstname} ${authorEmployee.lastname}`,
-            'Risks Analysis',
-            `${authorEmployee.firstname} ${authorEmployee.lastname}`
+            'Risk and Opportunity',
+            'risk-n-opportunity',
+            'Risk and Opportunity'
         );
 
         sendEmail(approvingEmployee.email, 'A document requires your approval', emailContent)

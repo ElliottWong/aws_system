@@ -9,6 +9,11 @@ const db = require('./src/config/connection');
 const config = require('./src/config/config');
 const mainRouter = require('./src/routes/main.routes');
 
+// notification job schedules
+const schedulesforSwot = require('./src/schedules/swots');
+const schedulesforEMP = require('./src/schedules/equipmentMaintenance');
+const schedulesForPLC = require('./src/schedules/licences');
+
 const app = express();
 const PORT = config.port || 8000;
 
@@ -46,6 +51,11 @@ app.use('/api/v1', mainRouter);
         app.listen(PORT, () => {
             console.log(`LISTENING TO PORT ${PORT}`);
         });
+
+        console.log('RUNNING ALL SCHEDULES');
+        schedulesforSwot();
+        schedulesforEMP();
+        schedulesForPLC();
     }
     catch (error) {
         console.log('FAIL TO START SERVER', error);

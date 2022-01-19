@@ -6,11 +6,23 @@ const { formDocumentsFolderPath } = require('../services/cloudinary.v1');
 
 const { isLoggedIn } = require('../middlewares/auth');
 const { parseIdParams, companyAccess } = require('../middlewares/access');
-const { checkAccountStatus, checkCompanyStatus } = require('../middlewares/active');
+const {
+    checkAccountStatus,
+    checkCompanyStatus
+} = require('../middlewares/active');
 
-const auth = [isLoggedIn, parseIdParams, checkAccountStatus, checkCompanyStatus, companyAccess];
+const auth = [
+    isLoggedIn,
+    parseIdParams,
+    checkAccountStatus,
+    checkCompanyStatus,
+    companyAccess
+];
 
 const licenceController = require('../controllers/com.licences');
+
+const licenceScheduler = require('../schedules/licences');
+
 
 // use query ?archived=1 or true for the two below routes to get archives
 
@@ -42,9 +54,9 @@ router.post(
     licenceController.insertLicence
 );
 
-
+// tested
 router.post(
-    '/company/:companyId/licence-registry/all-licences/:licenceId/renewal',
+    '/company/:companyId/licence-registry/all-licences/:licenceId/renewals',
     auth,
     uploadOne({
         field: 'renewal',
@@ -54,18 +66,21 @@ router.post(
     destroyUploads
 );
 
+// tested
 router.put(
     '/company/:companyId/licence-registry/all-licences/:licenceId',
     auth,
     licenceController.editLicence
 );
 
+// tested
 router.put(
     '/company/:companyId/licence-registry/all-licences/:licenceId/archive',
     auth,
     licenceController.archiveLicence
 );
 
+// tested
 router.put(
     '/company/:companyId/licence-registry/all-licences/:licenceId/activate',
     auth,

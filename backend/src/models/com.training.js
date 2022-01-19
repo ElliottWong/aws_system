@@ -36,7 +36,6 @@ module.exports.insertTraining = (data = {}, upload) => {
         training_end,
         training_institution,
         training_cost,
-        recommendations,
         justification_text
     } = data;
 
@@ -65,7 +64,6 @@ module.exports.insertTraining = (data = {}, upload) => {
             training_end,
             training_institution,
             training_cost,
-            recommendations,
             justification_text,
             justification_file
         }, { include: 'justification_file' });
@@ -82,7 +80,6 @@ module.exports.insertTraining = (data = {}, upload) => {
         training_end,
         training_institution,
         training_cost,
-        recommendations,
         justification_text
     });
 };
@@ -106,42 +103,106 @@ module.exports.insertAttendance = async (trainingId, employeeId, companyId, uplo
 
 // ============================================================
 
-module.exports.findTrainingRequests = {
-    in: (companyId) => HR.TrainingRequests.findAll({
-        where: { fk_company_id: companyId }
-    }),
+const $includeAuthor = {
+    association: 'author',
+    include: {
+        association: 'account',
+        attributes: ['username']
+    }
+};
 
-    by: (employeeId, companyId) => HR.TrainingRequests.findAll({
+const $includeApprover = {
+    association: 'approver',
+    include: {
+        association: 'account',
+        attributes: ['username']
+    }
+};
+
+const $includeJustificationFile = {
+    association: 'justification_file',
+    attributes: { exclude: ['cloudinary_id', 'cloudinary_uri'] }
+};
+
+const $includeAttendanceFile = {
+    association: 'attendance_file',
+    attributes: { exclude: ['cloudinary_id', 'cloudinary_uri'] }
+};
+
+const allIncludes = [$includeAuthor, $includeApprover, $includeJustificationFile, $includeAttendanceFile];
+
+// KISS (keep it simple stupid) - no config for now
+
+module.exports.findTraining = {
+    requestsIn: (companyId) => HR.TrainingRequests.findAll({
         where: {
             fk_company_id: companyId,
-            created_by: employeeId
-        }
+            status: { [Op.not]: TRAINING_STATUS.APPROVED }
+        },
+        include: allIncludes
     }),
 
-    pendingFor: (employeeId, companyId) => HR.TrainingRequests.findAll({
+    recordsIn: (companyId) => HR.TrainingRequests.findAll({
+        where: {
+            fk_company_id: companyId,
+            status: TRAINING_STATUS.APPROVED,       // approved
+            attendance_upload: { [Op.not]: null }   // and has attendance
+        },
+        include: allIncludes
+    }),
+
+    requestsBy: (employeeId, companyId) => HR.TrainingRequests.findAll({
+        where: {
+            fk_company_id: companyId,
+            created_by: employeeId,
+            status: { [Op.not]: TRAINING_STATUS.APPROVED }
+        },
+        include: allIncludes
+    }),
+
+    // records are subset of requests
+    recordsBy: (employeeId, companyId) => HR.TrainingRequests.findAll({
+        where: {
+            fk_company_id: companyId,
+            created_by: employeeId,
+            status: TRAINING_STATUS.APPROVED,       // approved
+            attendance_upload: { [Op.not]: null }   // and has attendance
+        },
+        include: allIncludes
+    }),
+
+    requestsPendingFor: (employeeId, companyId) => HR.TrainingRequests.findAll({
         where: {
             fk_company_id: companyId,
             approved_by: employeeId,
             status: TRAINING_STATUS.PENDING,
             approved_at: null
-        }
+        },
+        include: allIncludes
     }),
 
     // only the creator and approver can see
-    one: (trainingId, employeeId, companyId) => HR.TrainingRequests.findOne({
+    request: (trainingId, employeeId, companyId) => HR.TrainingRequests.findOne({
         where: {
             training_id: trainingId,
             fk_company_id: companyId,
             [Op.or]: [
                 { created_by: employeeId },
-                { approved_by: employeeId, }
+                { approved_by: employeeId }
             ]
-        }
+        },
+        include: allIncludes
     })
 };
 
 // ============================================================
 
 module.exports.editTrainingRequest = async () => {
-    
+
+};
+
+// ============================================================
+
+module.exports.deleteTrainingRequest = async () => {
+
 };

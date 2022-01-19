@@ -2,9 +2,11 @@ const enumValues = (enumeration) => Object.values(enumeration);
 
 const testEnum = (enumeration, value) => enumValues(enumeration).includes(value.toLowerCase());
 
+const testModule = (value) => /^m[0-9]{2}_[0-9]{2}[a-z]?$/.test(value);
+
 module.exports = {
     // utility functions
-    enumValues, testEnum,
+    enumValues, testEnum, testModule,
     MODULE: {
         SCOPES: 'm01_01',
         NORMATIVE_REFERENCES: 'm02_01',
@@ -29,7 +31,7 @@ module.exports = {
         ARCHIVED: 'archived'
     },
     TRAINING_STATUS: {
-        ACTIVE: 'active',
+        APPROVED: 'approved',
         PENDING: 'pending',
         REJECTED: 'rejected',
         CANCELLED: 'cancelled'

@@ -12,18 +12,27 @@ const auth = [isLoggedIn, parseIdParams, checkAccountStatus, checkCompanyStatus,
 
 const maintenanceController = require('../controllers/com.equipmentMaintenance');
 
+const maintenanceScheduler = require('../schedules/equipmentMaintenance');
+
+// router.get(
+//     '/company/equipment-maintenance-program',
+//     maintenanceScheduler.maintenanceSchedule
+// );
+
 router.get(
     '/company/:companyId/equipment-maintenance-program/all-equipment/:equipmentId/all-maintenance/:maintenanceId',
     auth,
     maintenanceController.findOneMaintenance
 );
 
+// tested
 router.post(
     '/company/:companyId/equipment-maintenance-program/all-equipment/:equipmentId/all-maintenance',
     auth,
     maintenanceController.insertOneMaintenance
 );
 
+// tested
 router.post(
     '/company/:companyId/equipment-maintenance-program/all-equipment/:equipmentId/all-maintenance/:maintenanceId/uploads',
     auth,
@@ -35,6 +44,7 @@ router.post(
     destroyUploads
 );
 
+// tested
 router.put(
     '/company/:companyId/equipment-maintenance-program/all-equipment/:equipmentId/all-maintenance/:maintenanceId',
     auth,
