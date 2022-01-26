@@ -11,7 +11,7 @@ const { BaseError: SequelizeError } = require('sequelize');
 const { BaseError, InternalError } = require('../errors/Errors');
 const { error500 } = require('../utils/response').responses;
 
-// winston can only can in strings or json-like things
+// winston can only read strings or json-like things
 // can automatically call the toJSON method on objects (line 38)
 const convertErrorForLog = (error) =>
     error.toJSON?.() ??

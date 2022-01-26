@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import RiskNOppItem from '../../common/RiskNOppItem';
 import axios from 'axios';
-import { getUserDisplayName, getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
+import React, { useEffect, useState } from 'react';
+import RiskNOppItem from '../../common/RiskNOppItem';
 import TokenManager from '../../utilities/tokenManager';
 
 const RiskNOppEditing = ({

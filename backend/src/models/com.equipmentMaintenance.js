@@ -8,16 +8,14 @@ const {
     Documents: { EMP }
 } = require('../schemas/Schemas');
 
-const { deleteFile } = require('./files.v1');
-
 const {
     includes: {
-        maintenanceAssignees: $includeAssignees,
-        maintenanceUploads: $includeUploads
+        maintenanceAssignees: $includeAssignees
     },
-    isEquipmentOwner,
-    isAssignedEquipment
-} = require('./com.equipment.v3').helpers;
+    isEquipmentOwner
+} = require('./com.equipment').helpers;
+
+const { deleteFile } = require('./files.v1');
 
 const E = require('../errors/Errors');
 
@@ -192,20 +190,18 @@ module.exports.insertMaintenanceUpload = async (maintenanceId, createdBy, data =
 
     const transaction = await db.transaction();
     try {
-        const [insertedUpload, maintenance] = await Promise.all([
-            EMP.MaintenanceUploads.create({
-                fk_maintenance_id: maintenanceId,
-                created_by: createdBy,
-                serviced_at: servicedAt,
-                description,
-                file
-            }, { include: 'file', transaction }),
+        const insertedUpload = await EMP.MaintenanceUploads.create({
+            fk_maintenance_id: maintenanceId,
+            created_by: createdBy,
+            serviced_at: servicedAt,
+            description,
+            file
+        }, { include: 'file', transaction });
 
-            EMP.Maintenance.findOne({
-                where: { maintenance_id: maintenanceId },
-                attributes: ['freq_multiplier', 'freq_unit_time']
-            })
-        ]);
+        const maintenance = await EMP.Maintenance.findOne({
+            where: { maintenance_id: maintenanceId },
+            attributes: ['freq_multiplier', 'freq_unit_time']
+        });
 
         const {
             freq_multiplier: multiplier,
@@ -240,33 +236,39 @@ module.exports.insertMaintenanceUpload = async (maintenanceId, createdBy, data =
 
 // ============================================================
 
-module.exports.findOneMaintenance = async function ({
-    maintenanceId,
-    equipmentId,
-    companyId,
-    employeeId,
-    includeAssignees = true,
-    includeUploads = true
-}) {
+const $includeUploads = {
+    association: 'uploads',
+    include: [
+        {
+            association: 'author',
+            include: {
+                association: 'account',
+                attributes: ['username']
+            }
+        },
+        {
+            association: 'file',
+            attributes: { exclude: ['cloudinary_id', 'cloudinary_uri'] }
+        }
+    ]
+};
+
+module.exports.findOneMaintenance = async (maintenanceId, equipmentId, companyId, employeeId) => {
     const [isOwner, isAssigned] = await Promise.all([
         isEquipmentOwner(equipmentId, companyId, employeeId),
         isAssignedMaintenance(maintenanceId, employeeId)
     ]);
 
     if (isOwner || isAssigned) {
-        let include = [];
-        if (includeAssignees) include = [...include, $includeAssignees];
-        if (includeUploads) include = [...include, $includeUploads];
+        const where = {
+            maintenance_id: maintenanceId,
+            fk_company_id: companyId,
+            fk_equipment_id: equipmentId
+        };
 
-        const maintenance = await EMP.Maintenance.findOne({
-            where: {
-                maintenance_id: maintenanceId,
-                fk_company_id: companyId,
-                fk_equipment_id: equipmentId
-            },
-            include
-        });
+        const include = [$includeAssignees, $includeUploads];
 
+        const maintenance = await EMP.Maintenance.findOne({ where, include });
         return maintenance;
     }
 
@@ -337,7 +339,7 @@ module.exports.editOneMaintenance = async (maintenanceId, equipmentId, companyId
         if (assignees.length > 0) {
             await EMP.MaintenanceAssignees.destroy({
                 where: {
-                    maintenance_id: maintenanceId,
+                    fk_maintenance_id: maintenanceId,
                     fk_equipment_id: equipmentId
                 },
                 transaction

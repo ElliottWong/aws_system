@@ -1,23 +1,17 @@
-import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import PageLayout from '../../layout/PageLayout';
-import DocumentLayout from '../../layout/DocumentLayout';
-import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import { myTrainingRecordsColumns, myTrainingRequestsColumns } from '../../config/tableColumns';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
 import dayjs from 'dayjs';
-import { ToastContainer } from 'react-toastify';
-import config from '../../config/config';
-import { useHistory } from 'react-router-dom';
-import StatusPill from '../../common/StatusPill';
-import { confirmAlert } from 'react-confirm-alert';
-import FileSelect from '../../common/FileSelect';
-import CustomConfirmAlert from '../../common/CustomConfirmAlert';
-import TokenManager from '../../utilities/tokenManager.js';
 import FileDownload from 'js-file-download';
-import { toast } from 'react-toastify';
+import React, { useEffect, useState } from 'react';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { confirmAlert } from 'react-confirm-alert';
+import { useHistory } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import CustomConfirmAlert from '../../common/CustomConfirmAlert';
+import StatusPill from '../../common/StatusPill';
+import config from '../../config/config';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
+import TokenManager from '../../utilities/tokenManager.js';
 
 const ManageMyTrainingRequest = ({ match }) => {
     const toastTiming = config.toastTiming;
@@ -31,6 +25,7 @@ const ManageMyTrainingRequest = ({ match }) => {
     // State declarations
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
     const [myTrainingRequest, setMyTrainingRequest] = useState({});
+    const [rerender, setRerender] = useState(false);
 
     useEffect(() => {
         let componentMounted = true;
@@ -46,13 +41,16 @@ const ManageMyTrainingRequest = ({ match }) => {
                         organisation: tempMyTrainingRequest.training_institution,
                         course_title: tempMyTrainingRequest.title,
                         cost: tempMyTrainingRequest.training_cost,
-                        approver: tempMyTrainingRequest.approved_at,
+                        approver: "@" + tempMyTrainingRequest.approver.account.username,
                         approval_status: tempMyTrainingRequest.status,
                         start_date: dayjs(tempMyTrainingRequest.training_start).format("D MMM YYYY"),
                         end_date: dayjs(tempMyTrainingRequest.training_end).format("D MMM YYYY"),
                         justification_text: tempMyTrainingRequest.justification_text,
                         justification_upload: tempMyTrainingRequest.justification_upload,
-                        remarks: tempMyTrainingRequest.remarks
+                        justification_upload_filename: tempMyTrainingRequest.justification_file?.file_name,
+                        remarks: tempMyTrainingRequest.remarks,
+                        attendance_upload: tempMyTrainingRequest.attendance_upload,
+                        created_by: "@" + tempMyTrainingRequest.author.account.username
                     }));
                 }
             } catch (error) {
@@ -63,14 +61,14 @@ const ManageMyTrainingRequest = ({ match }) => {
         return (() => {
             componentMounted = false;
         })
-    }, []);
+    }, [rerender]);
 
     // Handlers
-    const handleRemoveRecord = () => {
+    const handleRemoveOrCancelRequest = () => {
         // Confirmation dialogue for deleting rejected document
-        const message = `Deleting this record will remove its respective record (if any) permanently. Click confirm to proceed.`;
-        const handler = (onClose) => confirmRemoveRecord(onClose);
-        const heading = `Confirm Delete?`;
+        const message = `${myTrainingRequest.approval_status === "rejected" ? "Deleting" : "Removing"} this record will ${myTrainingRequest.approval_status === "rejected" ? "delete" : "remove"} its respective record (if any) permanently. Click confirm to proceed.`;
+        const handler = (onClose) => confirmRemoveOrCancelRequest(onClose);
+        const heading = `Confirm ${myTrainingRequest.approval_status === "rejected" ? "delete" : "remove"}?`;
         const type = "alert"
         const data = {
             message,
@@ -84,24 +82,51 @@ const ManageMyTrainingRequest = ({ match }) => {
             }
         });
 
-        const confirmRemoveRecord = () => {
+        const confirmRemoveOrCancelRequest = async (onClose) => {
 
+            try {
+                if (myTrainingRequest.approval_status === "rejected") {
+                    await axios.delete(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/training/rejected-requests/${trainingReqID}`);
+                } else {
+                    await axios.put(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/training/cancel-request/${trainingReqID}`);
+                }
+                setTimeout(() => {
+                    toast.success(`Successfully ${myTrainingRequest.approval_status === "rejected" ? "deleted" : "cancelled"}!`);
+                }, 0);
+
+                if (myTrainingRequest.approval_status === "rejected") {
+                    history.push("/training/requests");
+                    return;
+                } else {
+                    setRerender((prevState) => !prevState);
+                }
+
+            } catch (err) {
+                console.log(err);
+                let errCode = "Error!";
+                let errMsg = "Error!";
+                if (err.response !== undefined) {
+                    errCode = err.response.status;
+                    errMsg = err.response.data.message;
+                }
+
+                toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
+            }
+            onClose();
         };
     };
 
     const handleDownloadFile = async () => {
 
         try {
-            const fileInfoRes = await axios.get(`${process.env.REACT_APP_BASEURL}/file/info/${myTrainingRequest.justification_upload}`);
             const fileRes = await axios.get(`${process.env.REACT_APP_BASEURL}/file/download/${myTrainingRequest.justification_upload}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },
                 responseType: 'blob'
             });
-            console.log(fileInfoRes);
             console.log(fileRes);
-            FileDownload(fileRes.data, fileInfoRes.data.results.file_name);
+            FileDownload(fileRes.data, myTrainingRequest.justification_upload_filename);
             toast.success(<>Success!<br />Message: <b>Document has been downloaded successfully!</b></>);
         } catch (err) {
             console.log(err);
@@ -135,7 +160,7 @@ const ManageMyTrainingRequest = ({ match }) => {
                     {/* Breadcrumb */}
                     <Breadcrumb className="c-Manage-my-training-request__Breadcrumb l-Breadcrumb">
                         <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/training">Trainings</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/training/requests">My Training Requests</Breadcrumb.Item>
                         <Breadcrumb.Item active>Manage My Training Request</Breadcrumb.Item>
                     </Breadcrumb>
                     {/* Top section */}
@@ -166,6 +191,10 @@ const ManageMyTrainingRequest = ({ match }) => {
                                 <h2>Rejection Remarks</h2>
                                 <p>{myTrainingRequest.remarks ? myTrainingRequest.remarks : "Na"}</p>
                             </div>
+                            <div className = "c-Field">
+                                <h2>Trainee</h2>
+                                <p>{myTrainingRequest.created_by}</p>
+                            </div>
                         </div>
                         <div className="c-Fields__Right">
                             <div className="c-Field">
@@ -178,13 +207,13 @@ const ManageMyTrainingRequest = ({ match }) => {
                             </div>
                             <div className="c-Field">
                                 <h2>To be Approved by</h2>
-                                <p>@AppleKim</p>
+                                <p>{myTrainingRequest.approver}</p>
                             </div>
                             <div className="c-Field c-Field__File">
                                 <h2>File (For Justification)</h2>
                                 {
                                     myTrainingRequest.justification_upload ?
-                                        <button type="button" className="c-Btn c-Btn--primary" onClick = {handleDownloadFile}>Download</button> :
+                                        <button type="button" className="c-Btn c-Btn--primary" onClick={handleDownloadFile}>Download</button> :
                                         <p>Na</p>
                                 }
                             </div>
@@ -196,16 +225,28 @@ const ManageMyTrainingRequest = ({ match }) => {
                     </div>
 
                     {/* Danger Zone */}
-                    <div className="c-Manage-my-training-request__Danger c-Danger">
-                        <div className="c-Danger__Top">
-                            <h1>Danger Zone</h1>
-                        </div>
-                        <div className="c-Danger__Contents">
-                            <button type="button" className="c-Btn c-Btn--alert-border" onClick={() => handleRemoveRecord()}>Remove record & request</button>
-                            <p>Performing this action will remove the request and record (if any) permanently. This action cannot be undoned.</p>
-                        </div>
+                    {
 
-                    </div>
+                        myTrainingRequest.approval_status === "rejected" || ((myTrainingRequest.approval_status === "approved" || myTrainingRequest.approval_status === "pending") && !myTrainingRequest.attendance_upload) ?
+                            <div className="c-Manage-my-training-request__Danger c-Danger">
+                                <div className="c-Danger__Top">
+                                    <h1>Danger Zone</h1>
+                                </div>
+                                <div className="c-Danger__Contents">
+                                    <button type="button" className="c-Btn c-Btn--alert-border" onClick={() => handleRemoveOrCancelRequest()}>
+                                        {
+                                            myTrainingRequest.approval_status === "rejected" ?
+                                                "Delete record & request" :
+                                                "Cancel record & request"
+                                        }
+                                    </button>
+                                    <p>Performing this action will {myTrainingRequest.approval_status === "rejected" ? "delete" : "cancel"} the request and record (if any) permanently. This action cannot be undoned.</p>
+                                </div>
+
+                            </div> :
+                            null
+                    }
+
 
                 </div>
 

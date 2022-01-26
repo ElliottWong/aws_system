@@ -21,9 +21,6 @@ const auth = [
 
 const licenceController = require('../controllers/com.licences');
 
-const licenceScheduler = require('../schedules/licences');
-
-
 // use query ?archived=1 or true for the two below routes to get archives
 
 // tested

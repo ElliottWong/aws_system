@@ -2,7 +2,6 @@ import jwtDecode from "jwt-decode";
 import axios from 'axios';
 
 const tokenManager = () => {
-    console.log("token manager has been run");
     let accessToken = null;
     let message = "";
 

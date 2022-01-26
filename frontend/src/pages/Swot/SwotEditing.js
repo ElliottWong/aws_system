@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import BootstrapTable from 'react-bootstrap-table-next';
-import SwotItems from '../../common/SwotItems';
-import * as RiIcons from 'react-icons/ri';
-import { IconContext } from 'react-icons';
-import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
-import { getUserDisplayName, getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import BootstrapTable from 'react-bootstrap-table-next';
+import cellEditFactory from 'react-bootstrap-table2-editor';
+import { IconContext } from 'react-icons';
+import * as RiIcons from 'react-icons/ri';
+import SwotItems from '../../common/SwotItems';
 import TokenManager from '../../utilities/tokenManager';
 
 const SwotEditing = ({

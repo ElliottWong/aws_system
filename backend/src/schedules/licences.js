@@ -90,7 +90,7 @@ module.exports = () => {
 
                 try {
                     if (
-                        daysLeft == -2 &&
+                        daysLeft <= -2 &&
                         licenceFirstNotification == 1 &&
                         licenceSecondNotification == 0
                     ) {
@@ -103,10 +103,13 @@ module.exports = () => {
                         // console.log(`\n`, "Creator Email", creatorEmail, `\n`);
                         await sendEmail(
                             creatorEmail,
-                            `2nd Notification for ${licences.licence_name} Expired`,
-                            templates.LicenceSecondNoticeForCreatorOnly(
+                            `2nd Notification for Licence Expired`,
+                            templates.licenceScheduleNotice(
                                 creatorName,
-                                `${licences.licence_name}`
+                                `${licences.licence_name}`,
+                                'created by', 
+                                'expired', 
+                                `${licenceID}`
                             )
                         );
                     }
@@ -159,12 +162,16 @@ module.exports = () => {
                                 { where: { licence_id: licenceID } }
                             );
                             // console.log(`\n`, "Assign Email", assigneesEmail, `\n`);
+                          
                             await sendEmail(
                                 assigneesEmail,
-                                `1st Notification for ${licences.licence_name} Expires`,
-                                templates.LicenceFirstNoticeForAssigneesOnly(
+                                `1st Notification for Licence Almost Expired`,
+                                templates.licenceScheduleNotice(
                                     assigneesName,
-                                    `${licences.licence_name}`
+                                    `${licences.licence_name}`,
+                                    'assign to', 
+                                    'almost expired', 
+                                    `${licenceID}`
                                 )
                             );
                         }
@@ -175,7 +182,7 @@ module.exports = () => {
 
                     try {
                         if (
-                            daysLeft == -2 &&
+                            daysLeft <= -2 &&
                             licenceFirstNotification == 1 &&
                             licenceSecondNotification == 0
                         ) {
@@ -188,10 +195,13 @@ module.exports = () => {
                             // console.log(`\n`, "Assign Email", assigneesEmail, `\n`);
                             await sendEmail(
                                 assigneesEmail,
-                                `2nd Notification for ${licences.licence_name} Expired`,
-                                templates.LicenceSecondNoticeForAssigneesOnly(
+                                `2nd Notification for Licence Expired`,
+                                templates.licenceScheduleNotice(
                                     assigneesName,
-                                    `${licences.licence_name}`
+                                    `${licences.licence_name}`,
+                                    'assign to', 
+                                    'expired', 
+                                    `${licenceID}`
                                 )
                             );
                         }
@@ -240,13 +250,11 @@ module.exports = () => {
 
         for (const licences of getLicencesInformation) {
             const licenceID = licences.licence_id;
-            const expires = licences.expires_at;
             const licencesFirstNotification = licences.first_notification;
             const licencesSecondNotification = licences.second_notification;
 
             try {
                 if (
-                    expires == null &&
                     licencesFirstNotification == 0 &&
                     licencesSecondNotification == 0
                 ) {

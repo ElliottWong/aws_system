@@ -51,12 +51,24 @@ const sideNavListArr = [
                 header: "Training Pages",
                 subLinks: [
                     {
-                        link: "",
-                        display: "My Training"
+                        link: "/requests",
+                        display: "My Requests"
                     },
                     {
-                        link: "/manage",
-                        display: "Manage Trainings"
+                        link: "/records",
+                        display: "My Records"
+                    },
+                    {
+                        link: "/manage/requests",
+                        display: "Incoming Requests"
+                    },
+                    {
+                        link: "/manage/records",
+                        display: "Assigned Records"
+                    },
+                    {
+                        link: "/post-evaluation-templates",
+                        display: "Manage Post Evaluation Templates"
                     }
                 ]
             }

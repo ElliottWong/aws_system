@@ -1,23 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import PageLayout from '../../layout/PageLayout';
-import DocumentLayout from '../../layout/DocumentLayout';
-import { getSideNavStatus } from '../../utilities/sideNavUtils';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import dayjs from 'dayjs';
-import BootstrapTable from 'react-bootstrap-table-next';
-import TabRow from '../../common/TabRow';
-import DocumentBtnSection from '../../common/DocumentBtnSection';
-import RenderDocument from '../../common/RenderDocument';
-import { TAB } from '../../config/enums';
-import useDocAxios from '../../hooks/useDocAxios';
-import { docInterestedPartyColumns, historyInterestedPartyColumns } from '../../config/tableColumns';
-import { ToastContainer } from 'react-toastify';
-import jwt_decode from "jwt-decode";
 import axios from 'axios';
-import ManageDeleteArchivedDoc from '../../common/ManageDeleteArchivedDoc';
+import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { ToastContainer } from 'react-toastify';
+import DocumentBtnSection from '../../common/DocumentBtnSection';
+import ManageDeleteArchivedDoc from '../../common/ManageDeleteArchivedDoc';
+import RenderDocument from '../../common/RenderDocument';
+import TabRow from '../../common/TabRow';
 import config from '../../config/config';
+import { TAB } from '../../config/enums';
+import { docInterestedPartyColumns, historyInterestedPartyColumns } from '../../config/tableColumns';
+import useDocAxios from '../../hooks/useDocAxios';
+import DocumentLayout from '../../layout/DocumentLayout';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils';
 import TokenManager from '../../utilities/tokenManager';
 
 const InterestedParty = () => {

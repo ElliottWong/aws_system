@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import PageLayout from '../layout/PageLayout';
-import { getSideNavStatus } from '../utilities/sideNavUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
-import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit';
 import axios from 'axios';
-import { getToken, getUserCompanyID } from '../utilities/localStorageUtils';
-import { useHistory } from 'react-router';
-import { ToastContainer, toast } from 'react-toastify';
-import { confirmAlert } from 'react-confirm-alert';
+import React, { useState } from 'react';
 import { Spinner } from 'react-bootstrap';
+import { Search } from 'react-bootstrap-table2-toolkit';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { confirmAlert } from 'react-confirm-alert';
+import { useHistory } from 'react-router';
+import { toast, ToastContainer } from 'react-toastify';
 import CustomConfirmAlert from '../common/CustomConfirmAlert';
 import config from '../config/config';
+import PageLayout from '../layout/PageLayout';
+import { getSideNavStatus } from '../utilities/sideNavUtils';
 import TokenManager from '../utilities/tokenManager';
 
 

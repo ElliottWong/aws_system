@@ -1,0 +1,17 @@
+.c-Manage-training-requests {
+    &__Pending {
+        padding-top: 50px;
+        h2 {
+            font-size: $font-medium;
+            font-weight: bold;
+        }
+    }
+
+    &__All {
+        padding-top: 50px;
+        h2 {
+            font-size: $font-medium;
+            font-weight: bold;
+        }
+    }
+}

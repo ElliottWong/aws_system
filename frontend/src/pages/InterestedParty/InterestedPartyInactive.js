@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import BootstrapTable from 'react-bootstrap-table-next';
-import * as RiIcons from 'react-icons/ri';
-import { IconContext } from 'react-icons';
-import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
-import { getUserDisplayName, getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
 import axios from 'axios';
-import jwt_decode from "jwt-decode";
+import React, { useEffect, useState } from 'react';
+import BootstrapTable from 'react-bootstrap-table-next';
+import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
+import { IconContext } from 'react-icons';
+import * as RiIcons from 'react-icons/ri';
 import { TAB } from '../../config/enums';
 import TokenManager from '../../utilities/tokenManager';
 

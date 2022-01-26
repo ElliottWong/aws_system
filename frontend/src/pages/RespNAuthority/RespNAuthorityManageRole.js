@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { Search } from 'react-bootstrap-table2-toolkit';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { useHistory } from 'react-router';
+import { toast, ToastContainer } from 'react-toastify';
+import config from '../../config/config';
+import { normalPermissionListArr } from '../../config/permissionListArr';
 import PageLayout from '../../layout/PageLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
-import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit';
-import { useHistory } from 'react-router';
-import { normalPermissionListArr } from '../../config/permissionListArr';
-import axios from 'axios';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import { toast, ToastContainer } from 'react-toastify';
-import paginationFactory from 'react-bootstrap-table2-paginator';
-import config from '../../config/config';
 import TokenManager from '../../utilities/tokenManager';
 
 

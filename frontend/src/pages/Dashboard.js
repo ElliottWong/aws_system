@@ -1,18 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { getSideNavStatus } from '../utilities/sideNavUtils.js';
-import { getUserDisplayName, getToken, getUserCompanyID } from '../utilities/localStorageUtils.js';
-import PageLayout from '../layout/PageLayout';
-import DashboardInfoCards from '../common/DashboardInfoCards';
 import axios from 'axios';
-import jwt_decode from "jwt-decode";
-import { ToastContainer } from 'react-toastify';
-import DashboardBentoBox from '../common/DashboardBentoBox';
-import config from '../config/config';
-import StatusPill from '../common/StatusPill.js';
-import AnnouncementsBentoBox from '../common/AnnouncementsBentoBox.js';
 import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import { Col, Container, Row } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
-import { Container, Row, Col } from 'react-bootstrap';
+import { ToastContainer } from 'react-toastify';
+import AnnouncementsBentoBox from '../common/AnnouncementsBentoBox.js';
+import DashboardInfoCards from '../common/DashboardInfoCards';
+import config from '../config/config';
+import PageLayout from '../layout/PageLayout';
+import { getSideNavStatus } from '../utilities/sideNavUtils.js';
 import TokenManager from '../utilities/tokenManager.js';
 
 const Dashboard = () => {

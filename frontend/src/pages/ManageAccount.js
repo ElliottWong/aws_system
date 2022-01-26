@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { getSideNavStatus } from '../utilities/sideNavUtils.js';
-import profilePic from '../assets/images/default-profile-pic.jpg';
-import PageLayout from '../layout/PageLayout';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import axios from 'axios';
-import RoleTags from '../common/RoleTags';
-import { getToken, getUserCompanyID } from '../utilities/localStorageUtils';
-import jwt_decode from "jwt-decode";
-import { Container, Row, Col } from 'react-bootstrap';
-import { toast, ToastContainer } from 'react-toastify';
-import ErrorCard from '../common/ErrorCard.js';
+import React, { useEffect, useState } from 'react';
+import { Col, Container, Row } from 'react-bootstrap';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { confirmAlert } from 'react-confirm-alert';
+import { toast, ToastContainer } from 'react-toastify';
+import profilePic from '../assets/images/default-profile-pic.jpg';
 import CustomConfirmAlert from '../common/CustomConfirmAlert';
+import ErrorCard from '../common/ErrorCard.js';
 import PasswordCriteria from '../common/PasswordCriteria';
+import RoleTags from '../common/RoleTags';
 import config from '../config/config';
+import PageLayout from '../layout/PageLayout';
+import { getSideNavStatus } from '../utilities/sideNavUtils.js';
 import TokenManager from '../utilities/tokenManager';
 
 const ManageAccount = () => {

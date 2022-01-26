@@ -1,26 +1,23 @@
-import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import PageLayout from '../../layout/PageLayout';
-import DocumentLayout from '../../layout/DocumentLayout';
-import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import { myTrainingRecordsColumns, myTrainingRequestsColumns } from '../../config/tableColumns';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
 import dayjs from 'dayjs';
-import { ToastContainer } from 'react-toastify';
-import config from '../../config/config';
+import React, { useEffect, useState } from 'react';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { useHistory } from 'react-router-dom';
 import StatusPill from '../../common/StatusPill';
-import { confirmAlert } from 'react-confirm-alert';
-import FileSelect from '../../common/FileSelect';
+import config from '../../config/config';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
 import TokenManager from '../../utilities/tokenManager.js';
+import FileDownload from 'js-file-download';
+import { toast, ToastContainer } from 'react-toastify';
+
 
 const ManageTrainingRecord = ({ match }) => {
     const toastTiming = config.toastTiming;
     const history = useHistory();
     const trainingRecordID = match.params.trainingID;
     const decodedToken = TokenManager.getDecodedToken();
+    const token = TokenManager.getDecodedToken();
     const userCompanyID = decodedToken.company_id;
     const userID = decodedToken.employee_id;
 
@@ -44,7 +41,7 @@ const ManageTrainingRecord = ({ match }) => {
                         organisation: tempTrainingRecord.training_institution,
                         course_title: tempTrainingRecord.title,
                         cost: tempTrainingRecord.training_cost,
-                        approver: tempTrainingRecord.approved_at,
+                        approver: "@" + tempTrainingRecord.approver.account.username,
                         supervisor_evaluation_done: tempTrainingRecord.supervisor_evaluation_done,
                         trainee_evaluation_done: tempTrainingRecord.trainee_evaluation_done,
                         start_date: dayjs(tempTrainingRecord.training_start).format("D MMM YYYY"),
@@ -56,6 +53,9 @@ const ManageTrainingRecord = ({ match }) => {
                                 return true;
                             }
                         })(),
+                        attendance_file: tempTrainingRecord.attendance_file,
+                        status: tempTrainingRecord.status,
+                        created_by: "@" + tempTrainingRecord.author.account.username
                     }));
                 }
             } catch (error) {
@@ -70,9 +70,48 @@ const ManageTrainingRecord = ({ match }) => {
     }, []);
 
 
-    const handleCompletePostEvaluation = () => {
-        history.push("/training/training-record/post-training-evaluation");
+    // Handlers
+    const handleCompletePostEvaluation = async () => {
+        try {
+            // tell the system to start evaluation and lock on one template version
+            await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/training-evaluation/evaluate-record/${trainingRecordID}`);
+            history.push(`/training/manage/records/manage/${trainingRecordID}/post-training-evaluation`);
+        } catch (err) {
+            console.log(err);
+            let errCode = "Error!";
+            let errMsg = "Error!"
+            if (err.response !== undefined) {
+                errCode = err.response.status;
+                errMsg = err.response.data.message;
+            }
+            toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
+        }
     };
+
+    const handleFileDownload = async () => {
+        try {
+            const fileRes = await axios.get(`${process.env.REACT_APP_BASEURL}/file/download/${trainingRecord.attendance_file?.file_id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                responseType: 'blob'
+            });
+            console.log(fileRes);
+            FileDownload(fileRes.data, trainingRecord.attendance_file.file_name);
+            toast.success(<>Success!<br />Message: <b>Document has been downloaded successfully!</b></>);
+        } catch (err) {
+            console.log(err);
+            let errCode = "Error!";
+            let errMsg = "Error!"
+            if (err.response !== undefined) {
+                errCode = err.response.status;
+                errMsg = err.response.data.message;
+            }
+
+            toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
+        }
+    };
+
 
     return (
         <>
@@ -92,7 +131,7 @@ const ManageTrainingRecord = ({ match }) => {
                     {/* Breadcrumb */}
                     <Breadcrumb className="c-Manage-training-record__Breadcrumb l-Breadcrumb">
                         <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/training/manage">Manage Trainings</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/training/manage/records">Manage Training Records</Breadcrumb.Item>
                         <Breadcrumb.Item active>Manage Training Record</Breadcrumb.Item>
                     </Breadcrumb>
                     {/* Top section */}
@@ -122,17 +161,33 @@ const ManageTrainingRecord = ({ match }) => {
                             </div>
                             <div className="c-Field">
                                 <h2>Evaluation Status (Trainee)</h2>
-                                {
+                                {trainingRecord.status === "cancelled" ?
+                                    <StatusPill type="cancelled" /> :
                                     !trainingRecord.attendance ?
                                         <p>Nil</p> :
                                         trainingRecord.trainee_evaluation_done ?
-                                            <StatusPill type="pending" /> :
-                                            <StatusPill type="completed" />
+                                            <StatusPill type="completed" /> :
+                                            <StatusPill type="pending" />
                                 }
                             </div>
                             <div className="c-Field">
                                 <h2>File (Evidence for Attendance)</h2>
-                                <p>Na</p>
+                                {
+                                    trainingRecord.attendance_file ?
+                                        <div className="c-Field__File c-File">
+                                            <h1 onClick={handleFileDownload}>{trainingRecord.attendance_file.file_name}</h1>
+                                            {
+                                                trainingRecord.status === "cancelled" ?
+                                                    null :
+                                                    <h2>Change File</h2>
+                                            }
+                                        </div> :
+                                        <p>No file.</p>
+                                }
+                            </div>
+                            <div className="c-Field">
+                                <h2>Trainee</h2>
+                                <p>{trainingRecord.created_by}</p>
                             </div>
                         </div>
                         <div className="c-Fields__Right">
@@ -146,40 +201,31 @@ const ManageTrainingRecord = ({ match }) => {
                             </div>
                             <div className="c-Field">
                                 <h2>Approver</h2>
-                                <p>@AppleKim</p>
+                                <p>{trainingRecord.approver}</p>
                             </div>
                             <div className="c-Field">
                                 <h2>Evaluation Status (Approver)</h2>
-                                {
+                                {trainingRecord.status === "cancelled" ?
+                                    <StatusPill type="cancelled" /> :
                                     !trainingRecord.attendance ?
                                         <p>Nil</p> :
                                         trainingRecord.supervisor_evaluation_done ?
-                                            <StatusPill type="pending" /> :
-                                            <StatusPill type="completed" />
+                                            <StatusPill type="completed" /> :
+                                            <StatusPill type="pending" />
                                 }
                             </div>
                             <div className="c-Field">
                                 <h2>Attendance Status</h2>
                                 {
-                                    trainingRecord.attendance ?
-                                        <StatusPill type="completed" /> :
-                                        <StatusPill type="pending" />
+                                    trainingRecord.status === "cancelled" ?
+                                        <StatusPill type="cancelled" /> :
+                                        trainingRecord.attendance ?
+                                            <StatusPill type="completed" /> :
+                                            <StatusPill type="pending" />
                                 }
 
                             </div>
                         </div>
-                    </div>
-
-                    {/* Danger Zone */}
-                    <div className="c-Manage-training-record__Danger c-Danger">
-                        <div className="c-Danger__Top">
-                            <h1>Danger Zone</h1>
-                        </div>
-                        <div className="c-Danger__Contents">
-                            <button type="button" className="c-Btn c-Btn--alert-border">Remove record & request</button>
-                            <p>Performing this action will remove the record and request permanently. This action cannot be undoned.</p>
-                        </div>
-
                     </div>
 
                 </div>

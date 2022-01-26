@@ -37,10 +37,11 @@ const { RisksAnalysesForms, RisksAnalysesItems } = require('./RisksAnalyses');
 const { ObjectiveAchievementForms, ObjectiveAchievementItems, ObjectiveAchievementUploads } = require('./Achievements');
 
 // Clause 7
-const { Categories, Equipment, Equipment2Categories } = require('./Equipment.v3');
+const { Categories, Equipment, Equipment2Categories } = require('./Equipment');
 const { Maintenance, MaintenanceAssignees, MaintenanceUploads } = require('./EquipmentMaintenance');
 const { Licences, LicenceAssignees, LicenceUploads } = require('./Licences');
-const { TrainingRequests, TrainingEvaluationTemplates } = require('./Training');
+const { TrainingRequests } = require('./Training');
+const { TrainingEvaluationTemplates } = require('./TrainingEvaluation');
 
 module.exports = {
     Addresses, Companies, Employees, Files,

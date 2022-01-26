@@ -32,8 +32,32 @@ class DuplicateError extends DocumentError {
     }
 }
 
+class DocumentStatusError extends DocumentError {
+    /**
+     * The [document] is [not approved]
+     */
+    constructor(document = 'document', status = 'not approved') {
+        super();
+        this.name = 'DocumentStatusError';
+        this.message = `The ${document} is ${status}`;
+    }
+}
+
+class DocumentValueError extends DocumentError {
+    /**
+     * The [document] already has [been completed]
+     */
+    constructor(document = 'document', action = 'been completed') {
+        super();
+        this.name = 'DocumentValueError';
+        this.message = `The ${document} already has ${action}`;
+    }
+}
+
 module.exports = {
     DocumentError,
     BlockingError,
-    DuplicateError
+    DuplicateError,
+    DocumentStatusError,
+    DocumentValueError
 };

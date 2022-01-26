@@ -1,9 +1,13 @@
 import axios from 'axios';
-import React, { useEffect, useState, useRef } from 'react';
+import dayjs from 'dayjs';
+import FileDownload from 'js-file-download';
+import React, { useEffect, useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { confirmAlert } from 'react-confirm-alert';
+import DateTimePicker from 'react-datetime-picker';
 import { useHistory } from 'react-router-dom';
+import Select from "react-select";
 import { toast, ToastContainer } from 'react-toastify';
 import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 import ErrorCard from '../../common/ErrorCard';
@@ -12,21 +16,16 @@ import config from '../../config/config';
 import PageLayout from '../../layout/PageLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
 import TokenManager from '../../utilities/tokenManager';
-import DateTimePicker from 'react-datetime-picker';
-import Select from "react-select";
-import * as RiIcons from 'react-icons/ri';
-import { IconContext } from 'react-icons';
 
 const ManageLicense = ({ match }) => {
     const token = TokenManager.getToken();
     const decodedToken = TokenManager.getDecodedToken();
     const userCompanyID = decodedToken.company_id;
-    const userID = decodedToken.employee_id;
     const toastTiming = config.toastTiming;
     const [rerender, setRerender] = useState(false); // value of state doesnt matter, only using it to force useffect to execute
     const history = useHistory();
-    const fileRef = useRef(null);
     const licenseID = match.params.licenseID;
+    const userID = decodedToken.employee_id;
 
     // State declarations
     const [userList, setUserList] = useState([]);
@@ -39,12 +38,6 @@ const ManageLicense = ({ match }) => {
     ];
     const [loading, setLoading] = useState(false);
     const [inputTouched, setInputTouched] = useState(false);
-    const [editData, setEditData] = useState({
-        users: ''
-    });
-    const [allUsernameData, setallUsernameData] = useState({
-        username: []
-    });
     const [licenseData, setLicenseData] = useState({
         license: 'Error',
         licenseNo: 'Error',
@@ -61,9 +54,8 @@ const ManageLicense = ({ match }) => {
     });
     const [isEditing, setIsEditing] = useState(false);
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
-    const [isEditor, setIsEditor] = useState(false);        // Track if user has rights to edit
-    const [archivedDocData, setArchivedDocData] = useState([]);
-    const [licenseFile, setLicenseFile] = useState(null);
+    const [canApprove, setCanApprove] = useState(false);
+    const [canEdit, setCanEdit] = useState(false);
 
     useEffect(() => {
         // Set equipment maintenance cycle data
@@ -72,10 +64,25 @@ const ManageLicense = ({ match }) => {
                 let tempLicenseData = [];
                 let tempPersonsData = [];
 
-                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_02/employees`);
-                console.log(resClausePermission);
-                tempPersonsData = resClausePermission.data.results;
+                // Can approve people can create new license
+                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/approve/m07_02/employees`);
+                // Can edit people can upload new license
+                const resClausePermissionEdit = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_02/employees`);
+                console.log(resClausePermissionEdit);
+                tempPersonsData = resClausePermissionEdit.data.results;
                 console.log(tempPersonsData);
+                // Check if user can create new license
+                resClausePermission.data.results.forEach((data, index) => {
+                    if (data.employee_id === userID) {
+                        setCanApprove(true);
+                    }
+                });
+                // Check if user is assigned to a license
+                resClausePermissionEdit.data.results.forEach((data, index) => {
+                    if (data.employee_id === userID) {
+                        setCanEdit(true);
+                    }
+                });
 
                 const resOneLicense = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/licence-registry/all-licences/${licenseID}`);
                 console.log(resOneLicense);
@@ -88,6 +95,7 @@ const ManageLicense = ({ match }) => {
                         license: tempLicenseData.licence_name,
                         licenseNo: tempLicenseData.licence_number,
                         expDate: tempLicenseData.expires_at,
+                        issuedOn: new Date(tempLicenseData.issued_at),
                         responsibleExternalAgency: tempLicenseData.external_organisation,
                         archived_at: tempLicenseData.archived_at,
                         responsibleUser: (() => {
@@ -100,12 +108,16 @@ const ManageLicense = ({ match }) => {
                             });
                         })(),
                         status: (() => {
-                            let placeholder = '';
-                            if (placeholder === undefined) {
-                                return <p>Nil</p>
+                            if (tempLicenseData.days_left <= 0 && tempLicenseData.expires_at) {
+                                return <StatusPill type="expired" />
+                            } else if (tempLicenseData.days_left / (Math.ceil(Math.abs(new Date(tempLicenseData.expires_at) - new Date(tempLicenseData.issued_at)) / (1000 * 60 * 60 * 24))) < 1 / 5 && tempLicenseData.expires_at) {
+                                return <StatusPill type="almostDue" />
                             }
-                            return <StatusPill type="active" />
+                            else {
+                                return <StatusPill type="active" />
+                            }
                         })(),
+                        upload: tempLicenseData.upload,
                     }
                 });
 
@@ -119,7 +131,7 @@ const ManageLicense = ({ match }) => {
                 console.log(error);
             }
         })();
-    }, [licenseData.archivedAt]);
+    }, [licenseData.archivedAt, rerender]);
 
     // Handler for deleting maintenance record 
     const handleDeleteCycle = (maintenanceID) => {
@@ -170,7 +182,7 @@ const ManageLicense = ({ match }) => {
     const handleBtn = (buttonType) => {
         if (buttonType === "upload") {
             // Handler for upload button
-            fileRef.current.click();
+            history.push(`${licenseID}/upload`);
         }
 
         if (buttonType === "edit") {
@@ -181,6 +193,8 @@ const ManageLicense = ({ match }) => {
         if (buttonType === "editEquipmentCancel") {
             // Handler for cancel button
             setIsEditing(false);
+            setInputTouched(false);
+            setRerender((prevState) => !prevState);
         }
 
         if (buttonType === "editEquipmentSave") {
@@ -189,7 +203,19 @@ const ManageLicense = ({ match }) => {
                 try {
                     console.log(licenseData);
                     const resUpdateLicense = await axios.put(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/licence-registry/all-licences/${licenseID}`,
-                        licenseData, {
+                        {
+                            ...licenseData,
+                            licence_name: licenseData.license,
+                            licence_number: licenseData.licenseNo,
+                            expires_at: licenseData.expDate,
+                            issued_at: licenseData.issuedOn,
+                            external_organisation: licenseData.responsibleExternalAgency,
+                            assignees: (() => {
+                                return licenseData.responsibleUser.map((data) => {
+                                    return data.value;
+                                })
+                            })()
+                        }, {
                         headers: {
                             "Authorization": `Bearer ${token}`
                         }
@@ -197,8 +223,16 @@ const ManageLicense = ({ match }) => {
                     console.log(resUpdateLicense);
                     toast.success(<>Success!<br />Message: <b>Updated License details!</b></>);
                     setIsEditing(false);
-                } catch (error) {
-                    console.log(error);
+                    setRerender((prevState) => !prevState);
+                } catch (err) {
+                    console.log(err);
+                    let errCode = "Error!";
+                    let errMsg = "Error!"
+                    if (err.response !== undefined) {
+                        errCode = err.response.status;
+                        errMsg = err.response.data.message;
+                    }
+                    toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
                 }
             })();
         }
@@ -212,75 +246,6 @@ const ManageLicense = ({ match }) => {
         }));
     }
 
-    // For file input
-
-    const handleFileInputChange = (event) => {
-        const fileObj = event.target.files[0];
-        console.log(fileObj);
-        setLicenseFile(() => fileObj);
-    };
-
-    const handleDeleteFile = () => {
-        setLicenseFile(() => null);
-    };
-
-    // Handler for select input change
-    const handleSelectInputChange = (event) => {
-        let selectValue = parseInt(event.target.value);
-
-        setEditData((prevState) => ({
-            ...prevState,
-            [event.target.name]: selectValue
-        }));
-    };
-
-    // Handler for adding / delete role
-    const handleEditResponsibleUsers = (handleType, roleID) => {
-        // axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/employee/${employeeID}/roles`, {
-        //     roles: (() => {
-        //         // handle add role
-        //         if (handleType === "add") {
-        //             let tempRoleArrList = userData.roles.map((data, index) => {
-        //                 return data.role_id
-        //             });
-        //             tempRoleArrList.push(editData.roles);
-        //             console.log(tempRoleArrList);
-        //             return tempRoleArrList;
-        //         }
-        //         // handle delete role 
-        //         if (handleType === "delete") {
-        //             let tempRoleArrList = userData.roles.map((data, index) => {
-        //                 return data.role_id
-        //             });
-        //             const indexOfToBeDeletedRoleID = tempRoleArrList.indexOf(roleID);
-        //             tempRoleArrList.splice(indexOfToBeDeletedRoleID, 1);
-        //             console.log(tempRoleArrList);
-        //             return tempRoleArrList;
-        //         }
-        //     })()
-        // }, {
-        //     headers: {
-        //         'Authorization': `Bearer ${token}`
-        //     }
-        // })
-        //     .then((res) => {
-        //         console.log(res);
-        //         setRerender((prevState) => !prevState);
-        //         toast.success(<>Success!<br />Message: <b>Roles updated!</b></>);
-        //     })
-        //     .catch((err) => {
-        //         console.log(err);
-        //         let errCode = "Error!";
-        //         let errMsg = "Error!"
-        //         if (err.response !== undefined) {
-        //             errCode = err.response.status;
-        //             errMsg = err.response.data.message;
-        //         }
-
-        //         toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
-        //     });
-    };
-
     // Dynamic Search filter
     const filterSearch = (option, inputValue) => {
         const { label, value } = option;
@@ -292,6 +257,15 @@ const ManageLicense = ({ match }) => {
         );
         return value.includes(inputValue) || otherKey.length > 0;
     };
+
+    // Handler for setting last service date 
+    const setIssuedOn = (date) => {
+        console.log(date);
+        setLicenseData((prevState) => ({
+            ...prevState,
+            issuedOn: date
+        }));
+    }
 
     // Handler for setting last service date 
     const setExpDate = (date) => {
@@ -307,7 +281,8 @@ const ManageLicense = ({ match }) => {
         console.log(options);
         setLicenseData((prevState) => ({
             ...prevState,
-            assignees: options
+            assignees: options,
+            responsibleUser: options
         }));
     }
 
@@ -327,14 +302,26 @@ const ManageLicense = ({ match }) => {
                         <label htmlFor="licenseNo">License No.</label>
                         <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="licenseNo" value={licenseData.licenseNo} />
                     </Col>
+                    {/* Issued On */}
+                    <Col className="c-Input c-Input__Ref-no c-Input--edit">
+                        <label htmlFor="issuedOn">Issued On</label>
+                        <DateTimePicker
+                            onChange={setIssuedOn}
+                            value={licenseData.issuedOn}
+                            className="c-Form__Date"
+                            format="dd/MM/y"
+                            onFocus={() => setInputTouched(true)}
+                        />
+                    </Col>
                     {/* Exp. Date */}
                     <Col className="c-Input c-Input__Ref-no c-Input--edit">
                         <label htmlFor="expDate">Exp. Date</label>
                         <DateTimePicker
                             onChange={setExpDate}
-                            value={licenseData.expDate}
+                            value={new Date(licenseData.expDate)}
                             className="c-Form__Date"
                             format="dd/MM/y"
+                            onFocus={() => setInputTouched(true)}
                         />
                     </Col>
                 </Row>
@@ -354,6 +341,12 @@ const ManageLicense = ({ match }) => {
                             options={userList}
                             placeholder="Select Users"
                             onChange={handleInputArrayChange}
+                            onFocus={() => setInputTouched(true)}
+                            value={(() => {
+                                return licenseData.responsibleUser.map((data) => {
+                                    return data;
+                                })
+                            })()}
                         />
                     </Col>
                 </Row>
@@ -389,10 +382,15 @@ const ManageLicense = ({ match }) => {
                         <label htmlFor="licenseNo">License No.</label>
                         <input readOnly type="text" name="licenseNo" value={licenseData.licenseNo} />
                     </Col>
+                    {/* Issued On */}
+                    <Col className="c-Input c-Input__Ref-no c-Input--read-only">
+                        <label htmlFor="issuedOn">Issued On</label>
+                        <input readOnly type="text" name="issuedOn" value={dayjs(licenseData.issuedOn).format("D MMM YYYY")} />
+                    </Col>
                     {/* Exp. Date */}
                     <Col className="c-Input c-Input__Ref-no c-Input--read-only">
                         <label htmlFor="expDate">Exp. Date</label>
-                        <input readOnly type="text" name="expDate" value={licenseData.expDate} />
+                        <input readOnly type="text" name="expDate" value={licenseData.expDate ? dayjs(new Date(licenseData.expDate)).format("D MMM YYYY") : "NA"} />
                     </Col>
                 </Row>
 
@@ -528,6 +526,30 @@ const ManageLicense = ({ match }) => {
         }
     };
 
+    const handleFileDownload = async () => {
+        try {
+            const fileRes = await axios.get(`${process.env.REACT_APP_BASEURL}/file/download/${licenseData.upload?.file?.file_id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                responseType: 'blob'
+            });
+            console.log(fileRes);
+            FileDownload(fileRes.data, licenseData.upload?.file?.file_name);
+            toast.success(<>Success!<br />Message: <b>Document has been downloaded successfully!</b></>);
+        } catch (err) {
+            console.log(err);
+            let errCode = "Error!";
+            let errMsg = "Error!"
+            if (err.response !== undefined) {
+                errCode = err.response.status;
+                errMsg = err.response.data.message;
+            }
+
+            toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
+        }
+    };
+
     return (
         <>
             <ToastContainer
@@ -541,7 +563,7 @@ const ManageLicense = ({ match }) => {
                 draggable
                 pauseOnHover
             />
-            <PageLayout sideNavStatus={sideNavStatus} setSideNavStatus={setSideNavStatus} title='Equipment Maintenance' activeLink="/equipment-maintenance">
+            <PageLayout sideNavStatus={sideNavStatus} setSideNavStatus={setSideNavStatus} title='Equipment Maintenance' activeLink={`/licenses/manage-license/${licenseID}`}>
                 <div className="c-Manage-equipment-maintenance c-Main">
                     {/* Breadcrumb */}
                     <Breadcrumb className="c-Equipment-maintenance__Breadcrumb l-Breadcrumb">
@@ -554,15 +576,17 @@ const ManageLicense = ({ match }) => {
                         <h1>Manage Permits/Licenses/Certificates</h1>
                         {/* Edit button section */}
                         {
-                            isEditing || renderErrorCard.render ?
-                                null :
-                                <button
-                                    onClick={() => (handleBtn("edit"))}
-                                    type="button"
-                                    className={"c-Btn c-Btn--primary"}
-                                >
-                                    Edit
-                                </button>
+                            canApprove ?
+                                isEditing || renderErrorCard.render ?
+                                    null :
+                                    <button
+                                        onClick={() => (handleBtn("edit"))}
+                                        type="button"
+                                        className={"c-Btn c-Btn--primary"}
+                                    >
+                                        Edit
+                                    </button>
+                                : ""
                         }
                     </div>
                     {
@@ -579,54 +603,51 @@ const ManageLicense = ({ match }) => {
                                 }
                             </>
                     }
-                    {/* File Upload */}
-                        {/* Upload Button */}
-                        <div className="c-Manage-equipment__Mid c-Main__Top c-File-upload">
-                            <div className="c-Manage-equipment__File">
-                                {
-                                    licenseFile ?
-                                        <>
-                                            <p>{licenseFile.name}</p>
-                                            <IconContext.Provider value={{ color: "#DC3545", size: "21px" }}>
-                                                <RiIcons.RiDeleteBin7Line className="c-File-upload__Bin" onClick={() => handleDeleteFile()} />
-                                            </IconContext.Provider>
-                                        </>
-                                        : <p>No File Detected.</p>
-                                }
+                    {/* Upload/Update file */}
+                    <div className="c-Field">
+                        <h2>File</h2>
+                        {licenseData.upload ?
+                            <div className='c-Field__File c-File'>
+                                <h1 onClick={handleFileDownload}>{licenseData.upload?.file?.file_name}</h1>
                             </div>
-                            <button
-                                onClick={() => (handleBtn("upload"))}
-                                type="button"
-                                className={"c-Btn c-Btn--primary"}
-                            >
-                                Upload
-                            </button>
-                            <input className="c-Manage-equipment__File-input c-File-select__Raw" type="file" ref={fileRef} onChange={handleFileInputChange} />
-                        </div>
+                            : ""
+                        }
+                        <button
+                            onClick={() => (handleBtn("upload"))}
+                            type="button"
+                            className={"c-Btn c-Btn--primary"}
+                        >
+                            {licenseData.upload ? 'Update File' : 'Upload File'}
+                        </button>
+                    </div>
 
                     {/* Danger Zone */}
-                    <h2 className="c-Danger-zone__Title">Danger Zone</h2>
-                    <div className="c-Danger-zone__Row">
-                        {
-                            licenseData.archived_at === null ?
-                                <>
-                                    <div className='c-Danger-zone__Item'>
-                                        <button type="button" className="c-Btn c-Btn--alert-border" onClick={() => handleLicenseArchive("deactivated")}>Archive Permits/Licenses/Certificates</button>
-                                        <div className="c-Row__Info">
-                                            <p>Perfoming this action will archive this permit/license/certificate</p>
-                                        </div>
-                                    </div>
-                                </> :
-                                <>
-                                    <div className='c-Danger-zone__Item'>
-                                        <button type="button" className="c-Btn c-Btn--primary-border" onClick={() => handleLicenseArchive("activated")}>Unarchive Permits/Licenses/Certificates</button>
-                                        <div className="c-Row__Info">
-                                            <p>Perfoming this action will unarchive this permit/license/certificate </p>
-                                        </div>
-                                    </div>
-                                </>
-                        }
-                    </div>
+                    {canApprove ?
+                        <>
+                            <h2 className="c-Danger-zone__Title">Danger Zone</h2>
+                            <div className="c-Danger-zone__Row">
+                                {
+                                    licenseData.archived_at === null ?
+                                        <>
+                                            <div className='c-Danger-zone__Item'>
+                                                <button type="button" className="c-Btn c-Btn--alert-border" onClick={() => handleLicenseArchive("deactivated")}>Archive Permits/Licenses/Certificates</button>
+                                                <div className="c-Row__Info">
+                                                    <p>Perfoming this action will archive this permit/license/certificate</p>
+                                                </div>
+                                            </div>
+                                        </> :
+                                        <>
+                                            <div className='c-Danger-zone__Item'>
+                                                <button type="button" className="c-Btn c-Btn--primary-border" onClick={() => handleLicenseArchive("activated")}>Unarchive Permits/Licenses/Certificates</button>
+                                                <div className="c-Row__Info">
+                                                    <p>Perfoming this action will unarchive this permit/license/certificate </p>
+                                                </div>
+                                            </div>
+                                        </>
+                                }
+                            </div>
+                        </> : ""
+                    }
                 </div>
             </PageLayout>
         </>

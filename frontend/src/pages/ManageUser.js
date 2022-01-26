@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { getSideNavStatus } from '../utilities/sideNavUtils.js';
-import PageLayout from '../layout/PageLayout';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import axios from 'axios';
-import { getToken, getUserCompanyID } from '../utilities/localStorageUtils';
-import jwt_decode from "jwt-decode";
-import * as RiIcons from 'react-icons/ri';
-import { IconContext } from 'react-icons';
-import { ToastContainer, toast } from 'react-toastify';
+import React, { useEffect, useState } from 'react';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import { confirmAlert } from 'react-confirm-alert';
-import ErrorCard from '../common/ErrorCard.js';
+import { IconContext } from 'react-icons';
+import * as RiIcons from 'react-icons/ri';
+import { toast, ToastContainer } from 'react-toastify';
 import CustomConfirmAlert from '../common/CustomConfirmAlert.js';
+import ErrorCard from '../common/ErrorCard.js';
 import config from '../config/config';
+import PageLayout from '../layout/PageLayout';
+import { getSideNavStatus } from '../utilities/sideNavUtils.js';
 import TokenManager from '../utilities/tokenManager';
 
 const ManageUser = ({ match }) => {

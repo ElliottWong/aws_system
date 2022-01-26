@@ -10,6 +10,7 @@ import config from '../../config/config';
 import PageLayout from '../../layout/PageLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
 import TokenManager from '../../utilities/tokenManager.js';
+import Loading from '../../common/Loading.js';
 
 const CreateTrainingRequest = () => {
     const toastTiming = config.toastTiming;
@@ -33,13 +34,13 @@ const CreateTrainingRequest = () => {
     });
     const [newJustificationFile, setNewJustificationFile] = useState(null);
     const fileRef = useRef(null);
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         let componentMounted = true;
 
         (async () => {
             try {
-
                 // Do axios call here to get approval list then set approved by who
                 const resApprover = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/approve/m07_03a/employees`);
                 if (componentMounted) {
@@ -70,6 +71,8 @@ const CreateTrainingRequest = () => {
 
     // Handlers
     const handleSubmitTrainingRequest = async () => {
+        if (submitting === true) return;
+        setSubmitting(() => true);
         try {
             const newTrainingRequestFormData = new FormData();
             // Loop through a javascript object and append the fields to the form data variable
@@ -88,7 +91,7 @@ const CreateTrainingRequest = () => {
             setTimeout(() => {
                 toast.success("Success! Training requets has been submitted for approval!");
             }, 0);
-            history.push("/training");
+            history.push("/training/requests");
 
         } catch (err) {
             console.log(err);
@@ -100,7 +103,9 @@ const CreateTrainingRequest = () => {
             }
 
             toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
+            setSubmitting(() => false);
         }
+
     };
 
     const handleInputChange = (event) => {
@@ -150,95 +155,101 @@ const CreateTrainingRequest = () => {
                     {/* Breadcrumb */}
                     <Breadcrumb className="c-Create-training-request__Breadcrumb l-Breadcrumb">
                         <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/training">Trainings</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/training/requests">My Training Requests</Breadcrumb.Item>
                         <Breadcrumb.Item active>Create Training Request</Breadcrumb.Item>
                     </Breadcrumb>
                     {/* Top section */}
                     <div className="c-Create-training-request__Top c-Main__Top">
                         <h1>Create Training Request</h1>
-                        <button type="button" className="c-Btn c-Btn--primary" onClick={() => handleSubmitTrainingRequest()}>Create Training Request</button>
+                        <button type="button" className={`c-Btn c-Btn--primary ${submitting ? "c-Btn--disabled": ""}`} onClick={() => handleSubmitTrainingRequest()}>Create</button>
                     </div>
 
-                    {/* Form */}
-                    <div className="c-Create-training-request__Form c-Form">
-                        {/* Course Title & Start Date */}
-                        <div className="c-Form__Row">
-                            <div className="c-Form__Left c-Form__Input">
-                                <label htmlFor="title">Course Title</label>
-                                <input name="title" value={newTrainingRequest.title} type="text" placeholder="Enter Course Title" onChange={handleInputChange} />
-                            </div>
-                            <div className="c-Form__Right c-Form__Input">
-                                <label htmlFor="startDate">Start Date</label>
-                                <DateTimePicker
-                                    onChange={(date) => handleDateChange(date, "training_start")}
-                                    value={newTrainingRequest.training_start}
-                                    className="c-Form__Date"
-                                    format="dd/MM/y"
-                                />
-                            </div>
-                        </div>
-                        {/* Organisation/Institution & End Date */}
-                        <div className="c-Form__Row">
-                            <div className="c-Form__Left c-Form__Input">
-                                <label htmlFor="training_institution">Organisation/Institution</label>
-                                <input name="training_institution" value={newTrainingRequest.training_institution} type="text" placeholder="Enter Organisation/Instition" onChange={handleInputChange} />
-                            </div>
-                            <div className="c-Form__Right c-Form__Input">
-                                <label htmlFor="endDate">End Date</label>
-                                <DateTimePicker
-                                    onChange={(date) => handleDateChange(date, "training_end")}
-                                    value={newTrainingRequest.training_end}
-                                    className="c-Form__Date"
-                                    format="dd/MM/y"
-                                />
-                            </div>
-                        </div>
-                        {/* Cost & To be approved by */}
-                        <div className="c-Form__Row">
-                            <div className="c-Form__Left c-Form__Input">
-                                <label htmlFor="training_cost">Cost</label>
-                                <input name="training_cost" value={newTrainingRequest.training_cost} type="text" placeholder="Enter training cost S$" onChange={handleInputChange} />
-                            </div>
-                            <div className="c-Form__Right c-Form__Input">
-                                <label htmlFor="approved_by">To be approved by</label>
-                                <select name="approved_by" className="c-Form__Approver" value={newTrainingRequest.approved_by} onChange={handleInputChange}>
-                                    <option>{!approverList ? "No approver found!" : "Please select an approver"}</option>
-                                    {!approverList ? null : approverList.map((approver, index) => (
-                                        <option key={index} value={approver.approvalID}>
-                                            {approver.displayName}  {approver.username}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                        {/* Justification & Recommendations */}
-                        <div className="c-Form__Row">
-                            <div className="c-Form__Left c-Form__Input c-Form__Justification">
-                                <label htmlFor="justification_text">Justification</label>
-                                <textarea name="justification_text" value={newTrainingRequest.justification_text} type="text" placeholder="Enter Justification" onChange={handleInputChange} />
-                            </div>
-                        </div>
-                        {/* File Upload (For justification) */}
-                        <div className="c-Form__Row">
-                            <div className="c-Form__File-upload c-File-upload">
-                                <h2>File (For Justification)</h2>
-                                <div className="c-File-upload__Display">
-                                    {
-                                        newJustificationFile ?
-                                            <>
-                                                <p>{newJustificationFile.name}</p>
-                                                <IconContext.Provider value={{ color: "#DC3545", size: "21px" }}>
-                                                    <RiIcons.RiDeleteBin7Line className = "c-File-upload__Bin" onClick={() => handleDeleteFile()} />
-                                                </IconContext.Provider>
-                                            </>
-                                            : <p>No File Detected.</p>
-                                    }
+                    {
+                        submitting ?
+                            <Loading />
+                            :
+
+                            <div className="c-Create-training-request__Form c-Form">
+
+                                <div className="c-Form__Row">
+                                    <div className="c-Form__Left c-Form__Input">
+                                        <label htmlFor="title">Course Title</label>
+                                        <input name="title" value={newTrainingRequest.title} type="text" placeholder="Enter Course Title" onChange={handleInputChange} />
+                                    </div>
+                                    <div className="c-Form__Right c-Form__Input">
+                                        <label htmlFor="startDate">Start Date</label>
+                                        <DateTimePicker
+                                            onChange={(date) => handleDateChange(date, "training_start")}
+                                            value={newTrainingRequest.training_start}
+                                            className="c-Form__Date"
+                                            format="dd/MM/y"
+                                        />
+                                    </div>
                                 </div>
-                                <button type="button" className="c-Btn c-Btn--primary" onClick={() => handleFileSelect()}>Upload File</button>
-                                <input className="c-File-select__Raw" type="file" ref={fileRef} onChange={handleFileInputChange} />
+                                <div className="c-Form__Row">
+                                    <div className="c-Form__Left c-Form__Input">
+                                        <label htmlFor="training_institution">Organisation/Institution</label>
+                                        <input name="training_institution" value={newTrainingRequest.training_institution} type="text" placeholder="Enter Organisation/Instition" onChange={handleInputChange} />
+                                    </div>
+                                    <div className="c-Form__Right c-Form__Input">
+                                        <label htmlFor="endDate">End Date</label>
+                                        <DateTimePicker
+                                            onChange={(date) => handleDateChange(date, "training_end")}
+                                            value={newTrainingRequest.training_end}
+                                            className="c-Form__Date"
+                                            format="dd/MM/y"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="c-Form__Row">
+                                    <div className="c-Form__Left c-Form__Input">
+                                        <label htmlFor="training_cost">Cost</label>
+                                        <input name="training_cost" value={newTrainingRequest.training_cost} type="text" placeholder="Enter training cost" onChange={handleInputChange} />
+                                    </div>
+                                    <div className="c-Form__Right c-Form__Input">
+                                        <label htmlFor="approved_by">To be approved by</label>
+                                        <select name="approved_by" className="c-Form__Approver" value={newTrainingRequest.approved_by} onChange={handleInputChange}>
+                                            <option>{!approverList ? "No approver found!" : "Please select an approver"}</option>
+                                            {!approverList ? null : approverList.map((approver, index) => (
+                                                <option key={index} value={approver.approvalID}>
+                                                    {approver.displayName}  {approver.username}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                                {/* Justification & Recommendations */}
+                                <div className="c-Form__Row">
+                                    <div className="c-Form__Left c-Form__Input c-Form__Justification">
+                                        <label htmlFor="justification_text">Justification</label>
+                                        <textarea name="justification_text" value={newTrainingRequest.justification_text} type="text" placeholder="Enter Justification" onChange={handleInputChange} />
+                                    </div>
+                                </div>
+                                {/* File Upload (For justification) */}
+                                <div className="c-Form__Row">
+                                    <div className="c-Form__File-upload c-File-upload">
+                                        <h2>File (For Justification)</h2>
+                                        <div className="c-File-upload__Display">
+                                            {
+                                                newJustificationFile ?
+                                                    <>
+                                                        <p>{newJustificationFile.name}</p>
+                                                        <IconContext.Provider value={{ color: "#DC3545", size: "21px" }}>
+                                                            <RiIcons.RiDeleteBin7Line className="c-File-upload__Bin" onClick={() => handleDeleteFile()} />
+                                                        </IconContext.Provider>
+                                                    </>
+                                                    : <p>No File Detected.</p>
+                                            }
+                                        </div>
+                                        <button type="button" className="c-Btn c-Btn--primary" onClick={() => handleFileSelect()}>Upload File</button>
+                                        <input className="c-File-select__Raw" type="file" ref={fileRef} onChange={handleFileInputChange} />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                    }
+
+
 
                 </div>
 

@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useHistory } from "react-router-dom";
 import axios from 'axios';
-import Title from '../common/Title';
-import logo from '../assets/images/eISO-logo.png';
+import React, { useEffect, useState } from 'react';
+import { useHistory } from "react-router-dom";
 import { toast, ToastContainer } from 'react-toastify';
+import logo from '../assets/images/eISO-logo.png';
 import PasswordCriteria from '../common/PasswordCriteria';
-import jwt_decode from "jwt-decode";
+import Title from '../common/Title';
 import config from '../config/config';
 import TokenManager from '../utilities/tokenManager';
 

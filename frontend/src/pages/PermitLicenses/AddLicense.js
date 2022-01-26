@@ -2,15 +2,15 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import DateTimePicker from 'react-datetime-picker';
 import { useHistory } from 'react-router-dom';
+import Select from "react-select";
 import { toast, ToastContainer } from 'react-toastify';
 import ErrorCard from '../../common/ErrorCard';
 import config from '../../config/config';
 import PageLayout from '../../layout/PageLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
 import TokenManager from '../../utilities/tokenManager';
-import DateTimePicker from 'react-datetime-picker';
-import Select from "react-select";
 
 const AddLicense = () => {
     const token = TokenManager.getToken();
@@ -22,14 +22,7 @@ const AddLicense = () => {
     // State declarations
     const [loading, setLoading] = useState(false);
     const [inputTouched, setInputTouched] = useState(false);
-    const [licenseData, setLicenseData] = useState({
-        name: '',
-        category: '',
-        reference_number: '',
-        register_number: '',
-        model: '',
-        serial_number: '',
-    });
+    const [licenseData, setLicenseData] = useState([]);
     const [userList, setUserList] = useState([]);
     const [renderErrorCard, setRenderErrorCard] = useState({
         render: false,
@@ -40,21 +33,43 @@ const AddLicense = () => {
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
 
     const handleBtn = (buttonType) => {
-        if (buttonType === "addLicence") {
+        if (buttonType === "addLicense") {
             // Handler for add button
             console.log(licenseData);
             (async () => {
                 try {
                     const resInsertOneLicence = await axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/licence-registry/all-licences`,
-                        licenseData, {
+                        {
+                            issued_at: licenseData.issuedOn,
+                            licence_name: licenseData.license,
+                            licence_number: licenseData.licenseNo,
+                            external_organisation: licenseData.externalAgency,
+                            expires_at: licenseData.expDate,
+                            assignees: (() => {
+                                return licenseData.assignees.map((data) => {
+                                    return data.value;
+                                });
+                            })()
+                        }, {
                         headers: {
                             "Authorization": `Bearer ${token}`
                         }
                     });
                     console.log(resInsertOneLicence);
-                    toast.success(<>Success!<br />Message: <b>New License has been added!</b></>);
-                } catch (error) {
-                    console.log(error);
+                    setTimeout(() => {
+                        toast.success(<>Success!<br />Message: <b>New License has been added!</b></>);
+                    }, 0);
+                    history.push("/licenses");
+                } catch (err) {
+                    console.log(err);
+                    console.log(err.response);
+                    let errCode = "Error!";
+                    let errMsg = "Error!"
+                    if (err.response !== undefined) {
+                        errCode = err.response.status;
+                        errMsg = err.response.data.message;
+                    }
+                    toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
                 }
             })();
         } else if (buttonType === "cancel") {
@@ -73,11 +88,20 @@ const AddLicense = () => {
     }
 
     // Handler for setting last service date 
-    const setLastServiceDate = (date) => {
+    const setExpDate = (date) => {
         console.log(date);
         setLicenseData((prevState) => ({
             ...prevState,
             expDate: date
+        }));
+    }
+
+    // Handler for setting last service date 
+    const setIssuedDate = (date) => {
+        console.log(date);
+        setLicenseData((prevState) => ({
+            ...prevState,
+            issuedOn: date
         }));
     }
 
@@ -96,14 +120,26 @@ const AddLicense = () => {
                         <label htmlFor="licenseNo">License No.</label>
                         <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="licenseNo" value={licenseData.licenseNo} />
                     </Col>
+                    {/* Issued On */}
+                    <Col className="c-Input c-Input__Reg-no c-Input--edit">
+                        <label htmlFor="issuedOn">Issued On</label>
+                        <DateTimePicker
+                            onChange={setIssuedDate}
+                            value={licenseData.issuedOn}
+                            className="c-Form__Date"
+                            format="dd/MM/y"
+                            onFocus={() => setInputTouched(true)}
+                        />
+                    </Col>
                     {/* Exp. Date */}
                     <Col className="c-Input c-Input__Reg-no c-Input--edit">
                         <label htmlFor="expDate">Exp. Date</label>
                         <DateTimePicker
-                            onChange={setLastServiceDate}
+                            onChange={setExpDate}
                             value={licenseData.expDate}
                             className="c-Form__Date"
                             format="dd/MM/y"
+                            onFocus={() => setInputTouched(true)}
                         />
                     </Col>
                 </Row>
@@ -123,6 +159,7 @@ const AddLicense = () => {
                             options={userList}
                             placeholder="Select Users"
                             onChange={handleInputArrayChange}
+                            onFocus={() => setInputTouched(true)}
                         />
                     </Col>
                 </Row>
@@ -143,14 +180,10 @@ const AddLicense = () => {
     useEffect(() => {
         (async () => {
             try {
-                // Get all users with permission to add license
-                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/approve/m07_02/employees`);
-                console.log(resClausePermission);
-
                 let tempUserData = [];
-                // Get all equipment categories
-                const resAllCategories = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories`);
-                console.log(resAllCategories);
+                // Get all users with permission to upload license
+                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_02/employees`);
+                console.log(resClausePermission);
                 tempUserData = resClausePermission.data.results;
                 console.log(tempUserData);
 
@@ -194,7 +227,7 @@ const AddLicense = () => {
                         <div className='c-Manage-equipment__Btns'>
                             {
                                 inputTouched ?
-                                    <button onClick={() => (handleBtn("addEquipment"))} type="button" className="c-Btn c-Btn--primary">Add</button>
+                                    <button onClick={() => (handleBtn("addLicense"))} type="button" className="c-Btn c-Btn--primary">Add</button>
                                     :
                                     <button type="button" disabled={true} className="c-Btn c-Btn--disabled">{loading ? "Loading..." : "Add"}</button>
                             }

@@ -1,19 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import PageLayout from '../../layout/PageLayout';
-import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getToken, getUserCompanyID } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
-import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit';
-import { useHistory } from 'react-router';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import ManageDeleteRole from '../ManageDeleteRole';
-import { ToastContainer } from 'react-toastify';
-import jwt_decode from 'jwt-decode';
+import React, { useEffect, useState } from 'react';
+import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
+import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { useHistory } from 'react-router';
+import { ToastContainer } from 'react-toastify';
 import config from '../../config/config';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
 import TokenManager from '../../utilities/tokenManager';
+import ManageDeleteRole from '../ManageDeleteRole';
 
 const RespNAuthority = () => {
     const history = useHistory();

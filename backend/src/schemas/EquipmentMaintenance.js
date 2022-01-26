@@ -123,8 +123,8 @@ const MaintenanceUploads = db.define(
             type: DataTypes.INTEGER.UNSIGNED,
             allowNull: false,
             references: {
-                model: Equipment,
-                key: 'equipment_id'
+                model: Maintenance,
+                key: 'maintenance_id'
             }
         },
         fk_file_id: {
@@ -161,12 +161,12 @@ const MaintenanceUploads = db.define(
 );
 
 Maintenance.hasMany(MaintenanceUploads, {
-    foreignKey: 'fk_equipment_id',
+    foreignKey: 'fk_maintenance_id',
     as: 'uploads'
 });
 
 MaintenanceUploads.belongsTo(Maintenance, {
-    foreignKey: 'fk_equipment_id',
+    foreignKey: 'fk_maintenance_id',
     as: 'maintenance'
 });
 
@@ -185,7 +185,7 @@ Employees.hasMany(MaintenanceUploads, {
 
 MaintenanceUploads.belongsTo(Employees, {
     foreignKey: 'created_by',
-    as: 'creator'
+    as: 'author'
 });
 
 // this is a many to many join table

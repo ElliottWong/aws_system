@@ -33,5 +33,6 @@ export const QUESTION_TYPE = {
 
 export const TRAINING_EVALUATION_MODE = {
     EDIT: 'edit',
+    DO: 'do',
     VIEW: 'view'
 }

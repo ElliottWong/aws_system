@@ -1,4 +1,35 @@
 .c-Manage-equipment-maintenance {
+  .c-Field {
+    padding: 20px 0;
+    h2 {
+      font-size: $font-medium;
+      font-weight: bold;
+    }
+
+    .c-File {
+      background-color: #eaeaea;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px 30px;
+      border-radius: 5px;
+      width: 40%;
+      margin: 10px 0 20px 0;
+      h1 {
+        cursor: pointer;
+        font-size: $font-small;
+        color: black;
+        font-weight: bold;
+        &:hover {
+          opacity: 0.8;
+        }
+        &:active {
+          opacity: 0.7;
+        }
+      }
+    }
+  }
   .c-Manage-equipment-maintenance__Cycles-top {
     padding-top: 50px;
   }
@@ -26,8 +57,8 @@
   }
   .l-Manage-equipment__Inputs {
     display: flex;
-    justify-content: left;
-    align-items: left;
+    justify-content: center;
+    align-items: center;
     flex-direction: column;
     width: 100%;
     max-width: 100%;
@@ -41,6 +72,12 @@
         width: 100%;
         max-width: 25%;
         padding-bottom: 20px;
+        .react-datetime-picker {
+          width: 100%;
+          input {
+            border: none;
+          }
+        }
         .c-Input__Maintenance-frequency--input {
           display: flex;
           justify-content: left;

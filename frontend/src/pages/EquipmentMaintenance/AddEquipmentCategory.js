@@ -1,18 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import React, { useState } from 'react';
+import { Col, Container, Row } from 'react-bootstrap';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { useHistory } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import ErrorCard from '../../common/ErrorCard';
+import config from '../../config/config';
 import PageLayout from '../../layout/PageLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import jwt_decode from "jwt-decode";
-import axios from 'axios';
-import config from '../../config/config';
-import ErrorCard from '../../common/ErrorCard';
-import { Container, Row, Col } from 'react-bootstrap';
-import { ToastContainer, toast } from 'react-toastify';
-import { confirmAlert } from 'react-confirm-alert';
-import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 import TokenManager from '../../utilities/tokenManager';
-import { useHistory, NavLink } from 'react-router-dom';
 
 const AddEquipmentCategory = () => {
     const token = TokenManager.getToken();
@@ -50,7 +46,11 @@ const AddEquipmentCategory = () => {
                     });
                     console.log(resInsertOneCategory);
                     setLoading(false);
-                    toast.success(<>Success!<br />Message: <b>Inserted new category!</b></>);
+                    setTimeout(() => {
+                        toast.success(<>Success!<br />Message: <b>Inserted new category!</b></>);
+                    }, 0);
+                    history.push("/equipment-maintenance");
+
                 } catch (error) {
                     console.log(error);
                     setLoading(false);

@@ -1,6 +1,7 @@
 import axios from 'axios';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import FileDownload from 'js-file-download';
+import React, { useEffect, useRef, useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
@@ -16,37 +17,28 @@ import CustomConfirmAlert from '../../common/CustomConfirmAlert';
 import ErrorCard from '../../common/ErrorCard';
 import StatusPill from '../../common/StatusPill';
 import config from '../../config/config';
-import { maintenanceRecordColumns } from '../../config/tableColumns';
 import PageLayout from '../../layout/PageLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
 import TokenManager from '../../utilities/tokenManager';
+
 
 const ManageMaintenanceCycle = ({ match }) => {
     const token = TokenManager.getToken();
     const decodedToken = TokenManager.getDecodedToken();
     const userCompanyID = decodedToken.company_id;
-    const userID = decodedToken.employee_id;
     const toastTiming = config.toastTiming;
     let history = useHistory();
     const [rerender, setRerender] = useState(false); // value of state doesnt matter, only using it to force useffect to execute
+    const descriptionRef = useRef("");
+    const maintenanceFileRef = useRef(null);
+    const equipmentID = match.params.emID;
+    const maintenanceID = match.params.maintenanceID;
+    const userID = decodedToken.employee_id;
 
     // State declarations
-    const options = [
-        { label: 'Swedish', value: 'Swedish' },
-        { label: 'English', value: 'English' },
-        { label: 'English', value: 'English' },
-        { label: 'English', value: 'English' },
-        { label: 'English', value: 'English' },
-    ];
     const [maintenanceRecordsData, setMaintenanceRecordsData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [inputTouched, setInputTouched] = useState(false);
-    const [editData, setEditData] = useState({
-        users: ''
-    });
-    const [allUsernameData, setallUsernameData] = useState({
-        username: []
-    });
     const [userList, setUserList] = useState([]);
     const [maintenanceCyclesData, setMaintenanceCyclesData] = useState([]);
     const [renderErrorCard, setRenderErrorCard] = useState({
@@ -58,9 +50,8 @@ const ManageMaintenanceCycle = ({ match }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
     const [isEditor, setIsEditor] = useState(false);        // Track if user has rights to edit
-    const [archivedDocData, setArchivedDocData] = useState([]);
-    const equipmentID = match.params.emID;
-    const maintenanceID = match.params.maintenanceID;
+    const [canApprove, setCanApprove] = useState(false);
+    const [canEdit, setCanEdit] = useState(false);
 
     useEffect(() => {
         // Set equipment maintenance cycle data
@@ -69,10 +60,26 @@ const ManageMaintenanceCycle = ({ match }) => {
                 let tempEquipmentData = [];
                 let tempPersonsData = [];
 
-                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_01/employees`);
-                console.log(resClausePermission);
-                tempPersonsData = resClausePermission.data.results;
+                // Can approve people can create new equipment
+                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/approve/m07_01/employees`);
+                // Can edit people can upload new maintenance record
+                const resClausePermissionEdit = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_01/employees`);
+                console.log(resClausePermissionEdit);
+                tempPersonsData = resClausePermissionEdit.data.results;
                 console.log(tempPersonsData);
+
+                // Check if user can create new equipment
+                resClausePermission.data.results.forEach((data, index) => {
+                    if (data.employee_id === userID) {
+                        setCanApprove(true);
+                    }
+                });
+                // Check if user is assigned to an equipment
+                resClausePermissionEdit.data.results.forEach((data, index) => {
+                    if (data.employee_id === userID) {
+                        setCanEdit(true);
+                    }
+                });
 
                 const resOneEquipment = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment/${equipmentID}/all-maintenance/${maintenanceID}`);
                 console.log(resOneEquipment);
@@ -93,24 +100,17 @@ const ManageMaintenanceCycle = ({ match }) => {
                         })(),
                         freq_unit_time: tempEquipmentData.freq_unit_time,
                         freq_multiplier: tempEquipmentData.freq_multiplier,
-                        maintenanceFrequency: (() => {
-                            if (tempEquipmentData.freq_unit_time === 7) {
-                                return `${tempEquipmentData.freq_multiplier} weeks`
-                            }
-                            if (tempEquipmentData.freq_unit_time === 30) {
-                                return `${tempEquipmentData.freq_multiplier} months`
-                            }
-                            if (tempEquipmentData.freq_unit_time === 365) {
-                                return `${tempEquipmentData.freq_multiplier} years`
-                            }
-                        })(),
+                        maintenanceFrequency: tempEquipmentData.freq_unit_time,
                         lastServiceDate: new Date(tempEquipmentData.last_service_at),
                         status: (() => {
-                            let placeholder = '';
-                            if (placeholder === undefined) {
-                                return <p>Nil</p>
+                            if (tempEquipmentData.days_left <= 0) {
+                                return <StatusPill type="overdue" />
+                            } else if (tempEquipmentData.days_left / (tempEquipmentData.freq_multiplier * tempEquipmentData.freq_unit_time) < 2 / 5) {
+                                return <StatusPill type="almostDue" />
                             }
-                            return <StatusPill type="active" />
+                            else {
+                                return <StatusPill type="active" />
+                            }
                         })(),
                     }
                 });
@@ -123,41 +123,105 @@ const ManageMaintenanceCycle = ({ match }) => {
                 });
 
                 setMaintenanceRecordsData(() => {
-                    return {
-                        id: tempEquipmentData.maintenance_id,
-                        serialNo: 1,
-                        fileName: tempEquipmentData.fileName,
-                        description: tempEquipmentData.last_service_at,
-                        uploader: (() => {
-                            let personArray = [];
-                            let personString = ""
-                            tempEquipmentData.assignees.map((eachPerson) => {
-                                personString += eachPerson.account.username + ", ";
-                            });
-                            personArray.push(personString.slice(0, -2));
-                            personString = "";
-                            return personArray;
-                        })(),
-                        uploadDate: tempEquipmentData.last_service_at,
-                        action_download: `/equipment-maintenance/manage-equipment/manage-cycle/${tempEquipmentData.maintenance_id}`,
-                        action_delete: (() => {
-                            return (
-                                <IconContext.Provider value={{ color: "#DC3545", size: "16px" }}>
-                                    <RiIcons.RiDeleteBin7Line className="c-Table-Btn--bin c-Table-Btn" onClick={() => (handleDeleteRecord(tempEquipmentData.maintenance_record_id))} />
-                                </IconContext.Provider>
-                            )
-                        })(),
-                    }
+                    return tempEquipmentData.uploads.map((fileData, index) => {
+                        return {
+                            id: fileData.file.file_id,
+                            serialNo: index + 1,
+                            fileName: fileData.file.file_name,
+                            description: fileData.description,
+                            uploader: fileData.author.account.username,
+                            uploadDate: dayjs(fileData.created_at).format("D MMM YYYY"),
+                            action_download: fileData.file?.file_name,
+                            action_delete: (() => {
+                                return (
+                                    <IconContext.Provider value={{ color: "#DC3545", size: "16px" }}>
+                                        <RiIcons.RiDeleteBin7Line className="c-Table-Btn--bin c-Table-Btn" onClick={() => (handleDeleteRecord("deleteRecord", fileData.file.file_id))} />
+                                    </IconContext.Provider>
+                                )
+                            })(),
+                        }
+                    })
                 });
             } catch (error) {
                 console.log(error);
             }
         })();
-    }, []);
+    }, [rerender, loading]);
+    const maintenanceRecordColumns = [
+        {
+            dataField: 'id',
+            text: 'id',
+            hidden: true
+        },
+        {
+            dataField: 'serialNo',
+            text: '#',
+        },
+        {
+            dataField: 'fileName',
+            text: 'File Name'
+        },
+        {
+            dataField: 'description',
+            text: 'Description'
+        },
+        {
+            dataField: 'uploader',
+            text: 'Uploader'
+        },
+        {
+            dataField: 'uploadDate',
+            text: 'Upload Date'
+        },
+        {
+            dataField: 'action_download',
+            text: '',
+            formatter: (cell, row) => {
+                if (cell) {
+                    return <button className='c-Btn c-Btn--link' onClick={() => handleFileDownload(row.id, row.fileName)} >Download</button>
+                } else {
+                    return "N.a."
+                }
+            }
+        },
+        {
+            dataField: 'action_delete',
+            text: '',
+            formatter: (cell) => {
+                console.log(cell);
+                return cell
+            }
+        },
+    ];
+
+    const handleFileDownload = async (id, fileName) => {
+        try {
+            const fileRes = await axios.get(`${process.env.REACT_APP_BASEURL}/file/download/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                responseType: 'blob'
+            });
+            console.log(fileRes);
+            FileDownload(fileRes.data, fileName);
+            toast.success(<>Success!<br />Message: <b>Document has been downloaded successfully!</b></>);
+        } catch (err) {
+            console.log(err);
+            let errCode = "Error!";
+            let errMsg = "Error!"
+            if (err.response !== undefined) {
+                errCode = err.response.status;
+                errMsg = err.response.data.message;
+            }
+
+            toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
+        }
+    };
 
     const handleBtn = (buttonType) => {
         if (buttonType === "upload") {
             // Handler for upload button
+            history.push(`./${maintenanceID}/upload`);
         }
 
         if (buttonType === "editEquipment") {
@@ -168,6 +232,8 @@ const ManageMaintenanceCycle = ({ match }) => {
         if (buttonType === "editEquipmentCancel") {
             // Handler for cancel button
             setIsEditing(false);
+            setInputTouched(false);
+            setRerender((prevState) => !prevState);
         }
 
         if (buttonType === "editEquipmentSave") {
@@ -175,13 +241,22 @@ const ManageMaintenanceCycle = ({ match }) => {
             (async () => {
                 try {
                     console.log(maintenanceCyclesData);
+                    let unitTime = maintenanceCyclesData.freq_unit_time;
+                    if (unitTime === "7" || unitTime === 7) unitTime = "week";
+                    if (unitTime === "30" || unitTime === 30) unitTime = "month";
+                    if (unitTime === "365" || unitTime === 365) unitTime = "year";
+
                     const resUpdateCycle = await axios.put(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment/${equipmentID}/all-maintenance/${maintenanceID}`,
                         {
-                            title: maintenanceCyclesData.maintenanceType,
+                            type: maintenanceCyclesData.maintenanceType,
                             freq_multiplier: maintenanceCyclesData.freq_multiplier,
-                            freq_unit_time: maintenanceCyclesData.freq_unit_time,
+                            freq_unit_time: unitTime,
                             last_service_at: maintenanceCyclesData.lastServiceDate,
-                            assignees: maintenanceCyclesData.assignees,
+                            assignees: (() => {
+                                return maintenanceCyclesData.responsible.map((data) => {
+                                    return data.value;
+                                })
+                            })(),
                         },
                         {
                             headers: {
@@ -190,8 +265,18 @@ const ManageMaintenanceCycle = ({ match }) => {
                         });
                     console.log(resUpdateCycle);
                     toast.success(<>Success!<br />Message: <b>Updated Maintenance Cycle!</b></>);
-                } catch (error) {
-                    console.log(error);
+                    setIsEditing(false);
+                    setRerender((prevState) => !prevState);
+                } catch (err) {
+                    console.log(err);
+                    let errCode = "Error!";
+                    let errMsg = "Error!"
+                    if (err.response !== undefined) {
+                        errCode = err.response.status;
+                        errMsg = err.response.data.message;
+                    }
+
+                    toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
                 }
             })();
         }
@@ -204,75 +289,6 @@ const ManageMaintenanceCycle = ({ match }) => {
             [event.target.name]: event.target.value
         }));
     }
-
-    // Handler for select input change
-    const handleSelectInputChange = (event) => {
-        let selectValue = parseInt(event.target.value);
-
-        setEditData((prevState) => ({
-            ...prevState,
-            [event.target.name]: selectValue
-        }));
-    };
-
-    // Handler for adding / delete role
-    const handleEditResponsibleUsers = (handleType, roleID) => {
-        // axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/employee/${employeeID}/roles`, {
-        //     roles: (() => {
-        //         // handle add role
-        //         if (handleType === "add") {
-        //             let tempRoleArrList = userData.roles.map((data, index) => {
-        //                 return data.role_id
-        //             });
-        //             tempRoleArrList.push(editData.roles);
-        //             console.log(tempRoleArrList);
-        //             return tempRoleArrList;
-        //         }
-        //         // handle delete role 
-        //         if (handleType === "delete") {
-        //             let tempRoleArrList = userData.roles.map((data, index) => {
-        //                 return data.role_id
-        //             });
-        //             const indexOfToBeDeletedRoleID = tempRoleArrList.indexOf(roleID);
-        //             tempRoleArrList.splice(indexOfToBeDeletedRoleID, 1);
-        //             console.log(tempRoleArrList);
-        //             return tempRoleArrList;
-        //         }
-        //     })()
-        // }, {
-        //     headers: {
-        //         'Authorization': `Bearer ${token}`
-        //     }
-        // })
-        //     .then((res) => {
-        //         console.log(res);
-        //         setRerender((prevState) => !prevState);
-        //         toast.success(<>Success!<br />Message: <b>Roles updated!</b></>);
-        //     })
-        //     .catch((err) => {
-        //         console.log(err);
-        //         let errCode = "Error!";
-        //         let errMsg = "Error!"
-        //         if (err.response !== undefined) {
-        //             errCode = err.response.status;
-        //             errMsg = err.response.data.message;
-        //         }
-
-        //         toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
-        //     });
-    };
-
-    // Dynamic Search filter
-    const filterSearch = (option, inputValue) => {
-        const { label, value } = option;
-        // looking if other options with same username are matching inputValue
-        const otherKey = options.filter(
-            opt => {
-                return opt.name === label && opt.value.includes(inputValue)
-            }
-        );
-        return value.includes(inputValue) || otherKey.length > 0;
-    };
 
     // Handler for setting last service date 
     const setLastServiceDate = (date) => {
@@ -288,31 +304,21 @@ const ManageMaintenanceCycle = ({ match }) => {
         console.log(options);
         setMaintenanceCyclesData((prevState) => ({
             ...prevState,
-            assignees: options
+            assignees: options,
+            responsible: options
         }));
     }
 
     // Handler for input 
     const handleTimeInputChange = (event) => {
-        let unitTime;
-        // if(event.target.value === "Days") unitTime = 1;
-        if (event.target.value === "Weeks") unitTime = "week";
-        if (event.target.value === "Months") unitTime = "month";
-        if (event.target.value === "Years") unitTime = "year";
-
         // Set string value for backend endpoint
         setMaintenanceCyclesData((prevState) => ({
             ...prevState,
-            [event.target.name]: unitTime
+            [event.target.name]: event.target.value
         }));
-
-        // Set string value for frontend
-        setMaintenanceCyclesData((prevState) => ({
-            ...prevState,
-            freq_unit_time_UI: event.target.value
-        }));
+        console.log();
     }
-    console.log(maintenanceCyclesData.lastServiceDate);
+
     // Only rendered when document is in editing mode
     const renderInputFieldEditSection = () => {
         return (
@@ -332,6 +338,12 @@ const ManageMaintenanceCycle = ({ match }) => {
                             options={userList}
                             placeholder="Select Users"
                             onChange={handleInputArrayChange}
+                            onFocus={() => setInputTouched(true)}
+                            value={(() => {
+                                return maintenanceCyclesData.responsible.map((data) => {
+                                    return data;
+                                })
+                            })()}
                         />
                     </Col>
                     {/* Maintenance Frequency */}
@@ -339,11 +351,11 @@ const ManageMaintenanceCycle = ({ match }) => {
                         <label htmlFor="maintenanceFrequency">Maintenance Frequency</label>
                         <div className='c-Input__Maintenance-frequency--input'>
                             <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="freq_multiplier" value={maintenanceCyclesData.freq_multiplier} />
-                            <select onFocus={() => setInputTouched(true)} type="text" name="freq_unit_time" onChange={handleTimeInputChange} value={maintenanceCyclesData.freq_unit_time_UI}>
+                            <select onFocus={() => setInputTouched(true)} type="text" name="freq_unit_time" onChange={handleTimeInputChange} value={maintenanceCyclesData.freq_unit_time}>
                                 <option>Select Time Unit</option>
-                                <option>Weeks</option>
-                                <option>Months</option>
-                                <option>Years</option>
+                                <option value={7}>Weeks</option>
+                                <option value={30}>Months</option>
+                                <option value={365}>Years</option>
                             </select>
                         </div>
                     </Col>
@@ -359,6 +371,7 @@ const ManageMaintenanceCycle = ({ match }) => {
                             value={maintenanceCyclesData.lastServiceDate}
                             className="c-Form__Date"
                             format="dd/MM/y"
+                            onFocus={() => setInputTouched(true)}
                         />
                     </Col>
                     {/* Filler */}
@@ -406,7 +419,17 @@ const ManageMaintenanceCycle = ({ match }) => {
                     {/* Maintenance Frequency */}
                     <Col className="c-Input c-Input__Ref-no c-Input--read-only">
                         <label htmlFor="maintenanceFrequency">Maintenance Frequency</label>
-                        <input readOnly type="text" name="maintenanceFrequency" value={maintenanceCyclesData.maintenanceFrequency} />
+                        <input readOnly type="text" name="maintenanceFrequency" value={(() => {
+                            if (maintenanceCyclesData.freq_unit_time === 7) {
+                                return `${maintenanceCyclesData.freq_multiplier} weeks`
+                            }
+                            if (maintenanceCyclesData.freq_unit_time === 30) {
+                                return `${maintenanceCyclesData.freq_multiplier} months`
+                            }
+                            if (maintenanceCyclesData.freq_unit_time === 365) {
+                                return `${maintenanceCyclesData.freq_multiplier} years`
+                            }
+                        })()} />
                     </Col>
                 </Row>
 
@@ -415,7 +438,7 @@ const ManageMaintenanceCycle = ({ match }) => {
                     {/* Last Service Date */}
                     <Col className="c-Input c-Input__Reg-no c-Input--read-only">
                         <label htmlFor="lastServiceDate">Last Service Date</label>
-                        <input readOnly type="text" name="lastServiceDate" value={maintenanceCyclesData.lastServiceDate} />
+                        <input readOnly type="text" name="lastServiceDate" value={dayjs(maintenanceCyclesData.lastServiceDate).format("D MMM YYYY")} />
                     </Col>
                     {/* Status */}
                     <Col className="c-Input c-Input__Model-brand c-Input--read-only">
@@ -481,11 +504,11 @@ const ManageMaintenanceCycle = ({ match }) => {
     };
 
     // Handler for deleting maintenance record 
-    const handleDeleteRecord = (actionType) => {
+    const handleDeleteRecord = (actionType, id) => {
         if (actionType === "deleteRecord") {
             // Confirmation dialogue for activating this account
             const message = `Are you sure you want to delete this maintenance record?`;
-            const handler = (onClose) => handleDelete(onClose);
+            const handler = (onClose) => handleDelete(onClose, id);
             const heading = `Confirm Delete?`;
             const type = "alert"
             const data = {
@@ -501,9 +524,10 @@ const ManageMaintenanceCycle = ({ match }) => {
             });
         }
 
-        const handleDelete = (onClose) => {
-            // Wrong endpoint need edit
-            axios.delete(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment/${equipmentID}/all-maintenance/${maintenanceID}`, {}, {
+        const handleDelete = (onClose, id) => {
+            // Handler for deleting maintenance record
+            console.log(maintenanceRecordsData);
+            axios.delete(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment/${equipmentID}/all-maintenance/${maintenanceID}/uploads/${id}`, {}, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -512,7 +536,8 @@ const ManageMaintenanceCycle = ({ match }) => {
                     console.log(res);
                     setRerender((prevState) => !prevState);
                     onClose();
-                    toast.success(<>Success!<br />Message: <b>Maintenance cycle has been deleted!</b></>);
+                    toast.success(<>Success!<br />Message: <b>Maintenance record has been deleted!</b></>);
+                    setRerender((prevState) => !prevState);
                 })
                 .catch((err) => {
                     console.log(err);
@@ -528,43 +553,6 @@ const ManageMaintenanceCycle = ({ match }) => {
                 });
         }
     };
-
-    const maintenanceCyclesDataPlaceholder = [
-        {
-            id: 1,
-            serialNo: 1,
-            maintenanceType: "Preventive",
-            responsible: "HengHeng",
-            maintenanceFrequency: "1 Month",
-            lastServiceDate: dayjs(new Date()).format("MMMM D, YYYY h:mm A"),
-            status: (() => {
-                // if (new Date() < new Date()) {
-                //     return "active";
-                // } 
-                // TODO: algorithm to determine status
-                return "active";
-            })(),
-            action_manage: "",
-            action_delete: ""
-        },
-        {
-            id: 2,
-            serialNo: 2,
-            maintenanceType: "Corrective",
-            responsible: "HengHeng",
-            maintenanceFrequency: "1 Month",
-            lastServiceDate: dayjs(new Date()).format("MMMM D, YYYY h:mm A"),
-            status: (() => {
-                // if (new Date() < new Date()) {
-                //     return "active";
-                // } 
-                // TODO: algorithm to determine status
-                return "almostDue";
-            })(),
-            action_manage: "",
-            action_delete: ""
-        },
-    ]
 
     return (
         <>
@@ -593,15 +581,17 @@ const ManageMaintenanceCycle = ({ match }) => {
                         <h1>Manage Maintenance cycle</h1>
                         {/* Edit button section */}
                         {
-                            isEditing || renderErrorCard.render ?
-                                null :
-                                <button
-                                    onClick={() => (handleBtn("editEquipment"))}
-                                    type="button"
-                                    className={"c-Btn c-Btn--primary"}
-                                >
-                                    Edit
-                                </button>
+                            canApprove ?
+                                isEditing || renderErrorCard.render ?
+                                    null :
+                                    <button
+                                        onClick={() => (handleBtn("editEquipment"))}
+                                        type="button"
+                                        className={"c-Btn c-Btn--primary"}
+                                    >
+                                        Edit
+                                    </button>
+                                : ""
                         }
                     </div>
                     {
@@ -620,15 +610,19 @@ const ManageMaintenanceCycle = ({ match }) => {
                     }
 
                     {/* Danger Zone */}
-                    <h2 className="c-Danger-zone__Title">Danger Zone</h2>
-                    <div className="c-Danger-zone__Row">
-                        <div className='c-Danger-zone__Item'>
-                            <button type="button" className="c-Btn c-Btn--alert-border" onClick={() => handleDeleteCycle('deleteCycle')}>Delete Cycle</button>
-                            <div className="c-Row__Info">
-                                <p>This action cannot be undone</p>
+                    {canApprove ?
+                        <>
+                            <h2 className="c-Danger-zone__Title">Danger Zone</h2>
+                            <div className="c-Danger-zone__Row">
+                                <div className='c-Danger-zone__Item'>
+                                    <button type="button" className="c-Btn c-Btn--alert-border" onClick={() => handleDeleteCycle('deleteCycle')}>Delete Cycle</button>
+                                    <div className="c-Row__Info">
+                                        <p>This action cannot be undone</p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
+                        </> : ""
+                    }
 
                     {/* Maintenance Records */}
                     <div className="c-Manage-equipment-maintenance__Cycles-top c-Main__Top">
@@ -646,7 +640,7 @@ const ManageMaintenanceCycle = ({ match }) => {
                     {/* Maintenance Records Table section */}
                     <div className="c-Manage-equipment-maintenance__Cycles-table c-Main__Cycles-table">
                         {
-                            maintenanceCyclesDataPlaceholder.length !== 0 ?
+                            maintenanceRecordsData.length !== 0 ?
                                 <BootstrapTable
                                     bordered={false}
                                     keyField='serialNo'

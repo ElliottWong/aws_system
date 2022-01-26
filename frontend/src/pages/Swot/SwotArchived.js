@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import PageLayout from '../../layout/PageLayout';
-import DocumentLayout from '../../layout/DocumentLayout';
-import BootstrapTable from 'react-bootstrap-table-next';
-import { getSideNavStatus } from '../../utilities/sideNavUtils';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import BootstrapTable from 'react-bootstrap-table-next';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import SwotItems from '../../common/SwotItems';
 import { docSwotColumns } from '../../config/tableColumns';
+import DocumentLayout from '../../layout/DocumentLayout';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils';
 import TokenManager from '../../utilities/tokenManager';
 
 
@@ -36,9 +35,10 @@ const SwotArchived = ({ match }) => {
                 }
             })
                 .then((res) => {
+                    console.log(res);
                     // Format dopcument table data
                     const formattedDocTableData = {
-                        strength: res.data.strengths.map((strengthData, strengthIndex) => {
+                        strength: res.data.results.strengths.map((strengthData, strengthIndex) => {
                             return {
                                 id: strengthData.swot_item_id,
                                 type: "strength",
@@ -48,7 +48,7 @@ const SwotArchived = ({ match }) => {
                                 parentItemID: strengthData.parent_item_id
                             }
                         }),
-                        weakness: res.data.weaknesses.map((weaknessData, weaknessIndex) => {
+                        weakness: res.data.results.weaknesses.map((weaknessData, weaknessIndex) => {
                             return {
                                 id: weaknessData.swot_item_id,
                                 type: "weakness",
@@ -58,7 +58,7 @@ const SwotArchived = ({ match }) => {
                                 parentItemID: weaknessData.parent_item_id
                             }
                         }),
-                        opp: res.data.opportunities.map((oppData, oppIndex) => {
+                        opp: res.data.results.opportunities.map((oppData, oppIndex) => {
                             return {
                                 id: oppData.swot_item_id,
                                 type: "opp",
@@ -68,7 +68,7 @@ const SwotArchived = ({ match }) => {
                                 parentItemID: oppData.parent_item_id
                             }
                         }),
-                        threat: res.data.threats.map((threatData, threatIndex) => {
+                        threat: res.data.results.threats.map((threatData, threatIndex) => {
                             return {
                                 id: threatData.swot_item_id,
                                 type: "threat",
@@ -83,10 +83,10 @@ const SwotArchived = ({ match }) => {
 
                     // Format document header data
                     const formattedData = {
-                        title: res.data.title,
-                        created_by: res.data.author.firstname + " " + res.data.author.lastname,
-                        approved_by: res.data.approver.firstname + " " + res.data.author.lastname,
-                        approved_on: dayjs(new Date(res.data.approved_on)).format("MMMM D, YYYY h:mm A"),
+                        title: res.data.results.title,
+                        created_by: res.data.results.author.firstname + " " + res.data.results.author.lastname,
+                        approved_by: res.data.results.approver.firstname + " " + res.data.results.author.lastname,
+                        approved_on: dayjs(new Date(res.data.results.approved_at)).format("MMMM D, YYYY h:mm A"),
                     }
                     console.log(formattedData);
                     setDocHeaderData(() => (formattedData));

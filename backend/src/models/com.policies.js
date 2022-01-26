@@ -30,7 +30,7 @@ module.exports.insertPolicy = (data = {}) => {
 module.exports.findBlockingPolicy = (fk_company_id) => Policies.Forms.findOne({
     where: {
         fk_company_id,
-        status: { [Op.or]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
+        status: { [Op.in]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
     }
 });
 

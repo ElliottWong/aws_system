@@ -9,11 +9,10 @@ const {
 } = require('../schemas/Schemas');
 
 const { insertFile, deleteFileEntirely } = require('./files.v2');
-const { deleteFile } = require('../services/cloudinary.v1');
 
 const E = require('../errors/Errors');
 
-// FIXME this should be a common util in separate file
+// TODO this should be a common util in separate file
 // checks all assigned responsible employees
 // make sure they are of the same company
 const companyCheck = async (fk_company_id, employeeIds = []) => {
@@ -37,7 +36,9 @@ const isAssignedLicence = async (licenceId, employeeId) => {
             fk_employee_id: employeeId
         }
     });
-    return count > 0;
+
+    const isAssigned = count > 0;
+    return isAssigned;
 };
 
 const isLicenceOwner = async (licenceId, companyId, employeeId) => {
@@ -48,13 +49,14 @@ const isLicenceOwner = async (licenceId, companyId, employeeId) => {
             created_by: employeeId
         }
     });
+
     return [!!licence, licence];
 };
 
 // null in formdata is likely a string
 const parseNull = (value) => value === 'null' ? null : value;
 
-const clampNegative = (value) => value < 0 ? 0 : value;
+// const clampNegative = (value) => value < 0 ? 0 : value;
 
 const calculateFrequency = (start, end) => {
     const issuedAt = new Date(start);
@@ -69,7 +71,7 @@ const calculateFrequency = (start, end) => {
 
     const daysLeft = differenceInCalendarDays(expiresAt, now);
     const totalDays = differenceInCalendarDays(expiresAt, issuedAt);
-    const daysLeftPct = clampNegative((daysLeft / totalDays) * 100);
+    const daysLeftPct = (daysLeft / totalDays) * 100;
 
     return { issuedAt, expiresAt, daysLeft, daysLeftPct };
 };
@@ -128,7 +130,6 @@ module.exports.insertLicence = async (companyId, createdBy, licence = {}) => {
 
 // ============================================================
 
-// TODO test me
 module.exports.insertRenewalUpload = async (licenceId, companyId, createdBy, dates = {}, upload) => {
     const licence = await PLC.Licences.findOne({
         where: {
@@ -162,6 +163,12 @@ module.exports.insertRenewalUpload = async (licenceId, companyId, createdBy, dat
         daysLeftPct
     } = calculateFrequency(start, end);
 
+    // existing renewal can be null
+    // because licence has no uploads
+    // will only be created after first upload
+    // null has no properties and caused error
+    const oldFileId = existingRenewal?.fk_file_id;
+
     const transaction = await db.transaction();
     try {
         const { file_id } = await insertFile(createdBy, upload, transaction);
@@ -191,17 +198,21 @@ module.exports.insertRenewalUpload = async (licenceId, companyId, createdBy, dat
             }, { transaction });
 
         await Promise.all([updateLicence, updateRenewal]);
-
-        // delete old file
-        if (existingRenewal) {
-            await deleteFileEntirely(existingRenewal.fk_file_id);
-        }
-
         await transaction.commit();
     }
     catch (error) {
         await transaction.rollback();
         throw error;
+    }
+
+    // table was locked by transaction (file insert)
+    // thus delete file from db could not proceed
+
+    // delete old file
+    if (oldFileId) {
+        // TODO better error handling
+        await deleteFileEntirely(oldFileId)
+            .catch((e) => console.log(`FILE DELETE FAILED BUT IGNORED - FILE ID ${oldFileId}`, e));
     }
 };
 
@@ -254,7 +265,7 @@ module.exports.findLicence = {
         const licenceIds = joinRows.map((row) => row.fk_licence_id);
 
         const where = {
-            licence_id: { [Op.or]: licenceIds },
+            licence_id: { [Op.in]: licenceIds },
             archived_at: archivedOnly ? { [Op.not]: null } : null
         };
 

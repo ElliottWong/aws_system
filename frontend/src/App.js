@@ -18,10 +18,8 @@ const App = () => {
 
     const getRefreshToken = async () => {
         try {
-            console.log("attempted to refresh token again");
             axios.defaults.withCredentials = true;
-            const res = await axios.post(`${process.env.REACT_APP_BASEURL}/refresh`, {}, { withCredentials: true });
-            console.log(res);
+            const res = await axios.post(`${process.env.REACT_APP_BASEURL}/refresh`, {});
             if (res.status === 200) {
                 const accessToken = res.data.results.token;
 

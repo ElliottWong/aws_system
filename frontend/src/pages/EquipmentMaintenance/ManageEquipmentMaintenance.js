@@ -22,28 +22,16 @@ const ManageEquipmentMaintenance = ({ match }) => {
     const token = TokenManager.getToken();
     const decodedToken = TokenManager.getDecodedToken();
     const userCompanyID = decodedToken.company_id;
-    const userID = decodedToken.employee_id;
     const toastTiming = config.toastTiming;
     const [rerender, setRerender] = useState(false); // value of state doesnt matter, only using it to force useffect to execute
     const history = useHistory();
+    const equipmentID = match.params.emID;
+    const userID = decodedToken.employee_id;
 
     // State declarations
-    const options = [
-        { label: 'Swedish', value: 'Swedish' },
-        { label: 'English', value: 'English' },
-        { label: 'English', value: 'English' },
-        { label: 'English', value: 'English' },
-        { label: 'English', value: 'English' },
-    ];
     const [maintenanceCyclesData, setMaintenanceCyclesData] = useState([]);
     const [loading, setLoading] = useState(false);
     const [inputTouched, setInputTouched] = useState(false);
-    const [editData, setEditData] = useState({
-        users: ''
-    });
-    const [allUsernameData, setallUsernameData] = useState({
-        username: []
-    });
     const [equipmentData, setEquipmentData] = useState({
         name: 'Error',
         category: [],
@@ -63,14 +51,31 @@ const ManageEquipmentMaintenance = ({ match }) => {
     });
     const [isEditing, setIsEditing] = useState(false);
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
-    const [isEditor, setIsEditor] = useState(false);        // Track if user has rights to edit
-    const [archivedDocData, setArchivedDocData] = useState([]);
-    const equipmentID = match.params.emID;
+    const [isEditor, setIsEditor] = useState(false);        // Track if user has rights to edi
+    const [canApprove, setCanApprove] = useState(false);
+    const [canEdit, setCanEdit] = useState(false);
 
     useEffect(() => {
         // Set equipment maintenance cycle data
         (async () => {
             try {
+                // Can approve people can create new equipment
+                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/approve/m07_01/employees`);
+                // Can edit people can upload new maintenance record
+                const resClausePermissionEdit = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_01/employees`);
+                // Check if user can create new equipment
+                resClausePermission.data.results.forEach((data, index) => {
+                    if (data.employee_id === userID) {
+                        setCanApprove(true);
+                    }
+                });
+                // Check if user is assigned to an equipment
+                resClausePermissionEdit.data.results.forEach((data, index) => {
+                    if (data.employee_id === userID) {
+                        setCanEdit(true);
+                    }
+                });
+
                 let tempEquipmentData = [];
                 let tempCategoryData = [];
 
@@ -90,11 +95,12 @@ const ManageEquipmentMaintenance = ({ match }) => {
                         id: tempEquipmentData.equipment_id,
                         name: tempEquipmentData.name,
                         category: (() => {
-                            // eslint-disable-next-line array-callback-return
                             return tempEquipmentData.categories.map((catData) => {
-                                return catData.name;
+                                return {
+                                    label: catData.name,
+                                    value: catData.category_id
+                                }
                             });
-                            // return categoryString.slice(0, -2);
                         })(),
                         refNo: tempEquipmentData.reference_number,
                         regNo: tempEquipmentData.register_number,
@@ -142,15 +148,18 @@ const ManageEquipmentMaintenance = ({ match }) => {
                                 }
                             })(),
                             lastServiceDate: data.last_service_at,
-                            status: `/equipment-maintenance/manage-equipment/${data.maintenance_id}`,
+                            status: {
+                                frequency: data.freq_multiplier * data.freq_unit_time,
+                                timeLeft: data.days_left
+                            },
                             action_manage: `/equipment-maintenance/manage-equipment/${equipmentID}/manage-cycle/${data.maintenance_id}`,
                             action_delete: (() => {
-                                console.log(data.maintenance_id);
-                                return (
+                                if (canApprove) return (
                                     <IconContext.Provider value={{ color: "#DC3545", size: "16px" }}>
                                         <RiIcons.RiDeleteBin7Line className="c-Table-Btn--bin c-Table-Btn" onClick={() => (handleDeleteCycle(data.maintenance_id))} />
                                     </IconContext.Provider>
                                 )
+                                return "";
                             })(),
                         }
                     });
@@ -159,9 +168,7 @@ const ManageEquipmentMaintenance = ({ match }) => {
                 console.log(error);
             }
         })();
-    }, [equipmentData.archivedAt]);
-
-    console.log(equipmentData);
+    }, [equipmentData.archivedAt, rerender, canApprove]);
 
     // Handler for deleting maintenance record 
     const handleDeleteCycle = (maintenanceID) => {
@@ -223,6 +230,8 @@ const ManageEquipmentMaintenance = ({ match }) => {
         if (buttonType === "editEquipmentCancel") {
             // Handler for edit button
             setIsEditing(false);
+            setInputTouched(false);
+            setRerender((prevState) => !prevState);
         }
 
         if (buttonType === "editEquipmentSave") {
@@ -265,75 +274,6 @@ const ManageEquipmentMaintenance = ({ match }) => {
         }));
     }
 
-    // Handler for select input change
-    const handleSelectInputChange = (event) => {
-        let selectValue = parseInt(event.target.value);
-
-        setEditData((prevState) => ({
-            ...prevState,
-            [event.target.name]: selectValue
-        }));
-    };
-
-    // Handler for adding / delete role
-    const handleEditResponsibleUsers = (handleType, roleID) => {
-        // axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/employee/${employeeID}/roles`, {
-        //     roles: (() => {
-        //         // handle add role
-        //         if (handleType === "add") {
-        //             let tempRoleArrList = userData.roles.map((data, index) => {
-        //                 return data.role_id
-        //             });
-        //             tempRoleArrList.push(editData.roles);
-        //             console.log(tempRoleArrList);
-        //             return tempRoleArrList;
-        //         }
-        //         // handle delete role 
-        //         if (handleType === "delete") {
-        //             let tempRoleArrList = userData.roles.map((data, index) => {
-        //                 return data.role_id
-        //             });
-        //             const indexOfToBeDeletedRoleID = tempRoleArrList.indexOf(roleID);
-        //             tempRoleArrList.splice(indexOfToBeDeletedRoleID, 1);
-        //             console.log(tempRoleArrList);
-        //             return tempRoleArrList;
-        //         }
-        //     })()
-        // }, {
-        //     headers: {
-        //         'Authorization': `Bearer ${token}`
-        //     }
-        // })
-        //     .then((res) => {
-        //         console.log(res);
-        //         setRerender((prevState) => !prevState);
-        //         toast.success(<>Success!<br />Message: <b>Roles updated!</b></>);
-        //     })
-        //     .catch((err) => {
-        //         console.log(err);
-        //         let errCode = "Error!";
-        //         let errMsg = "Error!"
-        //         if (err.response !== undefined) {
-        //             errCode = err.response.status;
-        //             errMsg = err.response.data.message;
-        //         }
-
-        //         toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
-        //     });
-    };
-
-    // Dynamic Search filter
-    const filterSearch = (option, inputValue) => {
-        const { label, value } = option;
-        // looking if other options with same username are matching inputValue
-        const otherKey = options.filter(
-            opt => {
-                return opt.name === label && opt.value.includes(inputValue)
-            }
-        );
-        return value.includes(inputValue) || otherKey.length > 0;
-    };
-
     // Handler for input array
     const handleInputArrayChange = (options) => {
         console.log(options);
@@ -363,6 +303,12 @@ const ManageEquipmentMaintenance = ({ match }) => {
                             placeholder="Select Category"
                             onChange={handleInputArrayChange}
                             name="categories"
+                            value={(() => {
+                                return equipmentData.category.map((data) => {
+                                    return data;
+                                })
+                            })()}
+                            onFocus={() => setInputTouched(true)}
                         />
                     </Col>
                     {/* Ref. No. */}
@@ -428,7 +374,7 @@ const ManageEquipmentMaintenance = ({ match }) => {
                         <input readOnly type="text" name="category" value={(() => {
                             let catStr = "";
                             equipmentData.category.forEach((data) => {
-                                catStr += data + ", "
+                                catStr += data.label + ", "
                             });
 
                             return catStr.slice(0, -2);;
@@ -526,7 +472,7 @@ const ManageEquipmentMaintenance = ({ match }) => {
                         ...equipmentData,
                         archivedAt: null,
                     })
-                    toast.success(<>Success!<br />Message: <b>User has been {actionType}!</b></>);
+                    toast.success(<>Success!<br />Message: <b>Equipment has been {actionType}!</b></>);
                 })
                 .catch((err) => {
                     console.log(err);
@@ -556,7 +502,7 @@ const ManageEquipmentMaintenance = ({ match }) => {
                         ...equipmentData,
                         archivedAt: "refresh",
                     })
-                    toast.success(<>Success!<br />Message: <b>User has been {actionType}!</b></>);
+                    toast.success(<>Success!<br />Message: <b>Equipment has been {actionType}!</b></>);
                 })
                 .catch((err) => {
                     console.log(err);
@@ -599,15 +545,17 @@ const ManageEquipmentMaintenance = ({ match }) => {
                         <h1>Manage Equipment</h1>
                         {/* Edit button section */}
                         {
-                            isEditing || renderErrorCard.render ?
-                                null :
-                                <button
-                                    onClick={() => (handleBtn("edit"))}
-                                    type="button"
-                                    className={"c-Btn c-Btn--primary"}
-                                >
-                                    Edit
-                                </button>
+                            canApprove ?
+                                isEditing || renderErrorCard.render ?
+                                    null :
+                                    <button
+                                        onClick={() => (handleBtn("edit"))}
+                                        type="button"
+                                        className={"c-Btn c-Btn--primary"}
+                                    >
+                                        Edit
+                                    </button>
+                                : ""
                         }
                     </div>
                     {
@@ -626,40 +574,47 @@ const ManageEquipmentMaintenance = ({ match }) => {
                     }
 
                     {/* Danger Zone */}
-                    <h2 className="c-Danger-zone__Title">Danger Zone</h2>
-                    <div className="c-Danger-zone__Row">
-                        {
-                            equipmentData.archivedAt === null ?
-                                <>
-                                    <div className='c-Danger-zone__Item'>
-                                        <button type="button" className="c-Btn c-Btn--alert-border" onClick={() => handleEquipmentArchive("deactivated")}>Archive Equipment</button>
-                                        <div className="c-Row__Info">
-                                            <p>The equipment will be moved to archives.</p>
-                                        </div>
-                                    </div>
-                                </> :
-                                <>
-                                    <div className='c-Danger-zone__Item'>
-                                        <button type="button" className="c-Btn c-Btn--primary-border" onClick={() => handleEquipmentArchive("activated")}>Unarchive Equipment</button>
-                                        <div className="c-Row__Info">
-                                            <p>The equipment will be restored from archives.</p>
-                                        </div>
-                                    </div>
-                                </>
-                        }
-                    </div>
+                    {
+                        canApprove ?
+                            <>
+                                <h2 className="c-Danger-zone__Title">Danger Zone</h2>
+                                <div className="c-Danger-zone__Row">
+                                    {
+                                        equipmentData.archivedAt === null ?
+                                            <>
+                                                <div className='c-Danger-zone__Item'>
+                                                    <button type="button" className="c-Btn c-Btn--alert-border" onClick={() => handleEquipmentArchive("deactivated")}>Archive Equipment</button>
+                                                    <div className="c-Row__Info">
+                                                        <p>The equipment will be moved to archives.</p>
+                                                    </div>
+                                                </div>
+                                            </> :
+                                            <>
+                                                <div className='c-Danger-zone__Item'>
+                                                    <button type="button" className="c-Btn c-Btn--primary-border" onClick={() => handleEquipmentArchive("activated")}>Unarchive Equipment</button>
+                                                    <div className="c-Row__Info">
+                                                        <p>The equipment will be restored from archives.</p>
+                                                    </div>
+                                                </div>
+                                            </>
+                                    }
+                                </div>
+                            </> : ""
+                    }
 
                     {/* Maintenance Cycles */}
                     <div className="c-Manage-equipment-maintenance__Cycles-top c-Main__Top">
                         <h1>Maintenance Cycles</h1>
                         {/* Add button section */}
-                        <button
-                            onClick={() => handleBtn('add')}
-                            type="button"
-                            className={"c-Btn c-Btn--primary"}
-                        >
-                            Add
-                        </button>
+                        {canApprove ?
+                            <button
+                                onClick={() => handleBtn('add')}
+                                type="button"
+                                className={"c-Btn c-Btn--primary"}
+                            >
+                                Add
+                            </button> : ""
+                        }
                     </div>
 
                     {/* Maintenance Cycles Table section */}

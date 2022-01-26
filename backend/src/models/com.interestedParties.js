@@ -50,7 +50,7 @@ module.exports.insertParty = async (data = {}) => {
 module.exports.findBlockingParty = (fk_company_id) => InterestedParties.Forms.findOne({
     where: {
         fk_company_id,
-        status: { [Op.or]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
+        status: { [Op.in]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
     }
 });
 

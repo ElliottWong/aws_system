@@ -1,14 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import BootstrapTable from 'react-bootstrap-table-next';
-import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
-import { Editor } from 'react-draft-wysiwyg';
-import * as RiIcons from 'react-icons/ri';
-import { IconContext } from 'react-icons';
-import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
-import { getUserDisplayName, getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
 import axios from 'axios';
-import draftToHtml from 'draftjs-to-html';
-import convert from 'htmr';
+import React, { useEffect, useState } from 'react';
+import BootstrapTable from 'react-bootstrap-table-next';
+import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
+import { Editor } from 'react-draft-wysiwyg';
+import { IconContext } from 'react-icons';
+import * as RiIcons from 'react-icons/ri';
+import { getUserDisplayName } from '../../utilities/localStorageUtils';
 import TokenManager from '../../utilities/tokenManager';
 
 

@@ -1,23 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import PageLayout from '../../layout/PageLayout';
-import DocumentLayout from '../../layout/DocumentLayout';
-import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import { managePETColumns } from '../../config/tableColumns';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
-import dayjs from 'dayjs';
-import { ToastContainer } from 'react-toastify';
-import config from '../../config/config';
 import { useHistory } from 'react-router-dom';
-import { defaultTemplate } from '../../config/trainingEvaluation';
+import { toast, ToastContainer } from 'react-toastify';
 import EvaluationQuestions from '../../common/EvaluationQuestions';
+import config from '../../config/config';
 import { QUESTION_TYPE, TRAINING_EVALUATION_MODE } from '../../config/enums';
+import { defaultTemplate } from '../../config/trainingEvaluation';
+import DocumentLayout from '../../layout/DocumentLayout';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
+import TokenManager from '../../utilities/tokenManager.js';
 
 
 const CreateEvaluationTemplate = () => {
+
     const toastTiming = config.toastTiming;
     const history = useHistory();
+    const decodedToken = TokenManager.getDecodedToken();
+    const userCompanyID = decodedToken.company_id;
+    const userID = decodedToken.employee_id;
 
     // State declarations
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
@@ -29,9 +31,8 @@ const CreateEvaluationTemplate = () => {
 
     useEffect(() => {
         setQuestions(() => {
-   
             const sortedTraineeQnsRaw = defaultTemplate.evaluation.trainee.sort((a, b) => a.order - b.order);
-           
+
             const sortedSupervisorQnsRaw = defaultTemplate.evaluation.supervisor.sort((a, b) => a.order - b.order);
 
             return {
@@ -96,6 +97,38 @@ const CreateEvaluationTemplate = () => {
         }));
     };
 
+    const handleSubmit = async () => {
+        console.log(meta);
+        console.log(questions);
+        const formattedTemplateData = {
+            name: meta.template?.name,
+            version: meta.template.version,
+            evaluation: questions,
+            immediate: true
+        };
+
+        try {
+            await axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/training-evaluation/all-templates`, formattedTemplateData);
+            setTimeout(() => {
+                toast.success("Success! A new post evaluation form has been created!");
+            }, 0);
+            history.push("/training/post-evaluation-templates");
+
+        } catch (err) {
+            console.log(err);
+            let errCode = "Error!";
+            let errMsg = "Error!"
+            if (err.response !== undefined) {
+                errCode = err.response.status;
+                errMsg = err.response.data.message;
+            }
+
+            toast.error(<>Error Code: <b>{errCode}</b><br />Message: <b>{errMsg}</b></>);
+        }
+
+
+    };
+
     return (
         <>
             <ToastContainer
@@ -114,16 +147,14 @@ const CreateEvaluationTemplate = () => {
                     {/* Breadcrumb */}
                     <Breadcrumb className="c-Create-PET__Breadcrumb l-Breadcrumb">
                         <Breadcrumb.Item href="/dashboard">Dashboard</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/settings">Settings</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/settings/trainings">Manage Trainings</Breadcrumb.Item>
-                        <Breadcrumb.Item href="/settings/trainings/post-evaluation-templates" >Manage Post Evaluation Templates</Breadcrumb.Item>
+                        <Breadcrumb.Item href="/training/post-evaluation-templates" >Manage Post Evaluation Templates</Breadcrumb.Item>
                         <Breadcrumb.Item active>Create Post Evaluation Template</Breadcrumb.Item>
                     </Breadcrumb>
                     {/* Top section */}
                     <div className="c-Create-PET__Top c-Main__Top">
                         <h1>Create Post Evaluation Template</h1>
                         <div className="c-Top__Btns">
-                            <button type="button" className="c-Btn c-Btn--primary">Create</button>
+                            <button type="button" className="c-Btn c-Btn--primary" onClick = {() => handleSubmit()}>Create</button>
                             <button type="button" className="c-Btn c-Btn--cancel" onClick={() => history.push("/settings/trainings/post-evaluation-templates")}>Cancel</button>
                         </div>
 
@@ -134,7 +165,7 @@ const CreateEvaluationTemplate = () => {
                             <div className="c-Create-PET__Document-content">
                                 {/* Title */}
                                 <div className="c-Create-PET__Document-title">
-                                    <input type="text" placeholder="Enter form title" name="name" value={meta.template?.name} onChange={(event) => handleInputChange(event)} />
+                                    <input type="text" placeholder="Enter form title" name="name" value={meta.template?.name || ''} onChange={(event) => handleInputChange(event)} />
                                 </div>
 
                                 {/* Document Header Info */}
@@ -155,7 +186,7 @@ const CreateEvaluationTemplate = () => {
                                         <br />
                                         <br />
                                         <br />
-                                        <input type="text" name="version" value={meta.template?.version} onChange={(event) => handleInputChange(event)} />
+                                        <input type="text" name="version" value={meta.template?.version || ''} onChange={(event) => handleInputChange(event)} />
                                         <br />
                                         <br />
                                         <br />

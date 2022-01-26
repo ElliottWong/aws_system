@@ -74,38 +74,3 @@ module.exports.commonIntroductory = ({ Companies, Employees }) => ({
         }
     }
 });
-
-module.exports.commonTemplate = ({ Companies, Employees }) => ({
-    fk_company_id: {
-        type: DataTypes.INTEGER.UNSIGNED,
-        allowNull: false,
-        references: {
-            model: Companies,
-            key: 'company_id'
-        }
-    },
-    template: {
-        type: DataTypes.JSON,
-        allowNull: false
-    },
-    name: {
-        type: DataTypes.STRING(255),
-        allowNull: false
-    },
-    version: {
-        type: DataTypes.STRING(255),
-        allowNull: false
-    },
-    created_by: {
-        type: DataTypes.INTEGER.UNSIGNED,
-        allowNull: false,
-        references: {
-            model: Employees,
-            key: 'employee_id'
-        }
-    },
-    effective_at: {
-        type: 'TIMESTAMP',
-        allowNull: false
-    }
-});

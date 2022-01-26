@@ -4717,5 +4717,5 @@ definitions:
 # Location localhost
 schemes:
   - https
-host: 3.136.78.128:5000
+host: localhost:5000
 basePath: /api/v1

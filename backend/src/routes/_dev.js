@@ -5,7 +5,7 @@ const { Companies } = require('../schemas/Schemas');
 const accessLogging = require('../middlewares/morgan');
 const { uploadAny, uploadOne, destroyUploads } = require('../middlewares/multer');
 
-const { findEquipment } = require('../models/com.equipment.v3');
+const { findEquipment } = require('../models/com.equipment');
 
 const E = require('../errors/Errors');
 

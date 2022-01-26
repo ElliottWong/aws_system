@@ -1,56 +1,104 @@
 .c-Manage-training-record {
-    .c-Fields {
-        display: flex;
-        flex-direction: row;
-        &__Left {
-          display: flex;
-          flex: 1;
-          flex-direction: column;
-          align-items: flex-start;
-        }
-    
-        &__Right {
-          display: flex;
-          flex: 1;
-          flex-direction: column;
-          align-items: flex-start;
-        }
-    
-        .c-Field {
-          h2 {
-            font-size: small;
-            font-weight: bold;
-          }
-          p {
-            font-size: small;
-          }
-          padding: 20px 0;
-        }
+  .c-Fields {
+    display: flex;
+    flex-direction: row;
+
+    &__Left {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    &__Right {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .c-Field {
+      h2 {
+        font-size: small;
+        font-weight: bold;
       }
-    
-      &__Danger {
+
+      p {
+        font-size: small;
+      }
+
+      padding: 20px 0;
+
+      .c-File {
+        background-color: #EAEAEA;
         display: flex;
         flex-direction: column;
-        padding-top: 20px;
-        .c-Danger {
-          &__Top {
-            h1 {
-              font-size: $font-small;
-              font-weight: bold;
-              padding-bottom: 10px;
-            }
+        justify-content: center;
+        align-items: center;
+        padding: 20px 30px;
+        border-radius: 5px;
+
+        h1 {
+          cursor: pointer;
+          font-size: $font-small;
+          color: black;
+          font-weight: bold;
+
+          &:hover {
+            opacity: 0.8;
           }
-          &__Contents {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            p {
-              font-size: $font-small;
-              font-weight: bold;
-              color: $button-alert;
-              padding-left: 20px;
-            }
+
+          &:active {
+            opacity: 0.7;
           }
         }
+
+        h2 {
+          cursor: pointer;
+          font-size: $font-small;
+          font-weight: bold;
+          color: $anchor-enabled;
+          margin-top: 10px;
+
+          &:hover {
+            opacity: 0.8;
+          }
+
+          &:active {
+            opacity: 0.7;
+          }
+
+        }
       }
+    }
+  }
+
+  &__Danger {
+    display: flex;
+    flex-direction: column;
+    padding-top: 20px;
+
+    .c-Danger {
+      &__Top {
+        h1 {
+          font-size: $font-small;
+          font-weight: bold;
+          padding-bottom: 10px;
+        }
+      }
+
+      &__Contents {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        p {
+          font-size: $font-small;
+          font-weight: bold;
+          color: $button-alert;
+          padding-left: 20px;
+        }
+      }
+    }
+  }
 }

@@ -128,6 +128,78 @@
         }
     }
 
+    &__Do {
+        .c-Top {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 10px 0;
+            p {
+                font-size: $font-small;
+                font-weight: bold;
+            }
+
+            p:nth-of-type(2) {
+                padding-left: 10px;
+            }
+        }
+        .c-Evaluation-qns__Types {
+            .c-Evaluation-qns__Type {
+                &--boolean {
+                    padding: 20px 0;
+                    padding-left: 20px;
+                    label {
+                        padding-left: 10px;
+                    }
+
+                    input {
+                        cursor: pointer;
+                    }
+                }
+
+                &--rating {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-around;
+                    padding: 20px 0;
+
+                    .c-Evaluation-qns__Option {
+                        display: flex;
+                        flex-direction: column;
+                        max-width: 100px;
+                        align-items: center;
+
+                        label {
+                            text-align: center;
+                        }
+                    }
+                }
+
+                &--open {
+                    padding: 20px 0;
+                    textarea {
+                        width: 100%;
+                        padding: 3px 10px;
+                        outline: none;
+                        border: 1px solid black;
+                        border-radius: 5px;
+                    }
+                }
+
+                &--default {
+                    display: flex;
+                    justify-content: center;
+                    align-content: center;
+                    padding: 20px 0;
+                    p {
+                        font-weight: bold;
+                        font-size: $font-small;
+                    }
+                }
+            }
+        }
+    }
+
     &__View {
         .c-Top {
             display: flex;

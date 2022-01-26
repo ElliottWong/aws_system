@@ -19,6 +19,8 @@ const EquipmentMaintenance = () => {
     const decodedToken = TokenManager.getDecodedToken();
     const userCompanyID = decodedToken.company_id;
     const userID = decodedToken.employee_id;
+    const [canApprove, setCanApprove] = useState(false);
+    const [canEdit, setCanEdit] = useState(false);
 
     // State Declarations
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
@@ -26,7 +28,6 @@ const EquipmentMaintenance = () => {
     const [categoryData, setCategoryData] = useState([]);
     const [archivedEquipmentData, setArchivedEquipmentData] = useState([]);
     const [filteredCategoryID, setFilteredCategoryID] = useState(null);
-    const [categoryFilterDisplayName, setCategoryFilterDisplayName] = useState('');
 
     useEffect(() => {
         let componentMounted = true;
@@ -36,13 +37,18 @@ const EquipmentMaintenance = () => {
                 // Can approve people can create new equipment
                 const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/approve/m07_01/employees`);
                 // Can edit people can upload new maintenance record
-                // More code next time 
+                const resClausePermissionEdit = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_01/employees`);
                 if (componentMounted) {
-                    let canApprove = false;
                     // Check if user can create new equipment
                     resClausePermission.data.results.forEach((data, index) => {
                         if (data.employee_id === userID) {
-                            canApprove = true;
+                            setCanApprove(true);
+                        }
+                    });
+                    // Check if user is assigned to an equipment
+                    resClausePermissionEdit.data.results.forEach((data, index) => {
+                        if (data.employee_id === userID) {
+                            setCanEdit(true);
                         }
                     });
 
@@ -51,6 +57,7 @@ const EquipmentMaintenance = () => {
                     let tempArchivedEquimentData = [];
 
                     if (canApprove) {
+                        console.log(filteredCategoryID);
                         // Check if user tries to filter equipment by category
                         if (!filteredCategoryID) {
                             // Get all equipment in use
@@ -62,7 +69,7 @@ const EquipmentMaintenance = () => {
                             // Get all equipment of filtered category
                             const resAllEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories/${filteredCategoryID}/all-equipment`);
                             console.log(resAllEquipments);
-                            tempEquipmentData = resAllEquipments.data.results.equipment;
+                            tempEquipmentData = resAllEquipments.data.results?.equipment;
                             console.log(tempEquipmentData);
                         }
 
@@ -91,9 +98,20 @@ const EquipmentMaintenance = () => {
                             // Get all assigned equipment of filtered category
                             const resSpecificEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories/${filteredCategoryID}/assigned-equipment`);
                             console.log(resSpecificEquipments);
-                            tempEquipmentData = resSpecificEquipments.data.results;
+                            tempEquipmentData = resSpecificEquipments.data.results?.equipment;
                             console.log(tempEquipmentData);
                         }
+                        // Get all equipment categories
+                        const resAllCategories = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories`);
+                        console.log(resAllCategories);
+                        tempCategoryData = resAllCategories.data.results;
+                        console.log(tempCategoryData);
+
+                        // Get all archived equipment
+                        const resArchivedEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/assigned-equipment?archived=1`);
+                        console.log(resArchivedEquipments);
+                        tempArchivedEquimentData = resArchivedEquipments.data.results;
+                        console.log(tempArchivedEquimentData);
                     }
 
                     setCategoryData(() => {
@@ -103,13 +121,16 @@ const EquipmentMaintenance = () => {
                                 serialNo: index + 1,
                                 name: data.name,
                                 createdOn: dayjs(new Date(data.created_at)).format("MMMM D, YYYY h:mm A"),
-                                action_manage: `/equipment-maintenance/manage-category/${data.category_id}`
+                                action_manage: (() => {
+                                    if (canApprove) return `/equipment-maintenance/manage-category/${data.category_id}`
+                                    return "";
+                                })()
                             }
                         });
                     });
 
                     setEquipmentData(() => {
-                        return tempEquipmentData.map((data, index) => {
+                        return tempEquipmentData?.map((data, index) => {
                             return {
                                 id: data.equipment_id,
                                 serialNo: index + 1,
@@ -117,7 +138,7 @@ const EquipmentMaintenance = () => {
                                 category: (() => {
                                     let categoryString = ""
                                     // eslint-disable-next-line array-callback-return
-                                    data.categories.map((catData) => {
+                                    data.categories?.map((catData) => {
                                         categoryString += catData.name + ", ";
                                     });
                                     return categoryString.slice(0, -2);
@@ -172,7 +193,8 @@ const EquipmentMaintenance = () => {
     };
 
     // Handler for input 
-    const handleInputChange = (event) => {
+    const handleFilterSelect = (event) => {
+        console.log(event.target.value);
         setFilteredCategoryID(event.target.value);
     }
 
@@ -200,19 +222,21 @@ const EquipmentMaintenance = () => {
                     <div className="c-Equipment-maintenance__Top c-Main__Top">
                         <h1>Equipment Maintenance Programme</h1>
                         {/* Add button section */}
-                        <button
-                            onClick={() => handleBtn()}
-                            type="button"
-                            className={"c-Btn c-Btn--primary"}
-                        >
-                            Add New Equipment
-                        </button>
+                        {
+                            canApprove ? <button
+                                onClick={() => handleBtn()}
+                                type="button"
+                                className={"c-Btn c-Btn--primary"}
+                            >
+                                Add New Equipment
+                            </button> : ""
+                        }
                     </div>
                     {/* Filter */}
                     <div className='c-Equipment-maintenance__Filter'>
                         <h4>Filter (Category)</h4>
-                        <select type="text" name="filterCategory" onChange={handleInputChange} value={filteredCategoryID || 'Error'}>
-                            <option>{!categoryData ? "No categories found!" : "All"}</option>
+                        <select type="text" name="filterCategory" onChange={handleFilterSelect} value={filteredCategoryID || 'Error'}>
+                            <option value={''}>{!categoryData ? "No categories found!" : "All"}</option>
                             {!categoryData ? null : categoryData.map((category, index) => (
                                 <option key={index} value={category.id}>
                                     {category.name}
@@ -222,26 +246,32 @@ const EquipmentMaintenance = () => {
                     </div>
                     {/* Table section */}
                     <div className="c-Equipment-maintenance__Table">
-                        <BootstrapTable
-                            bordered={false}
-                            keyField='serialNo'
-                            data={equipmentData}
-                            columns={equipmentMaintenanceColumns}
-                            pagination={paginationFactory()}
-                        />
+                        {equipmentData ?
+                            <BootstrapTable
+                                bordered={false}
+                                keyField='serialNo'
+                                data={equipmentData}
+                                columns={equipmentMaintenanceColumns}
+                                pagination={paginationFactory()}
+                            />
+                            : "No results found"
+                        }
                     </div>
 
                     {/* Mid section */}
                     <div className="c-Equipment-maintenance-category__Top c-Main__Top">
                         <h1>Equipment Categories</h1>
-                        {/* Edit button section */}
-                        <button
-                            onClick={() => handleBtnAddCategory()}
-                            type="button"
-                            className={"c-Btn c-Btn--primary"}
-                        >
-                            Add New Category
-                        </button>
+                        {/* Add button section */}
+                        {
+                            canApprove ?
+                                <button
+                                    onClick={() => handleBtnAddCategory()}
+                                    type="button"
+                                    className={"c-Btn c-Btn--primary"}
+                                >
+                                    Add New Category
+                                </button> : ""
+                        }
                     </div>
                     {/* Table section */}
                     <div className="c-Equipment-maintenance__Table">

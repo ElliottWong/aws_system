@@ -32,6 +32,7 @@ const Login = () => {
         let password = event.target.password.value;
         event.preventDefault();
         setLoading(() => (true));
+        axios.defaults.withCredentials = true;
         axios.post(`${process.env.REACT_APP_BASEURL}/login`, {
             "username": username,
             "password": password

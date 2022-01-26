@@ -10,8 +10,8 @@ const config = require('./src/config/config');
 const mainRouter = require('./src/routes/main.routes');
 
 // notification job schedules
-const schedulesforSwot = require('./src/schedules/swots');
-const schedulesforEMP = require('./src/schedules/equipmentMaintenance');
+const schedulesForSwot = require('./src/schedules/swots');
+const schedulesForEMP = require('./src/schedules/equipmentMaintenance');
 const schedulesForPLC = require('./src/schedules/licences');
 
 const app = express();
@@ -53,8 +53,8 @@ app.use('/api/v1', mainRouter);
         });
 
         console.log('RUNNING ALL SCHEDULES');
-        schedulesforSwot();
-        schedulesforEMP();
+        schedulesForSwot();
+        schedulesForEMP();
         schedulesForPLC();
     }
     catch (error) {
@@ -68,6 +68,14 @@ app.use('/api/v1', mainRouter);
 // used for cleaning up the application and then shut down
 process.on('uncaughtException', (error, origin) => {
     console.log(`AN UNCAUGHT ERROR OCCURED AT ${origin}`);
-    console.log('THE ERROR', error);
+    console.log(error);
     process.exit(1);
+});
+
+// last resort to catch rejections
+// FOR DEV ONLY
+process.on('unhandledRejection', (reason, promise) => {
+    console.log('AN UNHANDLED PROMISE REJECTION OCCURED');
+    console.log(reason);
+    promise.catch((e) => console.log(`THE ERROR IN PROMISE ${e}`));
 });

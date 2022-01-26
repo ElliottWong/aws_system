@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import PageLayout from '../../layout/PageLayout';
-import DocumentLayout from '../../layout/DocumentLayout';
-import { getSideNavStatus } from '../../utilities/sideNavUtils';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import RiskNOppItem from '../../common/RiskNOppItem';
+import DocumentLayout from '../../layout/DocumentLayout';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils';
 import TokenManager from '../../utilities/tokenManager';
 
 
@@ -36,7 +35,7 @@ const RiskNOppArchived = ({ match }) => {
                 .then((res) => {
                     // Format dopcument table data
                     const formattedDocTableData = {
-                        strength: res.data.strengths.map((strengthData, strengthIndex) => {
+                        strength: res.data.results.strengths.map((strengthData, strengthIndex) => {
                             return {
                                 serialNo: strengthIndex + 1,
                                 id: strengthData.fk_risks_analysis_id,
@@ -50,7 +49,7 @@ const RiskNOppArchived = ({ match }) => {
                                 modified: dayjs(new Date(strengthData.updated_at)).format("DD/MM/YYYY"),
                             };
                         }),
-                        weakness: res.data.weaknesses.map((weaknessData, weaknessIndex) => {
+                        weakness: res.data.results.weaknesses.map((weaknessData, weaknessIndex) => {
                             return {
                                 serialNo: weaknessIndex + 1,
                                 id: weaknessData.fk_risks_analysis_id,
@@ -64,7 +63,7 @@ const RiskNOppArchived = ({ match }) => {
                                 modified: dayjs(new Date(weaknessData.updated_at)).format("DD/MM/YYYY"),
                             };
                         }),
-                        opp: res.data.opportunities.map((oppData, oppIndex) => {
+                        opp: res.data.results.opportunities.map((oppData, oppIndex) => {
                             return {
                                 serialNo: oppIndex + 1,
                                 id: oppData.fk_risks_analysis_id,
@@ -78,7 +77,7 @@ const RiskNOppArchived = ({ match }) => {
                                 modified: dayjs(new Date(oppData.updated_at)).format("DD/MM/YYYY"),
                             };
                         }),
-                        threat: res.data.threats.map((threatData, threatIndex) => {
+                        threat: res.data.results.threats.map((threatData, threatIndex) => {
                             return {
                                 serialNo: threatIndex + 1,
                                 id: threatData.fk_risks_analysis_id,
@@ -97,10 +96,10 @@ const RiskNOppArchived = ({ match }) => {
 
                     // Format document header data
                     const formattedData = {
-                        title: res.data.title,
-                        created_by: res.data.author.firstname + " " + res.data.author.lastname,
-                        approved_by: res.data.approver.firstname + " " + res.data.author.lastname,
-                        approved_on: dayjs(new Date(res.data.approved_on)).format("MMMM D, YYYY h:mm A"),
+                        title: res.data.results.title,
+                        created_by: res.data.results.author.firstname + " " + res.data.results.author.lastname,
+                        approved_by: res.data.results.approver.firstname + " " + res.data.results.author.lastname,
+                        approved_on: dayjs(new Date(res.data.results.approved_at)).format("MMMM D, YYYY h:mm A"),
                     }
                     console.log(formattedData);
                     setDocHeaderData(() => (formattedData));

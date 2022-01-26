@@ -231,7 +231,7 @@ Employees.hasMany(LicenceUploads, {
 
 LicenceUploads.belongsTo(Employees, {
     foreignKey: 'created_by',
-    as: 'creator'
+    as: 'author'
 });
 
 module.exports = { Licences, LicenceAssignees, LicenceUploads };

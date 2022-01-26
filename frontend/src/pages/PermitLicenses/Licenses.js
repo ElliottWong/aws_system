@@ -1,32 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import PageLayout from '../../layout/PageLayout';
-import DocumentLayout from '../../layout/DocumentLayout';
-import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
-import TabRow from '../../common/TabRow';
-import DocumentBtnSection from '../../common/DocumentBtnSection';
-import RenderDocument from '../../common/RenderDocument';
-import { TAB } from '../../config/enums';
-import useDocAxios from '../../hooks/useDocAxios';
-import dayjs from 'dayjs';
-import { ToastContainer } from 'react-toastify';
-import jwt_decode from "jwt-decode";
-import useCheckEditableAxios from '../../hooks/useCheckEditableAxios';
-import ManageDeleteArchivedDoc from '../../common/ManageDeleteArchivedDoc';
 import axios from 'axios';
+import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { useHistory } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
 import config from '../../config/config';
-import ErrorCard from '../../common/ErrorCard';
-import { Container, Row, Col } from 'react-bootstrap';
-import { useHistory, NavLink } from 'react-router-dom';
-import StatusPill from '../../common/StatusPill';
 import { historyLicenseColumns, licenseColumns } from '../../config/tableColumns';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
 import TokenManager from '../../utilities/tokenManager.js';
 
 const Licenses = () => {
-
     const toastTiming = config.toastTiming;
     const history = useHistory();
     const decodedToken = TokenManager.getDecodedToken();
@@ -37,26 +23,36 @@ const Licenses = () => {
     const [sideNavStatus, setSideNavStatus] = useState(getSideNavStatus); // Tracks if sidenav is collapsed
     const [licenseData, setLicenseData] = useState([]);
     const [archivedLicenseData, setArchivedLicenseData] = useState([]);
+    const [canApprove, setCanApprove] = useState(false);
+    const [canEdit, setCanEdit] = useState(false);
 
     useEffect(() => {
         let componentMounted = true;
 
         (async () => {
             try {
-                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_01/employees`);
+                // Can approve people can create new license
+                const resClausePermission = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/approve/m07_02/employees`);
+                // Can edit people can upload new license
+                const resClausePermissionEdit = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/edit/m07_02/employees`);
                 if (componentMounted) {
-                    let canEdit = false;
-                    // Check if user can create new equipment
+                    // Check if user can create new license
                     resClausePermission.data.results.forEach((data, index) => {
                         if (data.employee_id === userID) {
-                            canEdit = true;
+                            setCanApprove(true);
+                        }
+                    });
+                    // Check if user is assigned to a license
+                    resClausePermissionEdit.data.results.forEach((data, index) => {
+                        if (data.employee_id === userID) {
+                            setCanEdit(true);
                         }
                     });
 
                     let tempLicenseData = [];
                     let tempArchivedLicenseData = [];
 
-                    if (canEdit) {
+                    if (canApprove) {
                         // Get all License in use
                         const resAllLicenses = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/licence-registry/all-licences`);
                         console.log(resAllLicenses);
@@ -69,9 +65,16 @@ const Licenses = () => {
                         tempArchivedLicenseData = resArchivedLicenses.data.results;
                         console.log(tempArchivedLicenseData);
                     } else {
-                        const resSpecificEquipments = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/equipment/assignments`);
-                        console.log(resSpecificEquipments);
-                        tempLicenseData = resSpecificEquipments.data.results;
+                        // Get assigned licenses in use
+                        const resSpecificLicenses = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/licence-registry/assigned-licences`);
+                        console.log(resSpecificLicenses);
+                        tempLicenseData = resSpecificLicenses.data.results;
+
+                        // Get assigned archived licenses
+                        const resArchivedLicenses = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/licence-registry/assigned-licences?archived=1`);
+                        console.log(resArchivedLicenses);
+                        tempArchivedLicenseData = resArchivedLicenses.data.results;
+                        console.log(tempArchivedLicenseData);
                     }
 
                     setLicenseData(() => {
@@ -97,7 +100,17 @@ const Licenses = () => {
                                     });
                                     return userString.slice(0, -2);
                                 })(),
-                                status: '',
+                                status: {
+                                    frequency: Math.ceil(Math.abs(new Date(data.expires_at) - new Date(data.issued_at)) / (1000 * 60 * 60 * 24)),
+                                    timeLeft: data.days_left,
+                                    isNA: (() => {
+                                        if (data.expires_at) {
+                                            return data.expires_at
+                                        } else {
+                                            return ''
+                                        }
+                                    })()
+                                },
                                 action_manage: `/licenses/manage-license/${data.licence_id}`
                             }
                         });
@@ -176,13 +189,16 @@ const Licenses = () => {
                     <div className="c-Equipment-maintenance__Top c-Main__Top">
                         <h1>Register of Permits, Licenses, Approvals & Certificates</h1>
                         {/* Add button section */}
-                        <button
-                            onClick={() => handleBtn()}
-                            type="button"
-                            className={"c-Btn c-Btn--primary"}
-                        >
-                            Add
-                        </button>
+                        {canApprove ?
+                            <button
+                                onClick={() => handleBtn()}
+                                type="button"
+                                className={"c-Btn c-Btn--primary"}
+                            >
+                                Add
+                            </button>
+                            : ""
+                        }
                     </div>
                     {/* Table section */}
                     <div className="c-Equipment-maintenance__Table">

@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
 import axios from 'axios';
-import { getToken, getUserCompanyID } from '../utilities/localStorageUtils';
-import * as RiIcons from 'react-icons/ri';
-import { IconContext } from 'react-icons';
 import dayjs from 'dayjs';
-import { toast, ToastContainer } from 'react-toastify';
+import React from 'react';
 import { confirmAlert } from 'react-confirm-alert';
+import { IconContext } from 'react-icons';
+import * as RiIcons from 'react-icons/ri';
+import { toast } from 'react-toastify';
 import CustomConfirmAlert from '../common/CustomConfirmAlert';
 import TokenManager from '../utilities/tokenManager';
 

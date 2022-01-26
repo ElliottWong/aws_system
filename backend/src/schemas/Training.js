@@ -8,8 +8,6 @@ const Companies = db.model('Companies');
 const Employees = db.model('Employees');
 const Files = db.model('Files');
 
-// create, read, delete
-
 const TrainingRequests = db.define(
     'TrainingRequests',
     {
@@ -112,9 +110,8 @@ const TrainingRequests = db.define(
                 key: 'file_id'
             }
         },
-        // json structured string
-        trainee_evaluation: {
-            type: DataTypes.STRING(255),
+        evaluation: {
+            type: DataTypes.JSON,
             allowNull: true,
             defaultValue: null
         },
@@ -122,11 +119,6 @@ const TrainingRequests = db.define(
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false
-        },
-        supervisor_evaluation: {
-            type: DataTypes.STRING(255),
-            allowNull: true,
-            defaultValue: null
         },
         supervisor_evaluation_done: {
             type: DataTypes.BOOLEAN,
@@ -191,62 +183,4 @@ TrainingRequests.belongsTo(Files, {
     as: 'attendance_file'
 });
 
-const TrainingEvaluationTemplates = db.define(
-    'TrainingEvaluationTemplates',
-    {
-        evaluation_template_id: {
-            type: DataTypes.INTEGER.UNSIGNED,
-            primaryKey: true,
-            autoIncrement: true
-        },
-        fk_company_id: {
-            type: DataTypes.INTEGER.UNSIGNED,
-            allowNull: false,
-            references: {
-                model: Companies,
-                key: 'company_id'
-            }
-        },
-        trainee_template: {
-            type: DataTypes.JSON,
-            allowNull: false
-        },
-        supervisor_template: {
-            type: DataTypes.JSON,
-            allowNull: false
-        },
-        name: {
-            type: DataTypes.STRING(255),
-            allowNull: false
-        },
-        version: {
-            type: DataTypes.STRING(255),
-            allowNull: false
-        },
-        created_by: {
-            type: DataTypes.INTEGER.UNSIGNED,
-            allowNull: false,
-            references: {
-                model: Employees,
-                key: 'employee_id'
-            }
-        },
-        // template automatically becomes active
-        effective_at: {
-            type: 'TIMESTAMP',
-            allowNull: false
-        },
-        active: {
-            type: DataTypes.BOOLEAN,
-            allowNull: false
-        }
-    },
-    {
-        tableName: 'training_evaluation_templates',
-        timestamps: true,
-        createdAt: 'created_at',
-        updatedAt: 'updated_at'
-    }
-);
-
-module.exports = { TrainingRequests, TrainingEvaluationTemplates };
+module.exports = { TrainingRequests };

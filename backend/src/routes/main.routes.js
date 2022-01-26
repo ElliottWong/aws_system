@@ -21,10 +21,11 @@ const analysisRouter = require('./com.risksAnalyses.routes');
 const achievementRouter = require('./com.achievements.routes');
 
 // clause 7
-const equipmentRouter = require('./com.equipment.v3.routes');
+const equipmentRouter = require('./com.equipment.routes');
 const maintenanceRouter = require('./com.equipmentMaintenance.routes');
 const licenceRouter = require('./com.licences.routes');
 const trainingRouter = require('./com.training.routes');
+const trainingEvaluationRouter = require('./com.trainingEvaluation.routes');
 
 // other routers
 const accountRouter = require('./accounts.routes');
@@ -71,6 +72,7 @@ router.use(equipmentRouter);
 router.use(maintenanceRouter);
 router.use(licenceRouter);
 router.use(trainingRouter);
+router.use(trainingEvaluationRouter);
 
 // other routers
 router.use(accountRouter);

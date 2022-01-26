@@ -9,6 +9,7 @@ const QUESTION_TYPE = {
 
 // combined
 const obj0 = {
+    // meta is automatically added by the backend
     meta: {
         template: {
             name: 'post training evaluation 2021',
@@ -24,6 +25,7 @@ const obj0 = {
             updated_at: '' // maybe
         }
     },
+    // SEE HERE
     evaluation: {
         // we can include qns no and use array.sort(callback)
         // prob more applicable in the frontend than in the backend
@@ -71,7 +73,6 @@ const obj1 = {
         { order: 5, type: QUESTION_TYPE.LIST, question: 'food', answer: ['pizza', 'roti canai'] },
         { order: 4, type: QUESTION_TYPE.OPEN, question: 'remarks', answer: 'i want to die' }
     ]
-
 };
 
 // supervisor only

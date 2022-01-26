@@ -10,10 +10,12 @@ const {
 const { findRights } = require('../models/com.roles');
 const { sendEmail, templates } = require('../services/email');
 
-const {testEnum, DOCUMENT_STATUS } = require('../config/enums');
+const { testEnum, DOCUMENT_STATUS } = require('../config/enums');
 
 const r = require('../utils/response').responses;
 const E = require('../errors/Errors');
+
+const now = new Date();   
 
 // CREATE
 
@@ -64,16 +66,17 @@ module.exports.insertPolicy = async (req, res, next) => {
             title, policies
         });
 
-
-        const emailContent = templates.documentApproval(
+        // Send email to the approver
+        const emailContent = templates.documentSendApproval(
             `${approvingEmployee.firstname} ${approvingEmployee.lastname}`,
             `${authorEmployee.firstname} ${authorEmployee.lastname}`,
             'Company Policy',
+            `${now}`,
             'company-policy',
             'Company Policy'
         );
 
-        sendEmail(approvingEmployee.email, 'A document requires your approval', emailContent)
+        sendEmail(approvingEmployee.email, 'Company Policy document requires your approval', emailContent)
             .catch((error) => console.log(`Non-fatal: Failed to send email\n${error}`));
 
         res.status(201).send(r.success201({ policy_id, status }));
@@ -189,7 +192,7 @@ module.exports.rejectPolicy = async (req, res, next) => {
         const { companyId, policyId } = req.params;
 
         // check for permission for reject
-        const { approve } = await findRights(rejected_by, companyId, 'm05_02');
+        const { approve, employee: rejectingEmployee } = await findRights(rejected_by, companyId, 'm05_02');
         if (!approve) throw new E.PermissionError('reject');
 
         const [toBeRejected] = await findPolicies({
@@ -209,6 +212,38 @@ module.exports.rejectPolicy = async (req, res, next) => {
             status: DOCUMENT_STATUS.REJECTED
         });
 
+
+        // authors
+        const created_by = parseInt(toBeRejected.created_by);
+        if (isNaN(created_by))
+            throw new E.ParamTypeError('created_by', req.body.created_by, 1);
+
+        // check authors for appove rights
+        const { employee: authorEmployee } = await findRights(
+            created_by,
+            companyId,
+            'm05_02'
+        );
+
+        // Send email to the author
+        const emailContent = templates.documentRejected(
+            `${authorEmployee.firstname} ${authorEmployee.lastname}`,
+            `${rejectingEmployee.firstname} ${rejectingEmployee.lastname}`,
+            'Company Policy',
+            `${now}`,
+            `${remarks}`,
+            'company-policy',
+            'Company Policy'
+        );
+
+        sendEmail(
+            authorEmployee.email,
+            'Company Policy document have been rejected',
+            emailContent
+        ).catch((error) =>
+            console.log(`Non-fatal: Failed to send email\n${error}`)
+        );
+
         res.status(200).send(r.success200());
         return next();
     }
@@ -225,7 +260,7 @@ module.exports.approvePolicy = async (req, res, next) => {
         const { companyId, policyId } = req.params;
 
         // check for permission for approve
-        const { approve } = await findRights(approved_by, companyId, 'm05_02');
+        const { approve, employee: approverEmployee } = await findRights(approved_by, companyId, 'm05_02');
         if (!approve) throw new E.PermissionError('approve');
 
         // find the to be approved qms scope
@@ -277,6 +312,36 @@ module.exports.approvePolicy = async (req, res, next) => {
             throw error;
         }
 
+        // authors
+        const created_by = parseInt(toBeApproved.created_by);
+        if (isNaN(created_by))
+            throw new E.ParamTypeError('created_by', req.body.created_by, 1);
+
+        // check authors for approve rights
+        const { employee: authorEmployee } = await findRights(
+            created_by,
+            companyId,
+            'm05_02'
+        );
+
+        // Send email to the author
+        const emailContent = templates.documentApproval(
+            `${authorEmployee.firstname} ${authorEmployee.lastname}`,
+            `${approverEmployee.firstname} ${approverEmployee.lastname}`,
+            'Company Policy',
+            `${now}`,
+            'company-policy',
+            'Company Policy'
+        );
+
+        sendEmail(
+            authorEmployee.email,
+            'Company Policy document have been approved',
+            emailContent
+        ).catch((error) =>
+            console.log(`Non-fatal: Failed to send email\n${error}`)
+        );
+
         res.status(200).send(r.success200());
         return next();
     }
@@ -299,7 +364,7 @@ module.exports.deletePolicy = async (req, res, next) => {
                 policy_id: policyId,
                 fk_company_id: companyId,
                 // only can delete archived/rejected forms
-                status: { [Op.or]: [DOCUMENT_STATUS.ARCHIVED, DOCUMENT_STATUS.REJECTED] }
+                status: { [Op.in]: [DOCUMENT_STATUS.ARCHIVED, DOCUMENT_STATUS.REJECTED] }
             }),
             limit: 1,
             includeItems: false

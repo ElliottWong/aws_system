@@ -19,6 +19,8 @@ const { testEnum, DOCUMENT_STATUS } = require('../config/enums');
 const E = require('../errors/Errors');
 const r = require('../utils/response').responses;
 
+const now = new Date();   
+
 // CREATE
 
 module.exports.insertSwot = async (req, res, next) => {
@@ -76,21 +78,25 @@ module.exports.insertSwot = async (req, res, next) => {
             approved_by
         });
 
-        const emailContent = templates.documentApproval(
-            `${approvingEmployee.firstname} ${approvingEmployee.lastname}`,
-            `${authorEmployee.firstname} ${authorEmployee.lastname}`,
-            'SWOT',
-            'swot',
-            'SWOT'
-        );
 
-        sendEmail(
-            approvingEmployee.email,
-            'A document requires your approval',
-            emailContent
-        ).catch((error) =>
-            console.log(`Non-fatal: Failed to send email\n${error}`)
-        );
+     
+        // Send email to the approver
+         const emailContent = templates.documentSendApproval(
+             `${approvingEmployee.firstname} ${approvingEmployee.lastname}`,
+             `${authorEmployee.firstname} ${authorEmployee.lastname}`,
+             'SWOT',
+             `${now}`,
+             'swot',
+             'SWOT',
+         );
+
+         sendEmail(
+             approvingEmployee.email,
+             'SWOT document requires your approval',
+             emailContent
+         ).catch((error) =>
+             console.log(`Non-fatal: Failed to send email\n${error}`)
+         );
 
         res.status(201).send(r.success201({ swot_id, status }));
         return next();
@@ -208,7 +214,7 @@ module.exports.rejectSwot = async (req, res, next) => {
         const { companyId, swotId } = req.params;
 
         // check for permission for reject
-        const { approve, employee: approvingEmployee } = await findRights(
+        const { approve, employee: rejectingEmployee } = await findRights(
             rejected_by,
             companyId,
             'm04_01'
@@ -232,6 +238,8 @@ module.exports.rejectSwot = async (req, res, next) => {
             status: DOCUMENT_STATUS.REJECTED
         });
 
+        // FIXME ill logic here (actually i think this whole thing should redo)
+
         // authors
         const created_by = parseInt(toBeRejected.created_by);
         if (isNaN(created_by))
@@ -244,23 +252,24 @@ module.exports.rejectSwot = async (req, res, next) => {
             'm04_01'
         );
 
-        //* TODO EMAIL FOR REJECTED
-
-        const emailContent = templates.documentApproval(
-            `${approvingEmployee.firstname} ${approvingEmployee.lastname}`,
+        // Send email to the author
+        const emailContent = templates.documentRejected(
             `${authorEmployee.firstname} ${authorEmployee.lastname}`,
-            'SWOT nono',
+            `${rejectingEmployee.firstname} ${rejectingEmployee.lastname}`,
+            'SWOT',
+            `${now}`,
+            `${remarks}`,
             'swot',
             'SWOT'
         );
 
-        sendEmail(
-            approvingEmployee.email,
-            'A document requires your approval',
-            emailContent
-        ).catch((error) =>
-            console.log(`Non-fatal: Failed to send email\n${error}`)
-        );
+         sendEmail(
+             authorEmployee.email,
+             'SWOT document have been rejected',
+             emailContent
+         ).catch((error) =>
+             console.log(`Non-fatal: Failed to send email\n${error}`)
+         );
 
         res.status(200).send(r.success200());
         return next();
@@ -278,7 +287,11 @@ module.exports.approveSwot = async (req, res, next) => {
         const { companyId, swotId } = req.params;
 
         // check for permission for approve
-        const { approve } = await findRights(approved_by, companyId, 'm04_01');
+        const { approve, employee: approverEmployee } = await findRights(
+            approved_by,
+            companyId,
+            'm04_01'
+        );
         if (!approve) throw new E.PermissionError('approve');
 
         // find the to be approved swot
@@ -336,7 +349,35 @@ module.exports.approveSwot = async (req, res, next) => {
 
         await matchActiveSwot(companyId, toBeApproved.swot_id);
 
-        // TODO email notification
+        // authors
+        const created_by = parseInt(toBeApproved.created_by);
+        if (isNaN(created_by))
+            throw new E.ParamTypeError('created_by', req.body.created_by, 1);
+
+        // check authors for approve rights
+        const { employee: authorEmployee } = await findRights(
+            created_by,
+            companyId,
+            'm04_01'
+        );
+
+        // Send email to the author
+        const emailContent = templates.documentApproval(
+            `${authorEmployee.firstname} ${authorEmployee.lastname}`,
+            `${approverEmployee.firstname} ${approverEmployee.lastname}`,
+            'SWOT',
+            `${now}`,
+            'swot',
+            'SWOT'
+        );
+
+        sendEmail(
+            authorEmployee.email,
+            'SWOT document have been approved',
+            emailContent
+        ).catch((error) =>
+            console.log(`Non-fatal: Failed to send email\n${error}`)
+        );
 
         res.status(200).send(r.success200());
         return next();
@@ -360,7 +401,7 @@ module.exports.deleteSwot = async (req, res, next) => {
                 fk_company_id: companyId,
                 swot_id: swotId,
                 status: {
-                    [Op.or]: [DOCUMENT_STATUS.ARCHIVED, DOCUMENT_STATUS.REJECTED]
+                    [Op.in]: [DOCUMENT_STATUS.ARCHIVED, DOCUMENT_STATUS.REJECTED]
                 }
             }),
             limit: 1,

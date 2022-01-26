@@ -74,90 +74,425 @@ module.exports.sendBulkEmail = (recipients, contents) =>
 
 // EMAIL TEMPLATES
 
+//* INVITATION
+
 const inviteUserHTML = (name, token) => `
-    <h4>Hi ${name}!</h4>
-    <p>You have been invited by a fellow colleague to join them in using eISO.</p>
-    <p><strong><a href="${frontend.baseUrl}/create-account/${token}">Join Now</a></strong></p>
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${name}
+</h2>
+  
+<p style="font-size:0.5cm; padding-top:0.8cm; line-height: 2;">
+  You have been invited by a fellow colleague to join them. 
+</p>
+
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/create-account/${token}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.4cm;" type="submit" value="Click to Join Now" />
+</form>
+  
+</body>
 `;
 
 const inviteFirstSysadminHTML = (name, token) => `
-    <h4>Hi ${name}!</h4>
-    <p>Welcome to eISO!</p>
-    <p>You are being invited to setup your organisation's eISO.</p>
-    <p><strong><a href="${frontend.baseUrl}/create-account/${token}">Setup Now</a></strong></p>
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${name}
+</h2>
+  
+<p style="font-size:0.5cm; padding-top:0.8cm; line-height: 2;">
+  You are being invited to setup your organisation.
+</p>
+
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/create-account/${token}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.4cm;" type="submit" value="Click to Setup Now" />
+</form>
+  
+</body>
 `;
 
 const invitePlatformAdminHTML = (name, token) => `
-    <h4>Hi ${name}!</h4>
-    <p>You are being invited to administrate the eISO platform.</p>
-    <p><strong><a href="${frontend.baseUrl}/create-account/${token}">Begin Now</a></strong></p>
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${name}
+</h2>
+  
+<p style="padding-top:0.8cm; font-size:0.6cm;">Welcome to eISO!</p>
+  
+<p style="line-height: 2;">You are being invited to administrate the <strong style="font-size:0.5cm;"> eISO System Platform</strong>. </p>
+ 
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/create-account/${token}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.4cm;" type="submit" value="Click to Begin Now" />
+</form>
+  
+</body>
 `;
 
+
+// error
 const requestOtpHTML = (name, otp) => `
-    <h4>Hi ${name},</h4>
-    <p>You have recently requested for an OTP. Your OTP is <strong>${otp}</strong>.</p>
-    <p>The OTP will expire in 5 minutes.</p>
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${name}
+</h2>
+  
+<p style="padding-top:0.8cm; line-height: 2;">You have recently requested for an OTP.</p>
+ 
+<p>Your OTP is</p>
+<p style="font-size:1cm;"><strong>${otp}</strong><p>
+  
+<p>The OTP will expire in <strong style="font-size:0.5cm; color:red">5 minutes</strong>.</p>
+  
+</body>
 `;
 
+// error
 const passwordChangedHTML = (name) => `
-    <h4>Hi ${name},</h4>
-    <p>You have recently changed your password for your eISO account.</p>
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${name}
+</h2>
+  
+<p style="padding-top:0.8cm; line-height: 2;">You have recently changed your password for your account.</p>
+  
+</body>
 `;
 
-const documentApprovalHTML = (approver, author, document, link, linkname) => `
-    <h4>Hi ${approver},</h4>
-    <p>${author} have created a new document for <strong>${document}</strong> and it required your confirmation in order to be active.</p>
-    <p><strong><a href="${frontend.baseUrl}/${link}">Go to the ${linkname} now</a></strong></p>
+
+
+//* For clauses 4.1, 4.2, 4.3, 5.2, 6.1, 6.2
+
+const documentSendApprovalHTML = (approver, author, document, time, link, linkname) => `
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${approver}
+</h2>
+  
+<p style="padding-top:0.8cm; line-height: 2;">
+  <strong style="font-size:0.5cm;">${author}</strong>
+  has created a new 
+  <strong>${document}</strong> 
+  document at <strong>${time}</strong>.
+</p>
+  
+<p>It required your confirmation in order to be active.</p>  
+  
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/${link}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the ${linkname} now" />
+</form>
+  
+</body>
 `;
 
-const documentRejectedHTML = (author, approver, document, link, linkname) => `
-<h4>Hi ${author},</h4>
-<p>${approver} have rejected the document for <strong>${document}</strong> and it required an update in order to be active.</p>
-<p><strong><a href="${frontend.baseUrl}/${link}">Go to the ${linkname} now</a></strong></p>
+const documentApprovalHTML = (author, approver, document, time, link, linkname) => `
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${author}
+</h2>
+  
+<p style="padding-top:0.8cm; line-height: 2;">
+  <strong style="font-size:0.5cm;">${approver}</strong>
+  has approved the 
+  <strong>${document}</strong> 
+  document at <strong>${time}</strong>.
+</p>
+  
+<p>It will be available to be seen at the active tab!</p>  
+  
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/${link}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the ${linkname} now" />
+</form>
+  
+</body>
+
 `;
+
+const documentRejectedHTML = (author, approver, document, time, remarks, link, linkname) => `
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${author}
+</h2>
+  
+<p style="padding-top:0.8cm; line-height: 2;">
+  <strong style="font-size:0.5cm;">${approver}</strong>
+  have rejected the 
+  <strong>${document}</strong> 
+  document at <strong>${time}</strong>.
+</p>
+  
+<p>Please update again as soon as possible!</p>  
+
+<h3 style="padding-top:0.8cm; line-height: 2;">Remarks:</h3>
+<p style="padding: 10px; color:black">${remarks}</p>
+  
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/${link}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the ${linkname} now" />
+</form>
+  
+</body>
+`;
+
+
+
+//* For 7.1
+
+const createAndUpdatedEquipmentHTML = (creator, status, Currentstatus, equipmentInfo, link, linkname) => `
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${creator}
+</h2>
+  
+<p style="padding-top:0.8cm; padding-bottom:0.4cm; line-height: 2;">
+You have successfully ${status} the Equipment.
+
+<h3 style="padding-top:0.4cm; padding-bottom:0.4cm;">${Currentstatus} Equipment Information</h3>
+${equipmentInfo}
+
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/${link}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the ${linkname} now" />
+</form>
+  
+</body>
+`;
+
+const addedAndUpdatedAssigneesInMaintenanceHTML = (assignees, creator, status, currentStatus, maintenanceInfo, link, linkname) => `
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${assignees}
+</h2>
+  
+<p style="padding-top:0.8cm; padding-bottom:0.4cm; line-height: 2;">
+  <strong style="font-size:0.5cm;">${creator}</strong>
+have ${status} you to Maintenance.
+
+
+<h3 style="padding-top:0.4cm; padding-bottom:0.4cm;">${currentStatus} Equipment Information</h3>
+${maintenanceInfo}
+
+  
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/${link}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the ${linkname} now" />
+</form>
+  
+</body>
+`;
+
+const createAndUpdatedMaintenanceHTML = (creator, status, currentStatus, maintenanceInfo, link, linkname) => `
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${creator}
+</h2>
+  
+<p style="padding-top:0.8cm; line-height: 2;">
+You have successfully ${status} the Maintenance.
+</p>
+
+<h3 style="padding-top:0.4cm; padding-bottom:0.4cm;">${currentStatus} Maintenance Information</h3>
+${maintenanceInfo}
+
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/${link}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the ${linkname} now" />
+</form>
+  
+</body>
+`;
+
+
+//* For 7.2
+
+const addedAndUpdatedAssigneesInLicenceHTML = (assignees, creator, status, currentStatus, licenceInfo, link, linkname) => `
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${assignees}
+</h2>
+  
+<p style="padding-top:0.8cm; padding-bottom:0.4cm; line-height: 2;">
+  <strong style="font-size:0.5cm;">${creator}</strong>
+have ${status} you to Licence.
+
+<h3 style="padding-top:0.4cm; padding-bottom:0.4cm;">${currentStatus} Licence Information</h3>
+${licenceInfo}
+  
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/${link}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the ${linkname} now" />
+</form>
+  
+</body>
+`;
+
+const createAndUpdatedLicenceHTML = (creator, status, currentStatus, licenceInfo, link, linkname) => `
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${creator}
+</h2>
+  
+<p style="padding-top:0.8cm; line-height: 2;">
+You have successfully ${status} the Licence.
+</p>
+
+<h3 style="padding-top:0.4cm; padding-bottom:0.4cm;">${currentStatus} Licence Information</h3>
+${licenceInfo}
+
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/${link}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the ${linkname} now" />
+</form>
+  
+</body>
+`;
+
+
+//* For 7.3
+
+const documentSendApprovalTrainingHTML = (approver, author, trainingInfo, link, linkname) => `
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${approver}
+</h2>
+  
+<p style="padding-top:0.8cm; line-height: 2;">
+  <strong style="font-size:0.5cm;">${author}</strong>
+  has created a new training request.
+</p>
+  
+<p>It required your confirmation at Training Requests pending for your approval.</p>  
+
+<h3 style="padding-top:0.4cm; padding-bottom:0.4cm;">Created Training Requests</h3>
+${trainingInfo}
+
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/${link}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the ${linkname} now" />
+</form>
+  
+</body>
+`;
+
+/*
+<h3 style="padding-top:0.4cm; padding-bottom:0.4cm;">Approval Training Requests</h3>
+${trainingInfo}
+*/
+
+const documentApprovalTrainingHTML = (author, approver, /*trainingInfo,*/ link, linkname) => `
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${author}
+</h2>
+  
+<p style="padding-top:0.8cm; line-height: 2;">
+  <strong style="font-size:0.5cm;">${approver}</strong>
+  has approved the training request.
+</p>
+  
+<p>It will be available in All Training Requests (Under your approval)</p>  
+
+
+
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/${link}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the ${linkname} now" />
+</form>
+  
+</body>
+
+`;
+
+const documentRejectedTrainingHTML = (author, approver, remarks, /*trainingInfo,*/ link, linkname) => `
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${author}
+</h2>
+  
+<p style="padding-top:0.8cm; line-height: 2;">
+  <strong style="font-size:0.5cm;">${approver}</strong>
+  have rejected the training request.
+</p>
+  
+<p>Please update again as soon as possible!</p>  
+
+<h3 style="padding-top:0.8cm; line-height: 2;">Remarks:</h3>
+<p style="padding: 10px; color:black">${remarks}</p>
+
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/${link}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the ${linkname} now" />
+</form>
+  
+</body>
+`;
+
+
+//* Schedules for 4.1, 7.1, 7.2
 
 const updateSwotNoticeHTML = (name) => `
-    <h4>Hi ${name}!</h4>
-    <p>The current SWOT have not been updated for 11 months, please update again!</p>
-    <p><strong><a href="${frontend.baseUrl}/swot">Go to the SWOT now</a></strong></p>
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${name}
+</h2>
+  
+<p style="padding-top:0.8cm; line-height: 2;">
+The current <strong>SWOT</strong> have not been updated for 11 months.
+</p>
+  
+<p>Please update it as soon as possible!</p>
+
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/swot">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the SWOT now" />
+</form>
+
+</body>
 `;
 
-const MaintenanceFirstNoticeForAssigneesOnlyHTML = (name, document) => `
-    <h4>Hi ${name}!</h4>
-    <p>The Maintenance of <strong>${document}</strong> that was assign to you was almost due, please update it</p>
-    <p><strong><a href="${frontend.baseUrl}/equipment-maintenance">Go to the Equipment Maintenance now</a></strong></p>
+const equipmentMaintenanceScheduleNoticeHTML = (name, type, equipmentName, typeOfAssign, status, equipmentID, maintenceID) => `
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${name}
+</h2>
+  
+<p style="padding-top:0.8cm; line-height: 2;">
+The Maintenance Cycles<strong> ${type} </strong> in equipment <strong> ${equipmentName} </strong>
+  that was ${typeOfAssign} you was ${status} due.
+</p>
+  
+<p>Please update it as soon as possible!</p>
+
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/equipment-maintenance/manage-equipment/${equipmentID}/manage-cycle/${maintenceID}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the Equipment Maintenance now" />
+</form>
+  
+</body>
 `;
 
-const MaintenanceSecondNoticeForAssigneesOnlyHTML = (name, document) => `
-    <h4>Hi ${name}!</h4>
-    <p>The Maintenance of <strong>${document}</strong> that was assign to you was over due, please update it</p>
-    <p><strong><a href="${frontend.baseUrl}/equipment-maintenance">Go to the Equipment Maintenance now</a></strong></p>
-`;
+const licenceScheduleNoticeHTML = (name, type, typeOfAssign, status, licenceID) => `
+<body style="font-family:system-ui; padding:0.5cm; font-size:0.4cm;">
+<h2 style="font-size:0.7cm;">
+   Hi ${name}
+</h2>
+  
+<p style="padding-top:0.8cm; line-height: 2;">
+The Licence<strong> ${type} </strong> that was ${typeOfAssign} you was ${status}.
+</p>
+  
+<p>Please update it as soon as possible!</p>
 
-const MaintenanceSecondNoticeForCreatorOnlyHTML = (name, document) => `
-    <h4>Hi ${name}!</h4>
-    <p>The Maintenance of <strong>${document}</strong> that was created by you was over due, please update it</p>
-    <p><strong><a href="${frontend.baseUrl}/equipment-maintenance">Go to the Equipment Maintenance now</a></strong></p>
+<form style="padding-top:1cm;"action="${frontend.baseUrl}/licenses/manage-license/${licenceID}">
+<input style="border-radius:8px; padding:15px 35px; background-color:#2b313b; color:white; font-weight:bold; 
+font-size:0.5cm;" type="submit" value="Go to the Licence now" />
+</form>
+  
+</body>
 `;
-
-const LicenceFirstNoticeForAssigneesOnlyHTML = (name, license) => `
-    <h4>Hi ${name}!</h4>
-    <p>The License of <strong>${license}</strong> that was assign to you was almost expired, please upload a new one again</p>
-    <p><strong><a href="${frontend.baseUrl}/licenses">Go to the Licenses now</a></strong></p>
-`;
-
-const LicenceSecondNoticeForAssigneesOnlyHTML = (name, license) => `
-    <h4>Hi ${name}!</h4>
-    <p>The License of <strong>${license}</strong> that was assign to you was already expired, please upload a new one again</p>
-    <p><strong><a href="${frontend.baseUrl}/licenses">Go to the Licenses now</a></strong></p>
-`;
-
-const LicenceSecondNoticeForCreatorOnlyHTML = (name, license) => `
-    <h4>Hi ${name}!</h4>
-    <p>The License of <strong>${license}</strong> that was created by you was already expired, please upload a new one again</p>
-    <p><strong><a href="${frontend.baseUrl}/licenses">Go to the Licenses now</a></strong></p>
-`;
-
 
 // ============================================================
 
@@ -167,13 +502,22 @@ module.exports.templates = {
     invitePlatformAdmin: invitePlatformAdminHTML,
     requestOtp: requestOtpHTML,
     passwordChanged: passwordChangedHTML,
+    documentSendApproval: documentSendApprovalHTML,
     documentApproval: documentApprovalHTML,
     documentRejected: documentRejectedHTML,
+
+    createAndUpdatedEquipment: createAndUpdatedEquipmentHTML,
+    addedAndUpdatedAssigneesInMaintenance: addedAndUpdatedAssigneesInMaintenanceHTML,
+    createAndUpdatedMaintenance: createAndUpdatedMaintenanceHTML,
+
+    addedAndUpdatedAssigneesInLicence: addedAndUpdatedAssigneesInLicenceHTML,
+    createAndUpdatedLicence: createAndUpdatedLicenceHTML,
+
+    documentSendApprovalTraining:documentSendApprovalTrainingHTML,
+    documentApprovalTraining: documentApprovalTrainingHTML,
+    documentRejectedTraining: documentRejectedTrainingHTML,
+
     updateSwotNotice: updateSwotNoticeHTML,
-    MaintenanceFirstNoticeForAssigneesOnly: MaintenanceFirstNoticeForAssigneesOnlyHTML,
-    MaintenanceSecondNoticeForAssigneesOnly: MaintenanceSecondNoticeForAssigneesOnlyHTML,
-    MaintenanceSecondNoticeForCreatorOnly: MaintenanceSecondNoticeForCreatorOnlyHTML,
-    LicenceFirstNoticeForAssigneesOnly: LicenceFirstNoticeForAssigneesOnlyHTML,
-    LicenceSecondNoticeForAssigneesOnly: LicenceSecondNoticeForAssigneesOnlyHTML,
-    LicenceSecondNoticeForCreatorOnly: LicenceSecondNoticeForCreatorOnlyHTML
+    equipmentMaintenanceScheduleNotice: equipmentMaintenanceScheduleNoticeHTML,
+    licenceScheduleNotice: licenceScheduleNoticeHTML
 };

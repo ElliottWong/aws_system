@@ -1,16 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { useHistory } from 'react-router';
+import InductionFormSection from '../../common/InductionFormSection';
+import DocumentLayout from '../../layout/DocumentLayout';
 import PageLayout from '../../layout/PageLayout';
 import { getSideNavStatus } from '../../utilities/sideNavUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
-import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit';
-import axios from 'axios';
-import { useHistory } from 'react-router';
-import paginationFactory from 'react-bootstrap-table2-paginator';
 import TokenManager from '../../utilities/tokenManager';
-import DocumentLayout from '../../layout/DocumentLayout';
-import RenderDocument from '../../common/RenderDocument';
-import InductionFormSection from '../../common/InductionFormSection';
 
 const ManageInductionForm = ({ match }) => {
     const history = useHistory();

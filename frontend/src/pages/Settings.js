@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { getSideNavStatus } from '../utilities/sideNavUtils.js';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import profilePic from '../assets/images/default-profile-pic.jpg';
-import PageLayout from '../layout/PageLayout';
 import SettingsBentoBox from '../common/SettingsBentoBox';
-import { getUserDisplayName, getUserEmail, getUserCompanyName, getUserJobTitle, getUserCompanyAlias, getUserCompanyID, getToken } from '../utilities/localStorageUtils';
-import axios from 'axios';
-import jwt_decode from "jwt-decode";
+import PageLayout from '../layout/PageLayout';
+import { getSideNavStatus } from '../utilities/sideNavUtils.js';
 import TokenManager from '../utilities/tokenManager';
 
 const Settings = () => {

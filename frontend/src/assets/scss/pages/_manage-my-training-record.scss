@@ -25,6 +25,42 @@
         font-size: small;
       }
       padding: 20px 0;
+
+      .c-File {
+        background-color: #EAEAEA;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 20px 30px;
+        border-radius: 5px;
+        h1 {
+          cursor: pointer;
+          font-size: $font-small;
+          color: black;
+          font-weight: bold;
+          &:hover {
+            opacity: 0.8;
+          }
+          &:active {
+            opacity: 0.7;
+          }
+        }
+        h2 {
+          cursor: pointer;
+          font-size: $font-small;
+          font-weight: bold;
+          color: $anchor-enabled;
+          margin-top: 10px;
+          &:hover {
+            opacity: 0.8;
+          }
+          &:active {
+            opacity: 0.7;
+          }
+          
+        }
+      }
     }
   }
 

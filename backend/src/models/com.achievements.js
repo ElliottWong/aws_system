@@ -140,7 +140,7 @@ module.exports.insertAchievement = async (data = {}, uploadedFiles = {}) => {
 module.exports.findBlockingAchievement = (fk_company_id) => OAP.Forms.findOne({
     where: {
         fk_company_id,
-        status: { [Op.or]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
+        status: { [Op.in]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
     }
 });
 
@@ -208,7 +208,7 @@ module.exports.deleteAchievement = async (fk_company_id, achievement_id, force =
     const toBeDeleted = await OAP.Forms.findOne({
         where: {
             fk_company_id, achievement_id,
-            status: { [Op.or]: [DOCUMENT_STATUS.ARCHIVED, DOCUMENT_STATUS.PENDING] }
+            status: { [Op.in]: [DOCUMENT_STATUS.ARCHIVED, DOCUMENT_STATUS.PENDING] }
         },
         include: 'items'
     });
@@ -223,7 +223,7 @@ module.exports.deleteAchievement = async (fk_company_id, achievement_id, force =
     const itemIds = toBeDeleted.items.map((item) => item.achievement_item_id);
 
     const destroyTrackingData = OAP.TrackingData.destroy({
-        where: { fk_achievement_item_id: { [Op.or]: itemIds } }, force
+        where: { fk_achievement_item_id: { [Op.in]: itemIds } }, force
     });
 
     const destroyed = await Promise.all([

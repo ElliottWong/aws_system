@@ -1,7 +1,5 @@
-import StatusPill from '../common/StatusPill';
 import { NavLink } from 'react-router-dom';
-import * as RiIcons from 'react-icons/ri';
-import { IconContext } from 'react-icons';
+import StatusPill from '../common/StatusPill';
 
 // ----------------------------------------------------
 // SWOT
@@ -365,7 +363,7 @@ export const categoryColumns = [
             if (cell) {
                 return <NavLink to={cell} >Manage</NavLink>
             } else {
-                return "N.a."
+                return ""
             }
         }
     },
@@ -489,10 +487,13 @@ export const maintenanceCycleColumns = [
         dataField: 'status',
         text: 'Status',
         formatter: (cell, row) => {
-            if (cell) {
-                return <StatusPill type={cell} />
-            } else {
-                return "Error"
+            if (cell.timeLeft <= 0) {
+                return <StatusPill type="overdue" />
+            } else if (cell.timeLeft / cell.frequency < 2 / 5) {
+                return <StatusPill type="almostDue" />
+            }
+            else {
+                return <StatusPill type="active" />
             }
         }
     },
@@ -514,53 +515,6 @@ export const maintenanceCycleColumns = [
         dataField: 'action_delete',
         text: '',
         formatter: (cell) => {
-            return cell
-        }
-    },
-];
-
-export const maintenanceRecordColumns = [
-    {
-        dataField: 'id',
-        text: 'id',
-        hidden: true
-    },
-    {
-        dataField: 'serialNo',
-        text: '#',
-    },
-    {
-        dataField: 'fileName',
-        text: 'File Name'
-    },
-    {
-        dataField: 'description',
-        text: 'Description'
-    },
-    {
-        dataField: 'uploader',
-        text: 'Uploader'
-    },
-    {
-        dataField: 'uploadDate',
-        text: 'Upload Date'
-    },
-    {
-        dataField: 'action_download',
-        text: '',
-        formatter: (cell, row) => {
-            if (cell) {
-                return <NavLink to={cell} >Download</NavLink>
-            } else {
-                return "N.a."
-            }
-        }
-    },
-    {
-        dataField: 'action_delete',
-        text: '',
-        formatter: (cell) => {
-            console.log(cell);
             return cell
         }
     },
@@ -608,10 +562,14 @@ export const licenseColumns = [
         dataField: 'status',
         text: 'Status',
         formatter: (cell, row) => {
-            if (cell === undefined) {
-                return <p>Nil</p>
+            if (cell.timeLeft <= 0 && cell.isNA) {
+                return <StatusPill type="expired" />
+            } else if (cell.timeLeft / cell.frequency < 1 / 5 && cell.isNA) {
+                return <StatusPill type="almostDue" />
             }
-            return <StatusPill type="active" />
+            else {
+                return <StatusPill type="active" />
+            }
         }
     },
     {
@@ -696,6 +654,11 @@ export const myTrainingRecordsColumns = [
         hidden: true
     },
     {
+        dateField: 'request_status',
+        text: 'Request Status',
+        hidden: true
+    },
+    {
         dataField: 'serialNo',
         text: '#',
     },
@@ -711,11 +674,14 @@ export const myTrainingRecordsColumns = [
         dataField: 'supervisor_evaluation_done',
         text: 'Evaluation (Approver)',
         formatter: (cell, row) => {
+            if (row.request_status === "cancelled") {
+                return <StatusPill type="cancelled" />
+            }
             if (cell === undefined || row.attendance === false) {
                 return <p>Nil</p>
             }
             if (cell === false) {
-                return <StatusPill type ="pending" />
+                return <StatusPill type="pending" />
             }
             return <StatusPill type="active" />
         }
@@ -724,11 +690,14 @@ export const myTrainingRecordsColumns = [
         dataField: 'trainee_evaluation_done',
         text: 'Evaluation (Trainee)',
         formatter: (cell, row) => {
+            if (row.request_status === "cancelled") {
+                return <StatusPill type="cancelled" />
+            }
             if (cell === undefined || row.attendance === false) {
                 return <p>Nil</p>
             }
             if (cell === false) {
-                return <StatusPill type ="pending" />
+                return <StatusPill type="pending" />
             }
             return <StatusPill type="active" />
         }
@@ -737,12 +706,15 @@ export const myTrainingRecordsColumns = [
         dataField: 'attendance',
         text: 'Attendance',
         formatter: (cell, row) => {
+            if (row.request_status === "cancelled") {
+                return <StatusPill type="cancelled" />
+            }
             if (cell === undefined) {
                 return <p>Nil</p>
             }
 
             if (cell === false) {
-                return <StatusPill type ="pending" />
+                return <StatusPill type="pending" />
             }
             return <StatusPill type="active" />
         }
@@ -786,14 +758,18 @@ export const myTrainingRequestsColumns = [
     {
         dataField: 'request_status',
         text: 'Request status',
+        sort: true,
         formatter: (cell, row) => {
+            if (cell === "cancelled") {
+                return <StatusPill type="cancelled" />
+            }
             if (cell === "pending") {
-                return <StatusPill type ="pending" />
+                return <StatusPill type="pending" />
             }
             if (cell === "rejected") {
-                return <StatusPill type = "rejected"/>
+                return <StatusPill type="rejected" />
             }
-            return <StatusPill type="active" />
+            return <StatusPill type="approved" />
         }
     },
     {
@@ -821,16 +797,33 @@ export const managePendingTrainingRequestsColumns = [
         text: 'Course Title'
     },
     {
-        dataField: 'approver',
-        text: 'To be approved by'
-    },
-    {
         dataField: 'start_date',
         text: 'Start Date'
     },
     {
         dataField: 'end_date',
         text: 'End Date'
+    },
+    {
+        dataField: 'request_status',
+        text: 'Request status',
+        sort: true,
+        formatter: (cell, row) => {
+            if (cell === "cancelled") {
+                return <StatusPill type="cancelled" />
+            }
+            if (cell === "pending") {
+                return <StatusPill type="pending" />
+            }
+            if (cell === "rejected") {
+                return <StatusPill type="rejected" />
+            }
+            return <StatusPill type="active" />
+        }
+    },
+    {
+        dataField: 'created_by',
+        text: 'Created By'
     },
     {
         dataField: 'action_manage',
@@ -857,10 +850,6 @@ export const manageAllTrainingRequestsColumns = [
         text: 'Course Title'
     },
     {
-        dataField: 'approver',
-        text: 'To be approved by'
-    },
-    {
         dataField: 'start_date',
         text: 'Start Date'
     },
@@ -871,12 +860,23 @@ export const manageAllTrainingRequestsColumns = [
     {
         dataField: 'request_status',
         text: 'Request status',
+        sort: true,
         formatter: (cell, row) => {
-            if (row.done_at === undefined) {
-                return <p>Nil</p>
+            if (cell === "cancelled") {
+                return <StatusPill type="cancelled" />
             }
-            return <StatusPill type="active" />
+            if (cell === "pending") {
+                return <StatusPill type="pending" />
+            }
+            if (cell === "rejected") {
+                return <StatusPill type="rejected" />
+            }
+            return <StatusPill type="approved" />
         }
+    },
+    {
+        dataField: 'created_by',
+        text: 'Created By'
     },
     {
         dataField: 'action_manage',
@@ -895,16 +895,17 @@ export const manageAllTrainingRecordsColumns = [
         hidden: true
     },
     {
+        dataField: 'request_status',
+        text: 'Request status',
+        hidden: true
+    },
+    {
         dataField: 'serialNo',
         text: '#',
     },
     {
         dataField: 'course_title',
         text: 'Course Title'
-    },
-    {
-        dataField: 'approver',
-        text: 'Approver'
     },
     {
         dataField: 'start_date',
@@ -915,11 +916,33 @@ export const manageAllTrainingRecordsColumns = [
         text: 'End Date'
     },
     {
-        dataField: 'evaluation',
-        text: 'Evaluation',
+        dataField: 'supervisor_evaluation_done',
+        text: 'Evaluation (Approver)',
         formatter: (cell, row) => {
-            if (cell === undefined) {
+            if (row.request_status === "cancelled") {
+                return <StatusPill type="cancelled" />
+            }
+            if (cell === undefined || row.attendance === false) {
                 return <p>Nil</p>
+            }
+            if (cell === false) {
+                return <StatusPill type="pending" />
+            }
+            return <StatusPill type="active" />
+        }
+    },
+    {
+        dataField: 'trainee_evaluation_done',
+        text: 'Evaluation (Trainee)',
+        formatter: (cell, row) => {
+            if (row.request_status === "cancelled") {
+                return <StatusPill type="cancelled" />
+            }
+            if (cell === undefined || row.attendance === false) {
+                return <p>Nil</p>
+            }
+            if (cell === false) {
+                return <StatusPill type="pending" />
             }
             return <StatusPill type="active" />
         }
@@ -928,11 +951,22 @@ export const manageAllTrainingRecordsColumns = [
         dataField: 'attendance',
         text: 'Attendance',
         formatter: (cell, row) => {
+            if (row.request_status === "cancelled") {
+                return <StatusPill type="cancelled" />
+            }
             if (cell === undefined) {
                 return <p>Nil</p>
             }
-            return <StatusPill type="active" />
+
+            if (cell === false) {
+                return <StatusPill type="pending" />
+            }
+            return <StatusPill type="completed" />
         }
+    },
+    {
+        dataField: 'created_by',
+        text: 'Created By'
     },
     {
         dataField: 'action_manage',
@@ -972,13 +1006,7 @@ export const managePETColumns = [
     },
     {
         dataField: 'status',
-        text: 'Status',
-        formatter: (cell, row) => {
-            if (cell === undefined) {
-                return <p>Nil</p>
-            }
-            return <StatusPill type="active" />
-        }
+        text: 'Status'
     },
     {
         dataField: 'action_manage',
@@ -996,6 +1024,40 @@ export const managePETColumns = [
 // ----------------------------------------------------
 // Start of Induction Program
 // ----------------------------------------------------
+
+// Manage my induction form column
+export const manageMyInductionColumn = [
+    {
+        dataField: 'id',
+        text: 'Id',
+        hidden: true
+    },
+    {
+        dataField: 'template_name',
+        text: 'Template Name'
+    },
+    {
+        dataField: 'version_label',
+        text: 'Version Label'
+    },
+    {
+        dataField: 'status',
+        text: 'Status',
+        formatter: (cell, row) => {
+            if (cell) {
+                return <StatusPill type="completed" />
+            }
+            return <StatusPill type="pending" />
+        }
+    },
+    {
+        dataField: 'action_manage',
+        text: '',
+        formatter: (cell, row) => {
+            return <a href={cell}>Manage</a>
+        }
+    },
+];
 
 // Manage induction template columns
 export const manageInductionTemplatesColumns = [

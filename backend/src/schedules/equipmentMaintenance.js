@@ -97,7 +97,7 @@ module.exports = () => {
 
                     try {
                         if (
-                            daysLeft == -2 &&
+                            daysLeft <= -2 &&
                             maintenanceFirstNotification == 1 &&
                             MaintenanceSecondNotification == 0
                         ) {
@@ -110,10 +110,15 @@ module.exports = () => {
                             // console.log(`\n`, "Assign Email", creatorEmail, `\n`);
                             await sendEmail(
                                 creatorEmail,
-                                `2nd Notification for ${maintenance.type} Expired`,
-                                templates.MaintenanceSecondNoticeForCreatorOnly(
+                                `2nd Notification for Equipment Maintenance Over Due`,
+                                templates.equipmentMaintenanceScheduleNotice(
                                     creatorName,
-                                    `${maintenance.type}`
+                                    `${maintenance.type}`,
+                                    `${equipmentInfo.name}`,
+                                    'created by',
+                                    'over',
+                                    `${equipmentInfo.equipment_id}`,
+                                    `${maintenance.maintenance_id}`
                                 )
                             );
                         }
@@ -138,74 +143,93 @@ module.exports = () => {
             const MaintenanceSecondNotification = maintenance.second_notification;
             const daysLeft = maintenance.days_left;
             const daysPercentage = maintenance.days_left_pct;
+            const equipmentID = maintenance.fk_equipment_id;
 
-            const GetMaintenanceAssignees = await EMP.MaintenanceAssignees.findAll({
-                where: { fk_mnt_id: maintenanceID }
+            const getEquipmentInformation = await EMP.Equipment.findAll({
+                where: { equipment_id: equipmentID }
             });
 
-            for (const assignees of GetMaintenanceAssignees) {
-                const employeeID = assignees.fk_usr_id;
+            for (const equipmentInfo of getEquipmentInformation) {
 
-                const getAssigneesEmployeesInfo = await Employees.findAll({
-                    where: { employee_id: employeeID }
+                const GetMaintenanceAssignees = await EMP.MaintenanceAssignees.findAll({
+                    where: { fk_mnt_id: maintenanceID }
                 });
 
-                for (const assigneesEmployees of getAssigneesEmployeesInfo) {
-                    const assigneesEmail = assigneesEmployees.email;
-                    const assigneesName = `${assigneesEmployees.firstname} ${assigneesEmployees.lastname}`;
 
-                    try {
-                        if (
-                            daysPercentage < 40 &&
-                            maintenanceFirstNotification == 0 &&
-                            MaintenanceSecondNotification == 0
-                        ) {
-                            await EMP.Maintenance.update(
-                                {
-                                    first_notification: 1
-                                },
-                                { where: { maintenance_id: maintenanceID } }
-                            );
-                            // console.log(`\n`, "Assign Email", assigneesEmail, `\n`);
-                            await sendEmail(
-                                assigneesEmail,
-                                `1st Notification for ${maintenance.type} Expires`,
-                                templates.MaintenanceFirstNoticeForAssigneesOnly(
-                                    assigneesName,
-                                    `${maintenance.type}`
-                                )
-                            );
-                        }
-                    }
-                    catch (e) {
-                        console.log('Email failed to send, 1st email for assignees');
-                    }
+                for (const assignees of GetMaintenanceAssignees) {
+                    const employeeID = assignees.fk_usr_id;
 
-                    try {
-                        if (
-                            daysLeft == -2 &&
-                            maintenanceFirstNotification == 1 &&
-                            MaintenanceSecondNotification == 0
-                        ) {
-                            await EMP.Maintenance.update(
-                                {
-                                    second_notification: 1
-                                },
-                                { where: { maintenance_id: maintenanceID } }
-                            );
-                            // console.log(`\n`, "Assign Email", assigneesEmail, `\n`);
-                            await sendEmail(
-                                assigneesEmail,
-                                `2nd Notification for ${maintenance.type} Expired`,
-                                templates.MaintenanceSecondNoticeForAssigneesOnly(
-                                    assigneesName,
-                                    `${maintenance.type}`
-                                )
-                            );
+                    const getAssigneesEmployeesInfo = await Employees.findAll({
+                        where: { employee_id: employeeID }
+                    });
+
+                    for (const assigneesEmployees of getAssigneesEmployeesInfo) {
+                        const assigneesEmail = assigneesEmployees.email;
+                        const assigneesName = `${assigneesEmployees.firstname} ${assigneesEmployees.lastname}`;
+
+                        try {
+                            if (
+                                daysPercentage < 40 &&
+                                maintenanceFirstNotification == 0 &&
+                                MaintenanceSecondNotification == 0
+                            ) {
+                                await EMP.Maintenance.update(
+                                    {
+                                        first_notification: 1
+                                    },
+                                    { where: { maintenance_id: maintenanceID } }
+                                );
+                                // console.log(`\n`, "Assign Email", assigneesEmail, `\n`);
+                                await sendEmail(
+                                    assigneesEmail,
+                                    `1st Notification for Equipment Maintenance Almost Due`,
+                                    templates.equipmentMaintenanceScheduleNotice(
+                                        assigneesName,
+                                        `${maintenance.type}`,
+                                        `${equipmentInfo.name}`,
+                                        'assign to',
+                                        'almost',
+                                        `${equipmentInfo.equipment_id}`,
+                                        `${maintenance.maintenance_id}`
+                                    )
+                                );
+                            }
                         }
-                    }
-                    catch (e) {
-                        console.log('Email failed to send, 2nd email for assignees');
+                        catch (e) {
+                            console.log('Email failed to send, 1st email for assignees');
+                        }
+
+                        try {
+                            if (
+                                daysLeft <= -2 &&
+                                maintenanceFirstNotification == 1 &&
+                                MaintenanceSecondNotification == 0
+                            ) {
+                                await EMP.Maintenance.update(
+                                    {
+                                        second_notification: 1
+                                    },
+                                    { where: { maintenance_id: maintenanceID } }
+                                );
+                                // console.log(`\n`, "Assign Email", assigneesEmail, `\n`);
+                                await sendEmail(
+                                    assigneesEmail,
+                                    `2nd Notification for Equipment Maintenance Over Due`,
+                                    templates.equipmentMaintenanceScheduleNotice(
+                                        assigneesName,
+                                        `${maintenance.type}`,
+                                        `${equipmentInfo.name}`,
+                                        'assign to',
+                                        'over',
+                                        `${equipmentInfo.equipment_id}`,
+                                        `${maintenance.maintenance_id}`
+                                    )
+                                );
+                            }
+                        }
+                        catch (e) {
+                            console.log('Email failed to send, 2nd email for assignees');
+                        }
                     }
                 }
             }

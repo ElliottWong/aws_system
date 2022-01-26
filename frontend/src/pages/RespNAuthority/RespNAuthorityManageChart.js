@@ -1,17 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import PageLayout from '../../layout/PageLayout';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import { getSideNavStatus } from '../../utilities/sideNavUtils';
-import { getToken, getUserCompanyID } from '../../utilities/localStorageUtils';
-import BootstrapTable from 'react-bootstrap-table-next';
-import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
-import { useHistory } from "react-router-dom";
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { ToastContainer, toast } from 'react-toastify';
-import config from '../../config/config';
 import FileDownload from 'js-file-download';
-import jwt_decode from 'jwt-decode';
+import React, { useEffect, useState } from 'react';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { useHistory } from "react-router-dom";
+import { toast, ToastContainer } from 'react-toastify';
+import config from '../../config/config';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils';
 import TokenManager from '../../utilities/tokenManager';
 
 const RespNAuthorityManageChart = ({ match }) => {

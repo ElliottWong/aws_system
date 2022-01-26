@@ -1,7 +1,3 @@
-// extending Error and making customer errors
-// ive always had this idea to do this but its a bit late now
-// ill leave this in, perhaps to be picked up again in the future
-
 // https://javascript.info/custom-errors
 // https://stackoverflow.com/a/32750746
 

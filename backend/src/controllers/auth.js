@@ -42,7 +42,7 @@ module.exports.adminLogin = async (req, res, next) => {
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: true,
+            secure: false,
             signed: true,
             maxAge: 259200000,
             sameSite: 'none'
@@ -74,7 +74,7 @@ module.exports.useRefreshToken = async (req, res, next) => {
 
         res.cookie('refreshToken', newRefreshToken, {
             httpOnly: true,
-            secure: true,
+            secure: false,
             signed: true,
             maxAge: 259200000,
             sameSite: 'none'

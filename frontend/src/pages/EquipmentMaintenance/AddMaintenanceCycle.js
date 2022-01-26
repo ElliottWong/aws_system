@@ -48,13 +48,23 @@ const AddMaintenanceCycle = ({ match }) => {
             (async () => {
                 try {
                     const resInsertOneMaintenance = await axios.post(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/all-equipment/${equipmentID}/all-maintenance`,
-                        maintenanceData, {
+                        {
+                            ...maintenanceData,
+                            assignees: (() => {
+                                return maintenanceData.assignees?.map((data) => {
+                                    return data.value;
+                                })
+                            })()
+                        }, {
                         headers: {
                             "Authorization": `Bearer ${token}`
                         }
                     });
                     console.log(resInsertOneMaintenance);
-                    toast.success(<>Success!<br />Message: <b>New equipment has been added!</b></>);
+                    setTimeout(() => {
+                        toast.success(<>Success!<br />Message: <b>New equipment has been added!</b></>);
+                    }, 0);
+                    history.push(`/equipment-maintenance/manage-equipment/${equipmentID}`);
                 } catch (err) {
                     console.log(err);
                     console.log(err.response);
@@ -138,6 +148,7 @@ const AddMaintenanceCycle = ({ match }) => {
                             options={userList}
                             placeholder="Select Users"
                             onChange={handleInputArrayChange}
+                            onFocus={() => setInputTouched(true)}
                         />
                     </Col>
                     {/* Maintenance Frequency */}
@@ -162,6 +173,7 @@ const AddMaintenanceCycle = ({ match }) => {
                             value={maintenanceData.last_service_at}
                             className="c-Form__Date"
                             format="dd/MM/y"
+                            onFocus={() => setInputTouched(true)}
                         />
                     </Col>
                 </Row>

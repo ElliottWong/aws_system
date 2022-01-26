@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import PageLayout from '../../layout/PageLayout';
-import DocumentLayout from '../../layout/DocumentLayout';
-import { getSideNavStatus } from '../../utilities/sideNavUtils';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import CompanyPolicyItem from '../../common/CompanyPolicyItem';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import CompanyPolicyItem from '../../common/CompanyPolicyItem';
+import DocumentLayout from '../../layout/DocumentLayout';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils';
 import TokenManager from '../../utilities/tokenManager';
 
 
@@ -30,7 +29,7 @@ const CompanyPolicyArchived = ({ match }) => {
             })
                 .then((res) => {
                     // Format dopcument table data
-                    const formattedDocTableData = res.data.items.map((data, index) => {
+                    const formattedDocTableData = res.data.results.items.map((data, index) => {
                         return ({
                             ...data,
                             id: data.policy_item_id,
@@ -40,10 +39,10 @@ const CompanyPolicyArchived = ({ match }) => {
 
                     // Format document header data
                     const formattedData = {
-                        title: res.data.title,
-                        created_by: res.data.author.firstname + " " + res.data.author.lastname,
-                        approved_by: res.data.approver.firstname + " " + res.data.author.lastname,
-                        approved_on: dayjs(new Date(res.data.approved_on)).format("MMMM D, YYYY h:mm A"),
+                        title: res.data.results.title,
+                        created_by: res.data.results.author.firstname + " " + res.data.results.author.lastname,
+                        approved_by: res.data.results.approver.firstname + " " + res.data.results.author.lastname,
+                        approved_on: dayjs(new Date(res.data.results.approved_at)).format("MMMM D, YYYY h:mm A"),
                     }
                     setDocHeaderData(() => (formattedData));
 

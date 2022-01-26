@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useHistory } from "react-router-dom";
-import { saveUserData } from '../../utilities/localStorageUtils';
 import axios from 'axios';
-import Title from '../../common/Title';
-import logo from '../../assets/images/eISO-logo.png';
-import { toast, ToastContainer } from 'react-toastify';
-import { BiArrowBack } from 'react-icons/bi';
-import { Container, Row, Col } from 'react-bootstrap';
+import React, { useEffect, useState } from 'react';
+import { Col, Container, Row } from 'react-bootstrap';
 import { IconContext } from 'react-icons';
+import { BiArrowBack } from 'react-icons/bi';
+import { useHistory } from "react-router-dom";
+import { toast, ToastContainer } from 'react-toastify';
+import logo from '../../assets/images/eISO-logo.png';
 import PasswordCriteria from '../../common/PasswordCriteria';
+import Title from '../../common/Title';
 import config from '../../config/config';
-import TokenManager from '../../utilities/tokenManager';
 
 
 const ChangePassword = ({ match }) => {

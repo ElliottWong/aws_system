@@ -72,3 +72,6 @@
 - [ ] a new function that takes checks for approve and edit rights of the approver and creator respectively (less mess to check in the controllers)
 
 - [ ] double check routes with file upload that should an error arise file is deleted from cloudinary
+
+- [ ] SQL ENUM type has drawbacks such as not being able to add or remove value
+    - we already have enums in JS, so maybe its time to remove them from SQL

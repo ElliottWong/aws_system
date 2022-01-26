@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import BootstrapTable from 'react-bootstrap-table-next';
+import paginationFactory from 'react-bootstrap-table2-paginator';
+import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { useHistory } from 'react-router';
+import ErrorCard from '../common/ErrorCard.js';
 import PageLayout from '../layout/PageLayout';
 import { getSideNavStatus } from '../utilities/sideNavUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
-import ToolkitProvider, { Search } from 'react-bootstrap-table2-toolkit';
-import axios from 'axios';
-import { getToken, getUserCompanyID } from '../utilities/localStorageUtils';
-import { useHistory } from 'react-router';
-import jwt_decode from 'jwt-decode';
-import ErrorCard from '../common/ErrorCard.js';
-import paginationFactory from 'react-bootstrap-table2-paginator';
 import TokenManager from '../utilities/tokenManager';
 
 const ManageUsers = () => {

@@ -30,7 +30,7 @@ module.exports.insertQmsScope = (data = {}) => {
 module.exports.findBlockingQmsScope = (fk_company_id) => QmsScope.Forms.findOne({
     where: {
         fk_company_id,
-        status: { [Op.or]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
+        status: { [Op.in]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
     }
 });
 

@@ -1,23 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import PageLayout from '../../layout/PageLayout';
-import DocumentLayout from '../../layout/DocumentLayout';
-import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
-import TabRow from '../../common/TabRow';
-import DocumentBtnSection from '../../common/DocumentBtnSection';
-import RenderDocument from '../../common/RenderDocument';
-import { TAB } from '../../config/enums';
-import useDocAxios from '../../hooks/useDocAxios';
-import { ToastContainer } from 'react-toastify';
-import jwt_decode from "jwt-decode";
 import axios from 'axios';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
 import dayjs from 'dayjs';
-import { historyObjAchivColumns } from '../../config/tableColumns';
-import ManageDeleteArchivedDoc from '../../common/ManageDeleteArchivedDoc';
+import React, { useEffect, useState } from 'react';
+import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { ToastContainer } from 'react-toastify';
+import DocumentBtnSection from '../../common/DocumentBtnSection';
+import ManageDeleteArchivedDoc from '../../common/ManageDeleteArchivedDoc';
+import RenderDocument from '../../common/RenderDocument';
+import TabRow from '../../common/TabRow';
 import config from '../../config/config';
+import { TAB } from '../../config/enums';
+import { historyObjAchivColumns } from '../../config/tableColumns';
+import useDocAxios from '../../hooks/useDocAxios';
+import DocumentLayout from '../../layout/DocumentLayout';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
 import TokenManager from '../../utilities/tokenManager';
 
 
@@ -235,13 +233,14 @@ const ObjAchivProgram = () => {
                     return resObj.status === 'archived';
                 });
 
+                console.log(filteredArchivedDocData);
                 var formattedArchivedDocData = filteredArchivedDocData.map((archivedData, index) => {
                     return ({
                         ...archivedData,
                         id: archivedData.achievement_id,
                         serialNo: index + 1,
                         name: archivedData.title,
-                        approved_on: dayjs(new Date(archivedData.approved_on)).format("MMMM D, YYYY h:mm A"),
+                        approved_on: dayjs(new Date(archivedData.approved_at)).format("MMMM D, YYYY h:mm A"),
                         active_till: dayjs(new Date(archivedData.updated_at)).format("MMMM D, YYYY h:mm A"),
                         action_view: `/objective-achievement-program/archived/${archivedData.achievement_id}`,
                         action_delete: `${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/objective-achievements/${archivedData.achievement_id}`

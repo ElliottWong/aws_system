@@ -55,7 +55,7 @@ module.exports.insertSwot = (data = {}) => {
 module.exports.findBlockingSwot = (fk_company_id) => SWOT.Forms.findOne({
     where: {
         fk_company_id,
-        status: { [Op.or]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
+        status: { [Op.in]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
     }
 });
 

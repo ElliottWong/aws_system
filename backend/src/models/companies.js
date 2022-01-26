@@ -13,10 +13,12 @@ module.exports.insertCompany = async (meta) => {
         status: 'active'
     }, { include: 'address' });
 
-    await Promise.all([
+    // not necessary
+    // cloudinary will automatically create folders where they do not exist
+    /* await Promise.all([
         c.createFolder(c.formDocumentsFolderPath(company.company_id, 'm05_03')),
         c.createFolder(c.formDocumentsFolderPath(company.company_id, 'm06_02'))
-    ]);
+    ]); */
 
     return company;
 };

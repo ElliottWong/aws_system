@@ -15,7 +15,5 @@ ubuntu@ip-172-31-18-243:~/aws_system/backend/logs$ vim error.log
 18/1/2022
 List of Broken Features Hosted:
 1) Cannot edit scope, normative ref & terms/def "Dashboard"
-2) SWOT not working "4.1"
-3) Interested Parties submit new form bugged "4.2"
-4) Equipment Maintenance not creatable "7.1"
+2) Interested Parties allows submission, but does not reflect changes "7.2"
 5) Manage Users 404 "Manage Users"

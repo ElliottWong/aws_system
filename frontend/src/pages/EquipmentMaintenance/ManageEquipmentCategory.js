@@ -52,6 +52,7 @@ const ManageEquipmentCategory = ({ match }) => {
                     });
                     console.log(resUpdateOneCategory);
                     toast.success(<>Success!<br />Message: <b>Updated category!</b></>);
+                    setIsEditing(false);
                 } catch (error) {
                     console.log(error);
                     toast.error(<>Error Code: <b>{error.response.status}</b><br />Message: <b>{error.response.data.message}</b></>);
@@ -168,10 +169,10 @@ const ManageEquipmentCategory = ({ match }) => {
     useEffect(() => {
         (async () => {
             try {
-                const resCategoryData = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories/${categoryID}/assigned-equipment`);
+                const resCategoryData = await axios.get(`${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/equipment-maintenance-program/categories/${categoryID}/all-equipment`);
                 console.log(resCategoryData);
-                const dbName = resCategoryData.data.results.name;
-                const createdOn = resCategoryData.data.results.created_at;
+                const dbName = resCategoryData.data.results.category.name;
+                const createdOn = resCategoryData.data.results.category.created_at;
                 if (!isEditing) {
                     setCategoryData(() => {
                         return {

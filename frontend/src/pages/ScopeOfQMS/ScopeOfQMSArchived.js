@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import PageLayout from '../../layout/PageLayout';
-import DocumentLayout from '../../layout/DocumentLayout';
-import BootstrapTable from 'react-bootstrap-table-next';
-import { getSideNavStatus } from '../../utilities/sideNavUtils';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import { docScopeOfQMSColumns } from '../../config/tableColumns';
-import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
+import { convertFromRaw, convertToRaw, EditorState } from 'draft-js';
 import draftToHtml from 'draftjs-to-html';
 import convert from 'htmr';
+import React, { useEffect, useState } from 'react';
+import BootstrapTable from 'react-bootstrap-table-next';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { docScopeOfQMSColumns } from '../../config/tableColumns';
+import DocumentLayout from '../../layout/DocumentLayout';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils';
 import TokenManager from '../../utilities/tokenManager';
 
 
@@ -36,7 +35,8 @@ const ScopeOfQMSArchived = ({ match }) => {
                 .then((res) => {
                     // Format dopcument table data
                     // Format table data
-                    const formattedDocTableData = res.data.items.map((data, index) => {
+                    console.log(res);
+                    const formattedDocTableData = res.data.results[0].items.map((data, index) => {
                         return ({
                             ...data,
                             id: data.qms_scope_item_id,
@@ -57,8 +57,8 @@ const ScopeOfQMSArchived = ({ match }) => {
                         })
                     });
                     setDocTableData(() => (formattedDocTableData));
-
-                    res.data.forEach((resObj) => {
+                    
+                    res.data.results.forEach((resObj) => {
                         if (resObj.content) {
                             setEditorState(() => (EditorState.createWithContent(convertFromRaw(JSON.parse(resObj.content)))))
                         } else {

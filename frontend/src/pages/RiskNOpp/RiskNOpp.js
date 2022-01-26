@@ -1,24 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import PageLayout from '../../layout/PageLayout';
-import DocumentLayout from '../../layout/DocumentLayout';
-import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
-import { getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
-import Breadcrumb from 'react-bootstrap/Breadcrumb';
-import BootstrapTable from 'react-bootstrap-table-next';
-import TabRow from '../../common/TabRow';
-import DocumentBtnSection from '../../common/DocumentBtnSection';
-import RenderDocument from '../../common/RenderDocument';
-import { TAB } from '../../config/enums';
-import { ToastContainer } from 'react-toastify';
-import useDocAxios from '../../hooks/useDocAxios';
-import useCheckEditableAxios from '../../hooks/useCheckEditableAxios';
-import jwt_decode from "jwt-decode";
-import dayjs from 'dayjs';
 import axios from 'axios';
-import { historyRiskNOppColumns } from '../../config/tableColumns';
-import ManageDeleteArchivedDoc from '../../common/ManageDeleteArchivedDoc';
+import dayjs from 'dayjs';
+import React, { useEffect, useState } from 'react';
+import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
+import Breadcrumb from 'react-bootstrap/Breadcrumb';
+import { ToastContainer } from 'react-toastify';
+import DocumentBtnSection from '../../common/DocumentBtnSection';
+import ManageDeleteArchivedDoc from '../../common/ManageDeleteArchivedDoc';
+import RenderDocument from '../../common/RenderDocument';
+import TabRow from '../../common/TabRow';
 import config from '../../config/config';
+import { TAB } from '../../config/enums';
+import { historyRiskNOppColumns } from '../../config/tableColumns';
+import useCheckEditableAxios from '../../hooks/useCheckEditableAxios';
+import useDocAxios from '../../hooks/useDocAxios';
+import DocumentLayout from '../../layout/DocumentLayout';
+import PageLayout from '../../layout/PageLayout';
+import { getSideNavStatus } from '../../utilities/sideNavUtils.js';
 import TokenManager from '../../utilities/tokenManager';
 
 const RiskNOpp = () => {
@@ -278,7 +276,7 @@ const RiskNOpp = () => {
                         id: archivedData.risks_analysis_id,
                         serialNo: index + 1,
                         approved_by: `${archivedData.approver.firstname} ${archivedData.approver.lastname}`,
-                        approved_on: dayjs(new Date(archivedData.approved_on)).format("MMMM D, YYYY h:mm A"),
+                        approved_on: dayjs(new Date(archivedData.approved_at)).format("MMMM D, YYYY h:mm A"),
                         active_till: dayjs(new Date(archivedData.updated_at)).format("MMMM D, YYYY h:mm A"),
                         action_view: `/risk-n-opportunity/archived/${archivedData.risks_analysis_id}`,
                         action_delete: `${process.env.REACT_APP_BASEURL}/company/${userCompanyID}/risks-analyses/${archivedData.risks_analysis_id}`

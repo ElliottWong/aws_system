@@ -44,7 +44,7 @@ module.exports.insertAnalysis = (data = {}) => {
 module.exports.findBlockingAnalysis = (fk_company_id) => RO.Forms.findOne({
     where: {
         fk_company_id,
-        status: { [Op.or]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
+        status: { [Op.in]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
     }
 });
 
@@ -53,7 +53,7 @@ module.exports.findBlockingAnalysis = (fk_company_id) => RO.Forms.findOne({
 module.exports.lockAnalysis = async () => {
     const blockingSwot = await SWOT.Forms.findOne({
         where: {
-            status: { [Op.or]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
+            status: { [Op.in]: [DOCUMENT_STATUS.PENDING, DOCUMENT_STATUS.REJECTED] }
         },
         attributes: ['swot_id']
     });

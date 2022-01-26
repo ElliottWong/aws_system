@@ -16,6 +16,8 @@ const { testEnum, DOCUMENT_STATUS } = require('../config/enums');
 const E = require('../errors/Errors');
 const r = require('../utils/response').responses;
 
+const now = new Date();   
+
 // CREATE
 
 module.exports.insertAnalysis = async (req, res, next) => {
@@ -65,15 +67,16 @@ module.exports.insertAnalysis = async (req, res, next) => {
             companyId, ...req.body, created_by, approved_by
         });
 
-        const emailContent = templates.documentApproval(
+        const emailContent = templates.documentSendApproval(
             `${approvingEmployee.firstname} ${approvingEmployee.lastname}`,
             `${authorEmployee.firstname} ${authorEmployee.lastname}`,
             'Risk and Opportunity',
+            `${now}`,
             'risk-n-opportunity',
             'Risk and Opportunity'
         );
 
-        sendEmail(approvingEmployee.email, 'A document requires your approval', emailContent)
+        sendEmail(approvingEmployee.email, 'Risk and Opportunity document requires your approval', emailContent)
             .catch((error) => console.log(`Non-fatal: Failed to send email\n${error}`));
 
         res.status(201).send(r.success201({ risks_analysis_id, status }));
@@ -192,7 +195,7 @@ module.exports.rejectAnalysis = async (req, res, next) => {
         const { companyId, analysisId } = req.params;
 
         // check for permission for reject
-        const { approve } = await findRights(rejected_by, companyId, 'm06_01');
+        const { approve, employee: rejectingEmployee } = await findRights(rejected_by, companyId, 'm06_01');
         if (!approve) throw new E.PermissionError('reject');
 
         const [toBeRejected] = await findAnalyses({
@@ -212,7 +215,36 @@ module.exports.rejectAnalysis = async (req, res, next) => {
             status: DOCUMENT_STATUS.REJECTED
         });
 
-        // TODO email notification
+        // authors
+        const created_by = parseInt(toBeRejected.created_by);
+        if (isNaN(created_by))
+            throw new E.ParamTypeError('created_by', req.body.created_by, 1);
+
+        // check authors for appove rights
+        const { employee: authorEmployee } = await findRights(
+            created_by,
+            companyId,
+            'm06_01'
+        );
+
+        // Send email to the author
+        const emailContent = templates.documentRejected(
+            `${authorEmployee.firstname} ${authorEmployee.lastname}`,
+            `${rejectingEmployee.firstname} ${rejectingEmployee.lastname}`,
+            'Risk and Opportunity',
+            `${now}`,
+            `${remarks}`,
+            'risk-n-opportunity',
+            'Risk and Opportunity'
+        );
+
+        sendEmail(
+            authorEmployee.email,
+            'Risk and Opportunity document have been rejected',
+            emailContent
+        ).catch((error) =>
+            console.log(`Non-fatal: Failed to send email\n${error}`)
+        );
 
         res.status(200).send(r.success200());
         return next();
@@ -230,7 +262,7 @@ module.exports.approveAnalysis = async (req, res, next) => {
         const { companyId, analysisId } = req.params;
 
         // check for permission for approve
-        const { approve } = await findRights(approved_by, companyId, 'm06_01');
+        const { approve, employee: approverEmployee } = await findRights(approved_by, companyId, 'm06_01');
         if (!approve) throw new E.PermissionError('approve');
 
         // find the to be approved swot
@@ -282,7 +314,35 @@ module.exports.approveAnalysis = async (req, res, next) => {
             throw error;
         }
 
-        // TODO email notification
+        // authors
+        const created_by = parseInt(toBeApproved.created_by);
+        if (isNaN(created_by))
+            throw new E.ParamTypeError('created_by', req.body.created_by, 1);
+
+        // check authors for approve rights
+        const { employee: authorEmployee } = await findRights(
+            created_by,
+            companyId,
+            'm06_01'
+        );
+
+        // Send email to the author
+        const emailContent = templates.documentApproval(
+            `${authorEmployee.firstname} ${authorEmployee.lastname}`,
+            `${approverEmployee.firstname} ${approverEmployee.lastname}`,
+            'Risk and Opportunity',
+            `${now}`,
+            'risk-n-opportunity',
+            'Risk and Opportunity'
+        );
+
+        sendEmail(
+            authorEmployee.email,
+            'Risk and Opportunity document have been approved',
+            emailContent
+        ).catch((error) =>
+            console.log(`Non-fatal: Failed to send email\n${error}`)
+        );
 
         res.status(200).send(r.success200());
         return next();
@@ -307,7 +367,7 @@ module.exports.deleteAnalysis = async (req, res, next) => {
             where: (Op) => ({
                 fk_company_id: companyId,
                 analysisId: analysisId,
-                status: { [Op.or]: [DOCUMENT_STATUS.ARCHIVED, DOCUMENT_STATUS.REJECTED] }
+                status: { [Op.in]: [DOCUMENT_STATUS.ARCHIVED, DOCUMENT_STATUS.REJECTED] }
             }),
             limit: 1,
             includeItems: false

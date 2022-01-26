@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import CompanyPolicyItem from '../../common/CompanyPolicyItem';
-import { getUserDisplayName, getUserCompanyID, getToken } from '../../utilities/localStorageUtils';
 import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import CompanyPolicyItem from '../../common/CompanyPolicyItem';
 import TokenManager from '../../utilities/tokenManager';
 
 
