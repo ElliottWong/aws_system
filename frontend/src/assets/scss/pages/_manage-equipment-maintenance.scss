@@ -68,6 +68,14 @@
     &--row {
       width: 100%;
       margin: 5px 0;
+      .c-Input__Description {
+        display: flex;
+        justify-content: left;
+        align-items: left;
+        flex-direction: column;
+        width: 100%;
+        max-width: 100%;
+      }
       .c-Input {
         width: 100%;
         max-width: 25%;

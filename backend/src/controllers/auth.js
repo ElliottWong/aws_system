@@ -13,10 +13,10 @@ module.exports.clientLogin = async (req, res, next) => {
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
-            secure: true,
+            secure: false,
             signed: true,
             maxAge: 259200000,
-            sameSite: 'none'
+            sameSite: 'lax'
         });
 
         res.status(200).send(r.success200({

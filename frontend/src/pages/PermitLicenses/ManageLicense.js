@@ -292,9 +292,9 @@ const ManageLicense = ({ match }) => {
             <Container className="l-Manage-equipment__Inputs">
                 {/* Row 1 */}
                 <Row className="l-Manage-equipment__Inputs--row1 l-Manage-equipment__Inputs--row">
-                    {/* License/Permit/Certificate */}
+                    {/* License/Permit/Certificate/Approval */}
                     <Col className="c-Input c-Input__Name c-Input c-Input--edit">
-                        <label htmlFor="license">License/Permit/Certificate</label>
+                        <label htmlFor="license">License/Permit/Certificate/Approval</label>
                         <input onFocus={() => setInputTouched(true)} type="text" onChange={handleInputChange} name="license" value={licenseData.license} />
                     </Col>
                     {/* License No. */}
@@ -372,9 +372,9 @@ const ManageLicense = ({ match }) => {
             <Container className="l-Manage-equipment__Inputs">
                 {/* Row 1 */}
                 <Row className="l-Manage-equipment__Inputs--row1 l-Manage-equipment__Inputs--row">
-                    {/* License/Permit/Certificate */}
+                    {/* License/Permit/Certificate/Approval */}
                     <Col className="c-Input c-Input__Name c-Input--read-only">
-                        <label htmlFor="license">License/Permit/Certificate</label>
+                        <label htmlFor="license">License/Permit/Certificate/Approval</label>
                         <input readOnly type="text" name="license" value={licenseData.license} />
                     </Col>
                     {/* License No. */}
@@ -573,7 +573,7 @@ const ManageLicense = ({ match }) => {
                     </Breadcrumb>
                     {/* Top section */}
                     <div className="c-Manage-equipment__Top c-Main__Top">
-                        <h1>Manage Permits/Licenses/Certificates</h1>
+                        <h1>Manage Permits/Licenses/Certificates/Approvals</h1>
                         {/* Edit button section */}
                         {
                             canApprove ?
@@ -630,17 +630,17 @@ const ManageLicense = ({ match }) => {
                                     licenseData.archived_at === null ?
                                         <>
                                             <div className='c-Danger-zone__Item'>
-                                                <button type="button" className="c-Btn c-Btn--alert-border" onClick={() => handleLicenseArchive("deactivated")}>Archive Permits/Licenses/Certificates</button>
+                                                <button type="button" className="c-Btn c-Btn--alert-border" onClick={() => handleLicenseArchive("deactivated")}>Archive Permit/License/Certificate/Approval</button>
                                                 <div className="c-Row__Info">
-                                                    <p>Perfoming this action will archive this permit/license/certificate</p>
+                                                    <p>Perfoming this action will archive this permit/license/certificate/approval</p>
                                                 </div>
                                             </div>
                                         </> :
                                         <>
                                             <div className='c-Danger-zone__Item'>
-                                                <button type="button" className="c-Btn c-Btn--primary-border" onClick={() => handleLicenseArchive("activated")}>Unarchive Permits/Licenses/Certificates</button>
+                                                <button type="button" className="c-Btn c-Btn--primary-border" onClick={() => handleLicenseArchive("activated")}>Unarchive Permit/License/Certificate/Approval</button>
                                                 <div className="c-Row__Info">
-                                                    <p>Perfoming this action will unarchive this permit/license/certificate </p>
+                                                    <p>Perfoming this action will unarchive this permit/license/certificate/approval </p>
                                                 </div>
                                             </div>
                                         </>

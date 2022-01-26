@@ -540,7 +540,7 @@ export const licenseColumns = [
     },
     {
         dataField: 'license',
-        text: 'License/Permit/Certificate',
+        text: 'License/Permit/Certificate/Approval',
     },
     {
         dataField: 'licenseNo',
@@ -600,7 +600,7 @@ export const historyLicenseColumns = [
     },
     {
         dataField: 'license',
-        text: 'License/Permit/Certificate',
+        text: 'License/Permit/Certificate/Approval',
     },
     {
         dataField: 'licenseNo',
@@ -683,7 +683,7 @@ export const myTrainingRecordsColumns = [
             if (cell === false) {
                 return <StatusPill type="pending" />
             }
-            return <StatusPill type="active" />
+            return <StatusPill type="completed" />
         }
     },
     {
@@ -699,7 +699,7 @@ export const myTrainingRecordsColumns = [
             if (cell === false) {
                 return <StatusPill type="pending" />
             }
-            return <StatusPill type="active" />
+            return <StatusPill type="completed" />
         }
     },
     {
@@ -716,7 +716,7 @@ export const myTrainingRecordsColumns = [
             if (cell === false) {
                 return <StatusPill type="pending" />
             }
-            return <StatusPill type="active" />
+            return <StatusPill type="completed" />
         }
     },
     {
@@ -818,7 +818,7 @@ export const managePendingTrainingRequestsColumns = [
             if (cell === "rejected") {
                 return <StatusPill type="rejected" />
             }
-            return <StatusPill type="active" />
+            return <StatusPill type="approved" />
         }
     },
     {
@@ -928,7 +928,7 @@ export const manageAllTrainingRecordsColumns = [
             if (cell === false) {
                 return <StatusPill type="pending" />
             }
-            return <StatusPill type="active" />
+            return <StatusPill type="completed" />
         }
     },
     {
@@ -944,7 +944,7 @@ export const manageAllTrainingRecordsColumns = [
             if (cell === false) {
                 return <StatusPill type="pending" />
             }
-            return <StatusPill type="active" />
+            return <StatusPill type="completed" />
         }
     },
     {

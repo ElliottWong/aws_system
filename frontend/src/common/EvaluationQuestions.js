@@ -142,7 +142,7 @@ const EvaluationQuestions = ({ mode, qns, qnsType, index, viewType, setQuestions
                     </div>
                     <div className="c-Evaluation-qns__Option">
                         <input name="rating" type='radio' disabled />
-                        <label htmlFor="rating">Neutrel</label>
+                        <label htmlFor="rating">Neutral</label>
                     </div>
                     <div className="c-Evaluation-qns__Option">
                         <input name="rating" type='radio' disabled />
@@ -205,7 +205,7 @@ const EvaluationQuestions = ({ mode, qns, qnsType, index, viewType, setQuestions
                     </div>
                     <div className="c-Evaluation-qns__Option">
                         <input name="rating" type='radio' onChange={(event) => handleRadioInputChange(event)} checked={answer === undefined ? false : answer === "3" ? true : false} value={3} />
-                        <label htmlFor="rating">Neutrel</label>
+                        <label htmlFor="rating">Neutral</label>
                     </div>
                     <div className="c-Evaluation-qns__Option">
                         <input name="rating" type='radio' onChange={(event) => handleRadioInputChange(event)} checked={answer === undefined ? false : answer === "4" ? true : false} value={4} />
@@ -279,7 +279,7 @@ const EvaluationQuestions = ({ mode, qns, qnsType, index, viewType, setQuestions
                     </div>
                     <div className="c-Evaluation-qns__Option">
                         <input name="rating" type='radio' checked={answer === undefined ? false : answer === "3" ? true : false} value={answer === 3 ? true : false} disabled />
-                        <label htmlFor="rating">Neutrel</label>
+                        <label htmlFor="rating">Neutral</label>
                     </div>
                     <div className="c-Evaluation-qns__Option">
                         <input name="rating" type='radio' checked={answer === undefined ? false : answer === "4" ? true : false} value={answer === 4 ? true : false} disabled />

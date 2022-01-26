@@ -134,7 +134,7 @@ const UploadMaintenance = ({ match }) => {
                         />
                     </Col>
                     {/* Description */}
-                    <Col className="c-Input c-Input__Reg-no c-Input--edit">
+                    <Col className="c-Input c-Input__Description c-Input--edit">
                         <label htmlFor="description">Description</label>
                         <textarea onFocus={() => setInputTouched(true)} name="description" value={recordData.description} onChange={handleInputChange}></textarea>
                     </Col>

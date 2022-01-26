@@ -181,7 +181,7 @@ const EquipmentMaintenance = () => {
             componentMounted = false;
         });
 
-    }, [filteredCategoryID]);
+    }, [filteredCategoryID, canApprove]);
 
     // Handlers
     const handleBtn = () => {
